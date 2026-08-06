@@ -1,0 +1,528 @@
+import React, { useState, useRef, useEffect, useCallback } from "react";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THREAD WEB — pannable/zoomable editable encounter canvas for the Remnant
+// Continent 4X. Cluster by type, color by faction, tie by shared flags, edit in
+// natural language, export JSON for Claude to mechanize (round-trips).
+// Prototype — ships later as a standalone HTML file (localStorage/Supabase).
+// ─────────────────────────────────────────────────────────────────────────────
+
+const FACTIONS = {
+  none:      { label: "Frontier / none", color: "#a59d8c" },
+  versari:   { label: "Versari Korad",   color: "#3fb6b6" },
+  lakers:    { label: "Grand Lakers",    color: "#5b95e6" },
+  goldgrass: { label: "Goldgrass",       color: "#e0b53f" },
+  plainers:  { label: "Free Plainers",   color: "#e0634a" },
+};
+const TYPES = {
+  salvage: { label: "Salvage & Tech" },
+  uncanny: { label: "The Uncanny" },
+  hazard:  { label: "Frontier Hazard" },
+  parley:  { label: "Parley" },
+  social:  { label: "Social" },
+};
+const STATUSES = {
+  idea:       { label: "Idea",       color: "#6a655a" },
+  drafted:    { label: "Drafted",    color: "#e0b53f" },
+  structured: { label: "Structured", color: "#7a9b6e" },
+};
+
+const W = 180, H = 66;
+const PADX = 30, PADY = 26;
+
+function separate(list, fixedId) {
+  const out = list.map(n => ({ ...n }));
+  const needX = W + PADX, needY = H + PADY;
+  for (let pass = 0; pass < 10; pass++) {
+    let any = false;
+    for (let i = 0; i < out.length; i++) for (let j = i + 1; j < out.length; j++) {
+      const a = out[i], b = out[j];
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const ox = needX - Math.abs(dx), oy = needY - Math.abs(dy);
+      if (ox > 0 && oy > 0) { any = true;
+        if (ox <= oy) { const dir = dx < 0 ? -1 : 1;
+          if (a.id === fixedId) b.x += dir * ox; else if (b.id === fixedId) a.x -= dir * ox; else { a.x -= dir * ox / 2; b.x += dir * ox / 2; }
+        } else { const dir = dy < 0 ? -1 : 1;
+          if (a.id === fixedId) b.y += dir * oy; else if (b.id === fixedId) a.y -= dir * oy; else { a.y -= dir * oy / 2; b.y += dir * oy / 2; }
+        }
+      }
+    }
+    if (!any) break;
+  }
+  return out;
+}
+
+const SEED = [
+  { id:"fe_humming_room", n:1, title:"The Humming Room", type:"salvage", faction:"versari", scope:"universal", status:"structured",
+    hook:"An old-world console still draws power in a sealed sub-level, patient through every winter since the end.",
+    teaches:"Restored machines persist and nobody fully understands them; salvage-now vs study-slow.",
+    choices:[{label:"Strip it for parts",fx:"+2 Resource"},{label:"Study the console",fx:"+1 Tech · sets studied_oldworld_machine"},{label:"Seal it and move on",fx:"—"}],
+    out:["studied_oldworld_machine"], in:[], notes:"", x:300, y:230 },
+  { id:"fe_cold_cellar", n:8, title:"The Cold Cellar", type:"salvage", faction:"goldgrass", scope:"universal", status:"drafted",
+    hook:"A sealed old-world store room, intact: medicine, seed stock, sealed rations the living world can't make.",
+    teaches:"Salvage vs inheritance — some goods can't be remade, and that scarcity is a temptation.",
+    choices:[{label:"Take it all",fx:"+Resource · −Reputation if locals knew"},{label:"Share with the community",fx:"−gain · +Reputation · +standing (agrarian) · sets shared_the_cellar"},{label:"Seed-bank it",fx:"QUEUE_DEFERRED: larger return later"}],
+    out:["shared_the_cellar"], in:[], notes:"", x:300, y:360 },
+  { id:"fe_one_who_listens", n:2, title:"The One Who Listens", type:"uncanny", faction:"none", scope:"universal", status:"structured",
+    hook:"A frontier Reader sits apart at the settlement's edge — fed, unmet in the eye, believed and unnamed.",
+    teaches:"Perception is real and unevenly distributed; communities revere and fear it at once.",
+    choices:[{label:"Ask what's ahead",fx:"PEEK 2 encounter cards"},{label:"Offer her a place",fx:"−Resource · +Reputation · sets befriended_reader"},{label:"Leave her be",fx:"—"}],
+    out:["befriended_reader"], in:[], notes:"", x:760, y:170 },
+  { id:"fe_still_water", n:6, title:"The Still Water", type:"uncanny", faction:"lakers", scope:"gated", status:"drafted",
+    hook:"A Laker boatman has pulled ashore where no sane pilot would, waiting for the lake to settle.",
+    teaches:"Water-sense, open and unembarrassed — the gift is believed without question.",
+    choices:[{label:"Wait with him",fx:"tempo cost · PEEK / deferred shelter"},{label:"Press on against warning",fx:"deferred −Strength/Resource"},{label:"Hire him to pilot",fx:"−Resource · lasting benefit · sets trusted_watersense"}],
+    out:["trusted_watersense"], in:[], notes:"Gated to Lakers/Clan Tempest — see engine dep.", x:960, y:200 },
+  { id:"fe_quiet_camp", n:9, title:"The Quiet Camp", type:"uncanny", faction:"none", scope:"universal", status:"drafted",
+    hook:"A camp with the fire still warm and the gear undisturbed. No blood, no struggle. They simply aren't here.",
+    teaches:"The thinned boundary — kept small and unexplained. Texture, not a threat.",
+    choices:[{label:"Search the camp",fx:"+Resource · a unit picks up wrongness"},{label:"Leave an offering",fx:"−Resource · sets respected_the_quiet"},{label:"Study it (gated)",fx:"needs befriended_reader OR trusted_watersense → PEEK / foreshadow"}],
+    out:["respected_the_quiet"], in:["befriended_reader","trusted_watersense"], notes:"Intentionally rare.", x:850, y:330 },
+  { id:"fe_dry_line", n:4, title:"The Dry Line", type:"hazard", faction:"none", scope:"universal", status:"drafted",
+    hook:"A creek that should be running isn't, and the grass downstream will follow it into dust.",
+    teaches:"Water is the quiet currency of this world; the land is still settling and the maps lie.",
+    choices:[{label:"Dig for the water table",fx:"−Resource · sets found_water"},{label:"Read the land and reroute",fx:"— safe pass"},{label:"Push through fast",fx:"−Strength/Movement"}],
+    out:["found_water"], in:[], notes:"", x:1290, y:260 },
+  { id:"fe_steel_for_steel", n:5, title:"Steel for Steel", type:"parley", faction:"plainers", scope:"universal", status:"drafted",
+    hook:"A hard band blocks the track. Their spokesman doesn't want to talk — he wants to see what you're made of.",
+    teaches:"The steel pole: a fair fight is the negotiation, and respect is the only currency that sticks.",
+    choices:[{label:"Face their champion",fx:"Strength contest · sets earned_steel_respect · +standing (raider)"},{label:"Pay the toll",fx:"−Resource · no respect"},{label:"Refuse and force through",fx:"opens hostility"}],
+    out:["earned_steel_respect"], in:[], notes:"Variant candidate if player IS Plainers.", x:450, y:710 },
+  { id:"fe_cracked_axle", n:3, title:"Cracked Axle", type:"social", faction:"none", scope:"universal", status:"structured",
+    hook:"A stranded caravan in country with no law but reputation. Help, trade, or take.",
+    teaches:"Out here reputation is the only law; both plains poles — trade and steel — are live paths.",
+    choices:[{label:"Lend aid and tools",fx:"−Resource · +Reputation · +standing (trade pole)"},{label:"Trade fairly",fx:"+Resource"},{label:"Take what you want",fx:"+2 Resource · −Reputation · +standing (raider pole)"}],
+    out:[], in:[], notes:"Needs self-faction token for standing lines.", x:1000, y:710 },
+  { id:"fe_tally_stone", n:7, title:"The Tally Stone", type:"social", faction:"goldgrass", scope:"universal", status:"drafted",
+    hook:"Two settlements share a boundary marker and a slow argument about which way it's been moved.",
+    teaches:"No higher authority exists yet — justice is whoever people will agree to heed.",
+    choices:[{label:"Rule for one side",fx:"+favor / −grudge"},{label:"Broker a split",fx:"−Resource · +Reputation · sets brokered_peace"},{label:"Walk away",fx:"— quarrel festers"}],
+    out:["brokered_peace"], in:[], notes:"", x:1150, y:750 },
+];
+
+let idSeq = 100;
+const newId = () => "fe_new_" + (idSeq++);
+const parseFlags = (s) => s.split(",").map(x => x.trim()).filter(Boolean);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+export default function ThreadWeb() {
+  const [encounters, setEncounters] = useState(() => separate(SEED, null));
+  const [links, setLinks] = useState([]);
+  const [view, setView] = useState({ x: 30, y: 96, k: 0.6 });
+  const [selectedId, setSelectedId] = useState(null);
+  const [mode, setMode] = useState(null);
+  const [connectFrom, setConnectFrom] = useState(null);
+  const [hidden, setHidden] = useState({ faction:new Set(), type:new Set(), status:new Set() });
+  const [search, setSearch] = useState("");
+  const [modal, setModal] = useState(null);
+  const [ioText, setIoText] = useState("");
+  const [loaded, setLoaded] = useState(false);
+  const [legendOpen, setLegendOpen] = useState(false);
+  const [barH, setBarH] = useState(60);
+
+  const svgRef = useRef(null);
+  const barRef = useRef(null);
+  const viewRef = useRef(view);
+  const modeRef = useRef(mode);
+  const drag = useRef({ active:false });
+  const pointers = useRef(new Map());
+  const pinch = useRef(null);
+  useEffect(() => { viewRef.current = view; }, [view]);
+  useEffect(() => { modeRef.current = mode; }, [mode]);
+  useEffect(() => { if (!barRef.current) return;
+    const set = () => setBarH(barRef.current ? barRef.current.offsetHeight : 60);
+    set(); let ro; try { ro = new ResizeObserver(set); ro.observe(barRef.current); } catch (e) {}
+    window.addEventListener("resize", set);
+    return () => { if (ro) ro.disconnect(); window.removeEventListener("resize", set); };
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try { const r = await window.storage.get("tw_board");
+        if (r && r.value) { const b = JSON.parse(r.value); if (b.encounters) setEncounters(separate(b.encounters, null)); if (b.links) setLinks(b.links); }
+      } catch (e) {}
+      setLoaded(true);
+    })();
+  }, []);
+  useEffect(() => { if (!loaded) return;
+    (async () => { try { await window.storage.set("tw_board", JSON.stringify({ encounters, links })); } catch (e) {} })();
+  }, [encounters, links, loaded]);
+
+  const selected = encounters.find(e => e.id === selectedId) || null;
+
+  const consumers = {};
+  encounters.forEach(e => e.in.forEach(f => { (consumers[f] = consumers[f] || []).push(e.id); }));
+  const flagEdges = [];
+  encounters.forEach(src => src.out.forEach(f => { (consumers[f] || []).forEach(tid => { if (tid !== src.id) flagEdges.push({ from: src.id, to: tid, flag: f }); }); }));
+  const danglingByNode = {};
+  encounters.forEach(e => { const d = e.out.filter(f => !(consumers[f] && consumers[f].length)); if (d.length) danglingByNode[e.id] = d; });
+
+  const isVisible = useCallback((e) => {
+    if (hidden.faction.has(e.faction) || hidden.type.has(e.type) || hidden.status.has(e.status)) return false;
+    if (search.trim()) { const q = search.toLowerCase();
+      if (!((e.title + " " + e.hook + " " + e.out.join(" ") + " " + e.in.join(" ")).toLowerCase().includes(q))) return false; }
+    return true;
+  }, [hidden, search]);
+
+  const nodeById = Object.fromEntries(encounters.map(e => [e.id, e]));
+
+  const doPinch = useCallback(() => {
+    const vals = [...pointers.current.values()]; if (vals.length < 2) return;
+    const a = vals[0], b = vals[1];
+    const dist = Math.hypot(a.x - b.x, a.y - b.y);
+    const rect = svgRef.current.getBoundingClientRect();
+    const mx = (a.x + b.x) / 2 - rect.left, my = (a.y + b.y) / 2 - rect.top;
+    const v = viewRef.current;
+    if (!pinch.current) { pinch.current = { dist, wx: (mx - v.x) / v.k, wy: (my - v.y) / v.k, k: v.k }; drag.current.active = false; return; }
+    const p = pinch.current;
+    const nk = clamp(p.k * (dist / p.dist), 0.2, 2.6);
+    setView({ k: nk, x: mx - p.wx * nk, y: my - p.wy * nk });
+  }, []);
+
+  const onGlobalMove = useCallback((e) => {
+    if (pointers.current.has(e.pointerId)) pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.current.size >= 2) { doPinch(); return; }
+    const d = drag.current; if (!d.active) return;
+    const dx = e.clientX - d.lastX, dy = e.clientY - d.lastY;
+    d.lastX = e.clientX; d.lastY = e.clientY;
+    if (Math.abs(e.clientX - d.startX) + Math.abs(e.clientY - d.startY) > 4) d.moved = true;
+    if (d.kind === "bg") setView(v => ({ ...v, x: v.x + dx, y: v.y + dy }));
+    else if (d.kind === "node") { const k = viewRef.current.k;
+      setEncounters(list => separate(list.map(n => n.id === d.id ? { ...n, x: n.x + dx / k, y: n.y + dy / k } : n), d.id)); }
+  }, [doPinch]);
+
+  const onGlobalUp = useCallback((e) => {
+    pointers.current.delete(e.pointerId);
+    if (pointers.current.size < 2) pinch.current = null;
+    if (pointers.current.size === 0) {
+      const d = drag.current;
+      if (d.active && !d.moved && d.kind === "bg" && modeRef.current !== "connect") setSelectedId(null);
+      d.active = false;
+    }
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("pointermove", onGlobalMove);
+    window.addEventListener("pointerup", onGlobalUp);
+    window.addEventListener("pointercancel", onGlobalUp);
+    return () => { window.removeEventListener("pointermove", onGlobalMove); window.removeEventListener("pointerup", onGlobalUp); window.removeEventListener("pointercancel", onGlobalUp); };
+  }, [onGlobalMove, onGlobalUp]);
+
+  const onBgDown = (e) => {
+    if (e.target !== svgRef.current && !e.target.dataset.bg) return;
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.current.size >= 2) { drag.current.active = false; return; }
+    if (modeRef.current === "connect") { setConnectFrom(null); setMode(null); return; }
+    drag.current = { active:true, kind:"bg", id:null, startX:e.clientX, startY:e.clientY, lastX:e.clientX, lastY:e.clientY, moved:false };
+  };
+  const onNodeDown = (e, id) => {
+    e.stopPropagation();
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.current.size >= 2) { drag.current.active = false; return; }
+    if (modeRef.current === "connect") { pickConnect(id); return; }
+    setSelectedId(id);
+    drag.current = { active:true, kind:"node", id, startX:e.clientX, startY:e.clientY, lastX:e.clientX, lastY:e.clientY, moved:false };
+  };
+  const onWheel = (e) => {
+    e.preventDefault();
+    const rect = svgRef.current.getBoundingClientRect();
+    const cx = e.clientX - rect.left, cy = e.clientY - rect.top;
+    setView(v => { const nk = clamp(v.k * (e.deltaY < 0 ? 1.12 : 0.89), 0.2, 2.6);
+      const wx = (cx - v.x) / v.k, wy = (cy - v.y) / v.k; return { k: nk, x: cx - wx * nk, y: cy - wy * nk }; });
+  };
+
+  const pickConnect = (id) => {
+    if (!connectFrom) { setConnectFrom(id); return; }
+    if (connectFrom !== id) setLinks(ls => ls.some(l => (l.from===connectFrom&&l.to===id)||(l.from===id&&l.to===connectFrom)) ? ls : [...ls, { from: connectFrom, to: id }]);
+    setConnectFrom(null); setMode(null);
+  };
+
+  const zoom = (f) => setView(v => { const rect = svgRef.current.getBoundingClientRect();
+    const cx = rect.width/2, cy = rect.height/2; const nk = clamp(v.k * f, 0.2, 2.6);
+    const wx = (cx - v.x)/v.k, wy = (cy - v.y)/v.k; return { k:nk, x:cx - wx*nk, y:cy - wy*nk }; });
+  const fit = () => {
+    if (!encounters.length || !svgRef.current) return;
+    const xs = encounters.map(e=>e.x), ys = encounters.map(e=>e.y);
+    const minX=Math.min(...xs)-W, maxX=Math.max(...xs)+W, minY=Math.min(...ys)-H, maxY=Math.max(...ys)+H;
+    const rect = svgRef.current.getBoundingClientRect();
+    const k = clamp(Math.min(rect.width/(maxX-minX), rect.height/(maxY-minY)), 0.2, 1.4);
+    setView({ k, x:(rect.width-(maxX-minX)*k)/2 - minX*k, y:(rect.height-(maxY-minY)*k)/2 - minY*k });
+  };
+  useEffect(() => { const t = setTimeout(fit, 80); return () => clearTimeout(t); }, [loaded]); // eslint-disable-line
+
+  const tidy = () => {
+    const order = Object.keys(TYPES);
+    const groups = {}; encounters.forEach(e => { (groups[e.type] = groups[e.type] || []).push(e); });
+    const colW = 540, rowH = 380, perRow = 3; let ti = 0; const next = [];
+    order.forEach(t => { const members = groups[t]; if (!members || !members.length) return;
+      const cx = (ti % perRow) * colW + 320, cy = Math.floor(ti / perRow) * rowH + 240; ti++;
+      members.forEach((m, i) => { next.push({ ...m, x: cx + (i % 2) * (W + 44), y: cy + Math.floor(i / 2) * (H + 36) }); });
+    });
+    setEncounters(separate(next, null)); setTimeout(fit, 70);
+  };
+
+  const patch = (id, p) => setEncounters(list => separate(list.map(n => n.id===id ? { ...n, ...p } : n), null));
+  const patchChoice = (id, i, p) => setEncounters(list => list.map(n => n.id!==id ? n : { ...n, choices: n.choices.map((c,ci)=>ci===i?{...c,...p}:c) }));
+  const addChoice = (id) => setEncounters(list => list.map(n => n.id!==id?n:{...n, choices:[...n.choices,{label:"",fx:""}]}));
+  const delChoice = (id, i) => setEncounters(list => list.map(n => n.id!==id?n:{...n, choices:n.choices.filter((_,ci)=>ci!==i)}));
+  const addNode = () => {
+    const rect = svgRef.current.getBoundingClientRect();
+    const cx = (rect.width/2 - view.x)/view.k, cy = (rect.height/2 - view.y)/view.k;
+    const id = newId();
+    setEncounters(list => separate([...list, { id, n:null, title:"New encounter", type:"salvage", faction:"none", scope:"universal", status:"idea", hook:"", teaches:"", choices:[{label:"",fx:""}], out:[], in:[], notes:"", x:cx, y:cy }], null));
+    setSelectedId(id);
+  };
+  const delNode = (id) => { setEncounters(list => list.filter(n=>n.id!==id)); setLinks(ls=>ls.filter(l=>l.from!==id&&l.to!==id)); if (selectedId===id) setSelectedId(null); };
+  const delLink = (from,to) => setLinks(ls=>ls.filter(l=>!(l.from===from&&l.to===to)));
+
+  const openExport = () => { setIoText(JSON.stringify({ meta:{ tool:"thread-web", version:1, exportedAt:new Date().toISOString() }, encounters, links }, null, 2)); setModal("export"); };
+  const doImport = () => { try { const b = JSON.parse(ioText); if (b.encounters) setEncounters(separate(b.encounters, null)); setLinks(b.links||[]); setModal(null); setSelectedId(null); } catch(e){ alert("Couldn't parse that JSON."); } };
+  const copyExport = () => { try { navigator.clipboard.writeText(ioText); } catch(e){} };
+  const toggleHidden = (kind, key) => setHidden(h => { const s = new Set(h[kind]); s.has(key)?s.delete(key):s.add(key); return { ...h, [kind]: s }; });
+
+  const regions = Object.keys(TYPES).map(t => {
+    const members = encounters.filter(e => e.type===t && isVisible(e));
+    if (!members.length) return null;
+    const xs = members.map(m=>m.x), ys = members.map(m=>m.y); const pad = 48;
+    return { t, x:Math.min(...xs)-W/2-pad, y:Math.min(...ys)-H/2-pad-14, w:(Math.max(...xs)-Math.min(...xs))+W+pad*2, h:(Math.max(...ys)-Math.min(...ys))+H+pad*2+14 };
+  }).filter(Boolean);
+
+  const edgePath = (a,b) => { const dx=b.x-a.x; return `M ${a.x} ${a.y} C ${a.x+dx*0.5} ${a.y}, ${b.x-dx*0.5} ${b.y}, ${b.x} ${b.y}`; };
+
+  return (
+    <div className="tw-root">
+      <style>{CSS}</style>
+
+      <div className="tw-bar" ref={barRef}>
+        <div className="tw-brand"><span className="tw-brand-serif">Thread Web</span><span className="tw-brand-sub">Remnant Continent · encounter canvas · BUILD 2</span></div>
+        <div className="tw-tools">
+          <button className="tw-btn primary" onClick={addNode}>+ Encounter</button>
+          <button className={"tw-btn"+(mode==="connect"?" on":"")} onClick={()=>{ setMode(m=>m==="connect"?null:"connect"); setConnectFrom(null); }}>{mode==="connect"?"Linking…":"Connect"}</button>
+          <span className="tw-sep" />
+          <button className="tw-btn ghost" onClick={()=>zoom(1.25)}>+</button>
+          <button className="tw-btn ghost" onClick={()=>zoom(0.8)}>–</button>
+          <span className="tw-zoom">{Math.round(view.k*100)}%</span>
+          <button className="tw-btn ghost" onClick={fit}>Fit</button>
+          <button className="tw-btn ghost" onClick={tidy}>Tidy</button>
+          <span className="tw-sep" />
+          <button className={"tw-btn"+(legendOpen?" on":"")} onClick={()=>setLegendOpen(o=>!o)}>Legend</button>
+          <input className="tw-search" placeholder="search…" value={search} onChange={e=>setSearch(e.target.value)} />
+          <button className="tw-btn" onClick={openExport}>Export</button>
+          <button className="tw-btn" onClick={()=>{ setIoText(""); setModal("import"); }}>Import</button>
+        </div>
+      </div>
+
+      {mode==="connect" && <div className="tw-hint" style={{top:barH+8}}>{connectFrom ? "Tap a second encounter to tie them. Tap empty space to cancel." : "Tap an encounter to start a link."}</div>}
+
+      {legendOpen && (
+        <div className="tw-legpanel" style={{ top: barH + 8 }}>
+          <div className="tw-leg-cols">
+            <div className="tw-leg-group">
+              <div className="tw-leg-h">Faction · color</div>
+              {Object.entries(FACTIONS).map(([k,v]) => (
+                <button key={k} className={"tw-leg-item"+(hidden.faction.has(k)?" off":"")} onClick={()=>toggleHidden("faction",k)}>
+                  <span className="tw-leg-dot" style={{background:v.color}} />{v.label}</button>))}
+            </div>
+            <div className="tw-leg-group">
+              <div className="tw-leg-h">Type · cluster</div>
+              {Object.entries(TYPES).map(([k,v]) => (
+                <button key={k} className={"tw-leg-item"+(hidden.type.has(k)?" off":"")} onClick={()=>toggleHidden("type",k)}>
+                  <span className="tw-leg-sq" />{v.label}</button>))}
+            </div>
+            <div className="tw-leg-group">
+              <div className="tw-leg-h">Status</div>
+              {Object.entries(STATUSES).map(([k,v]) => (
+                <button key={k} className={"tw-leg-item"+(hidden.status.has(k)?" off":"")} onClick={()=>toggleHidden("status",k)}>
+                  <span className="tw-leg-dot" style={{background:v.color}} />{v.label}</button>))}
+            </div>
+          </div>
+          <div className="tw-leg-edgekey"><span className="k-gold" /> flag tie &nbsp;·&nbsp; <span className="k-teal" /> manual link &nbsp;·&nbsp; <span className="k-fray" /> open thread</div>
+        </div>
+      )}
+
+      <svg ref={svgRef} className="tw-svg" onPointerDown={onBgDown} onWheel={onWheel}>
+        <defs>
+          <marker id="arrow-gold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#d4b26a"/></marker>
+          <marker id="arrow-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4a9d9d"/></marker>
+        </defs>
+        <rect data-bg x="0" y="0" width="100%" height="100%" fill="transparent" />
+        <g transform={`translate(${view.x} ${view.y}) scale(${view.k})`}>
+          {regions.map(r => (<g key={r.t}>
+            <rect x={r.x} y={r.y} width={r.w} height={r.h} rx="18" className="tw-region" />
+            <text x={r.x+16} y={r.y+23} className="tw-region-lbl">{TYPES[r.t].label.toUpperCase()}</text>
+          </g>))}
+
+          {links.map((l,i) => { const a=nodeById[l.from], b=nodeById[l.to]; if(!a||!b) return null;
+            const dim = !(isVisible(a)&&isVisible(b)); const hot = selectedId && (l.from===selectedId||l.to===selectedId);
+            return <path key={"ml"+i} d={edgePath(a,b)} className={"tw-link"+(dim?" dim":"")+(hot?" hot":"")} markerEnd="url(#arrow-teal)" onClick={()=>delLink(l.from,l.to)} />; })}
+
+          {flagEdges.map((e,i) => { const a=nodeById[e.from], b=nodeById[e.to]; if(!a||!b) return null;
+            const dim = !(isVisible(a)&&isVisible(b)); const hot = selectedId && (e.from===selectedId||e.to===selectedId);
+            const mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+            return <g key={"fe"+i} className={dim?"dim":""}>
+              <path d={edgePath(a,b)} className={"tw-flagedge"+(hot?" hot":"")} markerEnd="url(#arrow-gold)" />
+              <text x={mx} y={my-4} className="tw-flagedge-lbl">{e.flag}</text></g>; })}
+
+          {Object.entries(danglingByNode).map(([id,flags]) => { const nd=nodeById[id]; if(!nd||!isVisible(nd)) return null;
+            return flags.map((f,j) => { const sx=nd.x+W/2, sy=nd.y-8+j*15, ex=sx+70;
+              return <g key={id+f} className="tw-dangle">
+                <path d={`M ${sx} ${sy} L ${ex} ${sy}`} className="tw-dangle-line" />
+                <circle cx={ex} cy={sy} r="3" className="tw-dangle-dot" />
+                <text x={ex+6} y={sy+3} className="tw-dangle-lbl">{f}</text></g>; }); })}
+
+          {encounters.map(e => { const fc=FACTIONS[e.faction]?.color||"#888"; const vis=isVisible(e);
+            const sel=e.id===selectedId, cf=connectFrom===e.id;
+            return (<g key={e.id} transform={`translate(${e.x-W/2} ${e.y-H/2})`} className={"tw-node"+(vis?"":" dim")+(sel?" sel":"")+(cf?" cf":"")} onPointerDown={ev=>onNodeDown(ev,e.id)} style={{cursor:mode==="connect"?"crosshair":"grab"}}>
+              <rect width={W} height={H} rx="9" fill="#211f1b" />
+              <rect width={W} height={H} rx="9" className="tw-node-bg" style={{ fill:fc+(sel?"5e":"40"), stroke:fc, strokeWidth:sel?2.5:1.6 }} />
+              <rect width="6" height={H} rx="3" style={{ fill:fc }} />
+              <circle cx={W-14} cy={14} r="4.5" style={{ fill:STATUSES[e.status].color, stroke:"#1b1a17", strokeWidth:1 }} />
+              <text x={16} y={24} className="tw-node-title">{e.title.length>21?e.title.slice(0,20)+"…":e.title}</text>
+              <text x={16} y={41} className="tw-node-meta">{TYPES[e.type].label} · {e.scope==="gated"?"gated":"universal"}</text>
+              <text x={16} y={56} className="tw-node-flags">{e.out.length?("sets "+e.out.length):""}{e.in.length?("  needs "+e.in.length):""}{(!e.out.length&&!e.in.length)?"no flags":""}</text>
+            </g>); })}
+        </g>
+      </svg>
+
+      {selected && (
+        <aside className="tw-drawer" onPointerDown={e=>e.stopPropagation()}>
+          <div className="tw-dr-head">
+            <input className="tw-dr-title" value={selected.title} onChange={e=>patch(selected.id,{title:e.target.value})} />
+            <button className="tw-dr-x" onClick={()=>setSelectedId(null)}>✕</button>
+          </div>
+          <div className="tw-dr-row3">
+            <label>Type<select value={selected.type} onChange={e=>patch(selected.id,{type:e.target.value})}>{Object.entries(TYPES).map(([k,v])=><option key={k} value={k}>{v.label}</option>)}</select></label>
+            <label>Faction<select value={selected.faction} onChange={e=>patch(selected.id,{faction:e.target.value})}>{Object.entries(FACTIONS).map(([k,v])=><option key={k} value={k}>{v.label}</option>)}</select></label>
+            <label>Status<select value={selected.status} onChange={e=>patch(selected.id,{status:e.target.value})}>{Object.entries(STATUSES).map(([k,v])=><option key={k} value={k}>{v.label}</option>)}</select></label>
+          </div>
+          <div className="tw-dr-row2">
+            <label>Scope<select value={selected.scope} onChange={e=>patch(selected.id,{scope:e.target.value})}><option value="universal">universal</option><option value="gated">faction-gated</option></select></label>
+            <label>id<input className="tw-mono" value={selected.id} onChange={e=>patch(selected.id,{id:e.target.value})} /></label>
+          </div>
+          <label className="tw-dr-field">Hook <span className="tw-dr-hintlbl">what the player sees</span><textarea rows={2} value={selected.hook} onChange={e=>patch(selected.id,{hook:e.target.value})} /></label>
+          <label className="tw-dr-field">Teaches <span className="tw-dr-hintlbl">the world-fact this exposes</span><textarea rows={2} value={selected.teaches} onChange={e=>patch(selected.id,{teaches:e.target.value})} /></label>
+          <div className="tw-dr-field">
+            <div className="tw-dr-choicehead">Choices <button className="tw-mini" onClick={()=>addChoice(selected.id)}>+ add</button></div>
+            {selected.choices.map((c,i) => (<div key={i} className="tw-choice">
+              <input className="tw-ch-label" placeholder="button text" value={c.label} onChange={e=>patchChoice(selected.id,i,{label:e.target.value})} />
+              <input className="tw-ch-fx" placeholder="effect in plain words" value={c.fx} onChange={e=>patchChoice(selected.id,i,{fx:e.target.value})} />
+              <button className="tw-ch-x" onClick={()=>delChoice(selected.id,i)}>✕</button></div>))}
+          </div>
+          <div className="tw-dr-row2">
+            <label className="tw-dr-field">Sets flags <span className="tw-dr-hintlbl">comma-sep</span><input className="tw-mono" value={selected.out.join(", ")} onChange={e=>patch(selected.id,{out:parseFlags(e.target.value)})} /></label>
+            <label className="tw-dr-field">Needs flags <span className="tw-dr-hintlbl">comma-sep</span><input className="tw-mono" value={selected.in.join(", ")} onChange={e=>patch(selected.id,{in:parseFlags(e.target.value)})} /></label>
+          </div>
+          <label className="tw-dr-field">Notes for Claude<textarea rows={2} value={selected.notes} onChange={e=>patch(selected.id,{notes:e.target.value})} /></label>
+          <div className="tw-dr-foot">
+            <button className="tw-btn ghost" onClick={()=>{ setMode("connect"); setConnectFrom(selected.id); }}>Link from here</button>
+            <button className="tw-btn danger" onClick={()=>delNode(selected.id)}>Delete</button>
+          </div>
+        </aside>
+      )}
+
+      {modal && (
+        <div className="tw-modal-wrap" onPointerDown={()=>setModal(null)}>
+          <div className="tw-modal" onPointerDown={e=>e.stopPropagation()}>
+            <div className="tw-modal-h">{modal==="export"?"Export — paste this to Claude to mechanize":"Import — paste a board JSON"}</div>
+            <textarea className="tw-io" value={ioText} onChange={e=>setIoText(e.target.value)} spellCheck={false} />
+            <div className="tw-modal-foot">
+              {modal==="export"
+                ? <><button className="tw-btn" onClick={copyExport}>Copy</button><button className="tw-btn ghost" onClick={()=>setModal(null)}>Close</button></>
+                : <><button className="tw-btn primary" onClick={doImport}>Load board</button><button className="tw-btn ghost" onClick={()=>setModal(null)}>Cancel</button></>}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const CSS = `
+.tw-root{--bg:#1b1a17;--bg2:#211f1b;--panel:#26241f;--panel2:#2f2c25;--bone:#e9e3d5;--muted:#9a9484;--faint:#6a655a;--line:#39352d;--gold:#d4b26a;--teal:#4a9d9d;
+  position:relative;width:100%;height:100vh;min-height:640px;background:var(--bg);color:var(--bone);
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased;}
+.tw-root *{box-sizing:border-box;}
+
+.tw-bar{position:absolute;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:.6rem .9rem;background:linear-gradient(#1b1a17f2,#1b1a17e0);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);flex-wrap:wrap;}
+.tw-brand{display:flex;flex-direction:column;line-height:1.1;}
+.tw-brand-serif{font-family:Georgia,serif;font-size:1.15rem;font-weight:600;}
+.tw-brand-sub{font-family:ui-monospace,monospace;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+.tw-tools{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;}
+.tw-btn{background:var(--panel2);border:1px solid var(--line);color:var(--bone);font-family:ui-monospace,monospace;font-size:.72rem;padding:.4rem .7rem;border-radius:5px;cursor:pointer;transition:background .12s,border-color .12s;}
+.tw-btn:hover{background:#38342c;}
+.tw-btn.primary{background:rgba(212,178,106,.16);border-color:rgba(212,178,106,.5);color:var(--gold);}
+.tw-btn.ghost{background:transparent;padding:.4rem .55rem;}
+.tw-btn.on{background:rgba(74,157,157,.18);border-color:var(--teal);color:#8fd4d4;}
+.tw-btn.danger{background:rgba(192,90,68,.14);border-color:rgba(192,90,68,.5);color:#d98a76;}
+.tw-sep{width:1px;height:20px;background:var(--line);margin:0 .2rem;}
+.tw-zoom{font-family:ui-monospace,monospace;font-size:.68rem;color:var(--muted);min-width:38px;text-align:center;}
+.tw-search{background:var(--bg2);border:1px solid var(--line);color:var(--bone);font-family:ui-monospace,monospace;font-size:.72rem;padding:.4rem .6rem;border-radius:5px;width:110px;}
+.tw-search::placeholder{color:var(--faint);}
+.tw-hint{position:absolute;left:50%;transform:translateX(-50%);z-index:22;background:rgba(74,157,157,.14);border:1px solid var(--teal);color:#8fd4d4;font-family:ui-monospace,monospace;font-size:.72rem;padding:.35rem .8rem;border-radius:20px;}
+
+.tw-legpanel{position:absolute;left:.9rem;z-index:22;background:rgba(30,28,24,.97);border:1px solid var(--line);border-radius:10px;padding:.8rem .95rem;backdrop-filter:blur(8px);max-width:340px;max-height:62vh;overflow-y:auto;box-shadow:0 10px 30px rgba(0,0,0,.4);}
+.tw-leg-cols{display:flex;gap:1.3rem;flex-wrap:wrap;}
+.tw-leg-group{display:flex;flex-direction:column;gap:.15rem;}
+.tw-leg-h{font-family:ui-monospace,monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:.2rem;}
+.tw-leg-item{display:flex;align-items:center;gap:.4rem;background:none;border:none;color:var(--bone);font-size:.74rem;cursor:pointer;padding:.14rem 0;text-align:left;transition:opacity .12s;}
+.tw-leg-item.off{opacity:.32;text-decoration:line-through;}
+.tw-leg-dot{width:10px;height:10px;border-radius:50%;flex:none;}
+.tw-leg-sq{width:10px;height:10px;border-radius:2px;border:1px dashed var(--faint);flex:none;}
+.tw-leg-edgekey{font-family:ui-monospace,monospace;font-size:.62rem;color:var(--muted);margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--line);display:flex;align-items:center;flex-wrap:wrap;}
+.k-gold,.k-teal,.k-fray{display:inline-block;width:16px;height:0;border-top:2px solid;vertical-align:middle;margin-right:3px;}
+.k-gold{border-color:var(--gold);}.k-teal{border-color:var(--teal);border-top-style:dashed;}.k-fray{border-color:var(--gold);border-top-style:dotted;opacity:.6;}
+
+.tw-svg{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block;}
+.tw-region{fill:rgba(255,255,255,.02);stroke:var(--line);stroke-width:1;stroke-dasharray:6 7;}
+.tw-region-lbl{font-family:ui-monospace,monospace;font-size:13px;letter-spacing:.18em;fill:var(--faint);}
+.tw-node{transition:opacity .15s;}
+.tw-node.dim{opacity:.16;}
+.tw-node-bg{transition:stroke .12s,fill .12s;}
+.tw-node.cf .tw-node-bg{stroke:#8fd4d4 !important;stroke-width:2.5;}
+.tw-node-title{font-family:Georgia,serif;font-size:14.5px;font-weight:600;fill:#f4efe3;pointer-events:none;}
+.tw-node-meta{font-family:system-ui,sans-serif;font-size:10px;fill:#cdc6b5;pointer-events:none;}
+.tw-node-flags{font-family:ui-monospace,monospace;font-size:9px;fill:var(--gold);opacity:.9;pointer-events:none;}
+.tw-flagedge{fill:none;stroke:var(--gold);stroke-width:1.4;opacity:.7;}
+.tw-flagedge.hot{opacity:1;stroke-width:2.3;}
+.tw-flagedge-lbl{font-family:ui-monospace,monospace;font-size:10px;fill:var(--gold);opacity:.85;text-anchor:middle;pointer-events:none;}
+.tw-link{fill:none;stroke:var(--teal);stroke-width:1.4;stroke-dasharray:5 4;opacity:.7;cursor:pointer;}
+.tw-link:hover,.tw-link.hot{opacity:1;stroke-width:2.2;}
+.dim{opacity:.12 !important;}
+.tw-dangle-line{stroke:var(--gold);stroke-width:1;stroke-dasharray:2 3;opacity:.5;}
+.tw-dangle-dot{fill:var(--gold);opacity:.6;}
+.tw-dangle-lbl{font-family:ui-monospace,monospace;font-size:9px;fill:var(--gold);opacity:.6;font-style:italic;pointer-events:none;}
+
+.tw-drawer{position:absolute;top:52px;right:0;bottom:0;width:min(380px,92vw);z-index:18;background:var(--bg2);border-left:1px solid var(--line);padding:1rem 1.05rem 2rem;overflow-y:auto;box-shadow:-14px 0 34px rgba(0,0,0,.35);}
+.tw-dr-head{display:flex;align-items:flex-start;gap:.5rem;margin-bottom:.8rem;}
+.tw-dr-title{flex:1;background:transparent;border:none;border-bottom:1px solid var(--line);color:var(--bone);font-family:Georgia,serif;font-size:1.25rem;font-weight:600;padding:.2rem 0;}
+.tw-dr-title:focus{outline:none;border-bottom-color:var(--gold);}
+.tw-dr-x{background:none;border:none;color:var(--muted);font-size:1rem;cursor:pointer;padding:.2rem;}
+.tw-dr-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-bottom:.6rem;}
+.tw-dr-row2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.6rem;}
+.tw-drawer label{display:flex;flex-direction:column;gap:.2rem;font-family:ui-monospace,monospace;font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+.tw-drawer select,.tw-drawer input,.tw-drawer textarea{background:var(--bg);border:1px solid var(--line);color:var(--bone);border-radius:4px;padding:.35rem .45rem;font-family:system-ui,sans-serif;font-size:.82rem;text-transform:none;letter-spacing:normal;width:100%;}
+.tw-drawer select:focus,.tw-drawer input:focus,.tw-drawer textarea:focus{outline:none;border-color:var(--gold);}
+.tw-mono{font-family:ui-monospace,monospace !important;font-size:.72rem !important;}
+.tw-dr-field{margin-bottom:.6rem;}
+.tw-dr-hintlbl{text-transform:none;letter-spacing:normal;color:var(--faint);font-size:.6rem;}
+.tw-dr-choicehead{display:flex;align-items:center;justify-content:space-between;font-family:ui-monospace,monospace;font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;}
+.tw-mini{background:rgba(212,178,106,.14);border:1px solid rgba(212,178,106,.4);color:var(--gold);font-family:ui-monospace,monospace;font-size:.62rem;padding:.15rem .4rem;border-radius:4px;cursor:pointer;text-transform:none;}
+.tw-choice{display:grid;grid-template-columns:1fr 1.3fr auto;gap:.3rem;margin-bottom:.3rem;}
+.tw-ch-label,.tw-ch-fx{font-size:.76rem !important;}
+.tw-ch-x{background:none;border:none;color:var(--faint);cursor:pointer;font-size:.75rem;}
+.tw-ch-x:hover{color:#d98a76;}
+.tw-dr-foot{display:flex;justify-content:space-between;margin-top:1rem;padding-top:.8rem;border-top:1px solid var(--line);}
+
+.tw-modal-wrap{position:absolute;inset:0;z-index:30;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:1.2rem;}
+.tw-modal{background:var(--bg2);border:1px solid var(--line);border-radius:10px;width:min(680px,100%);max-height:86vh;display:flex;flex-direction:column;padding:1rem;}
+.tw-modal-h{font-family:ui-monospace,monospace;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.7rem;}
+.tw-io{flex:1;min-height:340px;background:var(--bg);border:1px solid var(--line);color:var(--bone);border-radius:6px;padding:.7rem;font-family:ui-monospace,monospace;font-size:.72rem;line-height:1.5;resize:vertical;}
+.tw-io:focus{outline:none;border-color:var(--gold);}
+.tw-modal-foot{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.7rem;}
+
+@media (max-width:620px){
+  .tw-drawer{top:auto;bottom:0;left:0;right:0;width:100%;height:72vh;border-left:none;border-top:1px solid var(--line);}
+  .tw-legpanel{max-width:calc(100% - 1.8rem);}
+}
+`;

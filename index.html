@@ -1,0 +1,2012 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Thread Web — a pannable canvas for authoring Remnant Continent encounter content.">
+<title>Thread Web — Remnant Continent encounter canvas</title>
+<style>
+:root{
+  --bg:#1b1a17; --bg2:#211f1b; --panel:#26241f; --panel2:#2f2c25;
+  --bone:#e9e3d5; --muted:#9a9484; --faint:#6a655a; --line:#39352d;
+  --gold:#d4b26a; --teal:#4a9d9d; --rust:#d98a76; --sage:#7a9b6e;
+  --barH:60px;
+  --serif:Georgia,"Iowan Old Style","Times New Roman",serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}   /* author display rules must not defeat it */
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:var(--bg); color:var(--bone); font-family:var(--sans);
+  overflow:hidden; -webkit-font-smoothing:antialiased; overscroll-behavior:none;
+}
+.root{position:relative;width:100%;height:100%;min-height:100%}
+
+/* ── focus ───────────────────────────────────────────────────────────── */
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
+.node:focus-visible .node-focus{opacity:1}
+
+/* ── toolbar ─────────────────────────────────────────────────────────── */
+.bar{
+  position:absolute;top:0;left:0;right:0;z-index:20;
+  display:flex;align-items:center;justify-content:space-between;gap:.9rem;
+  padding:.55rem .8rem calc(.55rem + env(safe-area-inset-top,0px));
+  padding-left:calc(.8rem + env(safe-area-inset-left,0px));
+  padding-right:calc(.8rem + env(safe-area-inset-right,0px));
+  background:linear-gradient(#1b1a17f5,#1b1a17e6);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--line);flex-wrap:wrap;
+}
+.brand{display:flex;flex-direction:column;line-height:1.15}
+.brand-serif{font-family:var(--serif);font-size:1.15rem;font-weight:600}
+.brand-sub{font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.tools{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap}
+.grp{display:flex;align-items:center;gap:.35rem}
+.btn{
+  background:var(--panel2);border:1px solid var(--line);color:var(--bone);
+  font-family:var(--mono);font-size:.72rem;line-height:1;
+  padding:.5rem .7rem;border-radius:5px;cursor:pointer;
+  transition:background .12s,border-color .12s,color .12s;
+  min-height:32px;white-space:nowrap;
+}
+.btn:hover{background:#38342c}
+.btn.primary{background:rgba(212,178,106,.16);border-color:rgba(212,178,106,.5);color:var(--gold)}
+.btn.ghost{background:transparent;padding:.5rem .55rem}
+.btn.on{background:rgba(74,157,157,.18);border-color:var(--teal);color:#8fd4d4}
+.btn.danger{background:rgba(192,90,68,.14);border-color:rgba(192,90,68,.5);color:var(--rust)}
+.btn[disabled]{opacity:.45;cursor:default}
+.sep{width:1px;height:20px;background:var(--line);margin:0 .15rem}
+.zoom{font-family:var(--mono);font-size:.68rem;color:var(--muted);min-width:40px;text-align:center}
+.search{
+  background:var(--bg2);border:1px solid var(--line);color:var(--bone);
+  font-family:var(--mono);font-size:.72rem;padding:.45rem .6rem;border-radius:5px;width:118px;min-height:32px;
+}
+.search::placeholder{color:var(--faint)}
+.search:focus{border-color:var(--gold)}
+.seg{display:flex;border:1px solid var(--line);border-radius:5px;overflow:hidden}
+.seg .seglbl{font-family:var(--mono);font-size:.6rem;color:var(--faint);padding:.5rem .4rem .5rem .55rem;align-self:center;letter-spacing:.08em;text-transform:uppercase}
+.segbtn{
+  background:transparent;border:none;border-left:1px solid var(--line);color:var(--muted);
+  font-family:var(--mono);font-size:.68rem;padding:.5rem .55rem;cursor:pointer;min-height:32px;
+}
+.segbtn.on{background:rgba(212,178,106,.14);color:var(--gold)}
+.chipbtn{display:flex;align-items:center;gap:.35rem}
+.chipbtn .chip-open{color:var(--gold)}
+.chipbtn .chip-warn{color:var(--rust)}
+.chipbtn .chip-ok{color:var(--sage)}
+
+/* ── floating panels ─────────────────────────────────────────────────── */
+.hint{
+  position:absolute;left:50%;transform:translateX(-50%);z-index:22;top:calc(var(--barH) + 8px);
+  background:rgba(74,157,157,.16);border:1px solid var(--teal);color:#8fd4d4;
+  font-family:var(--mono);font-size:.72rem;padding:.35rem .8rem;border-radius:20px;
+  max-width:calc(100% - 2rem);text-align:center;
+}
+.panel{
+  position:absolute;z-index:22;top:calc(var(--barH) + 8px);
+  background:rgba(30,28,24,.97);border:1px solid var(--line);border-radius:10px;
+  padding:.8rem .95rem;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  max-height:min(62vh,520px);overflow-y:auto;box-shadow:0 10px 30px rgba(0,0,0,.45);
+  -webkit-overflow-scrolling:touch;
+}
+.panel.legend{left:.8rem;max-width:min(360px,calc(100% - 1.6rem))}
+.panel.coverage{left:.8rem;width:min(340px,calc(100% - 1.6rem))}
+.panel.menu{right:.8rem;width:min(260px,calc(100% - 1.6rem));padding:.45rem}
+.leg-cols{display:flex;gap:1.3rem;flex-wrap:wrap}
+.leg-group{display:flex;flex-direction:column;gap:.1rem}
+.leg-h{font-family:var(--mono);font-size:.57rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:.25rem}
+.leg-item{
+  display:flex;align-items:center;gap:.42rem;background:none;border:none;color:var(--bone);
+  font-size:.76rem;cursor:pointer;padding:.22rem .1rem;text-align:left;transition:opacity .12s;font-family:var(--sans);
+}
+.leg-item.off{opacity:.32;text-decoration:line-through}
+.leg-count{color:var(--faint);font-family:var(--mono);font-size:.62rem;margin-left:auto;padding-left:.5rem}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex:none}
+.leg-sq{width:10px;height:10px;border-radius:2px;border:1px dashed var(--faint);flex:none}
+.leg-note{font-family:var(--mono);font-size:.6rem;color:var(--faint);margin-top:.55rem;line-height:1.5}
+.leg-edgekey{
+  font-family:var(--mono);font-size:.62rem;color:var(--muted);margin-top:.55rem;padding-top:.5rem;
+  border-top:1px solid var(--line);display:flex;align-items:center;flex-wrap:wrap;gap:.15rem;
+}
+.k-gold,.k-teal,.k-fray{display:inline-block;width:16px;height:0;border-top:2px solid;vertical-align:middle;margin-right:3px}
+.k-gold{border-color:var(--gold)}
+.k-teal{border-color:var(--teal);border-top-style:dashed}
+.k-fray{border-color:var(--gold);border-top-style:dotted;opacity:.6}
+
+.cov-h{font-family:var(--mono);font-size:.57rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:.7rem 0 .3rem}
+.cov-h:first-child{margin-top:0}
+.cov-lead{font-family:var(--serif);font-size:.94rem;line-height:1.45;color:var(--bone)}
+.cov-row{display:flex;align-items:baseline;gap:.5rem;font-size:.76rem;padding:.14rem 0}
+.cov-row .k{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cov-row .v{font-family:var(--mono);font-size:.7rem;color:var(--muted)}
+.cov-row.zero .k{color:var(--rust)}
+.cov-row.zero .v{color:var(--rust)}
+.cov-flags{display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.25rem}
+.cov-flag{
+  font-family:var(--mono);font-size:.64rem;padding:.16rem .38rem;border-radius:4px;cursor:pointer;
+  background:rgba(212,178,106,.1);border:1px solid rgba(212,178,106,.32);color:var(--gold);
+}
+.cov-flag.unmet{background:rgba(217,138,118,.1);border-color:rgba(217,138,118,.35);color:var(--rust)}
+.cov-empty{font-family:var(--mono);font-size:.66rem;color:var(--faint)}
+.menu-item{
+  display:block;width:100%;text-align:left;background:none;border:none;color:var(--bone);
+  font-family:var(--mono);font-size:.72rem;padding:.55rem .6rem;border-radius:5px;cursor:pointer;
+}
+.menu-item:hover{background:var(--panel2)}
+.menu-item.danger{color:var(--rust)}
+.menu-sep{height:1px;background:var(--line);margin:.3rem .2rem}
+.menu-note{font-family:var(--mono);font-size:.6rem;color:var(--faint);padding:.35rem .6rem;line-height:1.5}
+
+/* ── canvas ──────────────────────────────────────────────────────────── */
+.canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block;user-select:none;-webkit-user-select:none}
+.region{fill:rgba(255,255,255,.02);stroke:var(--line);stroke-width:1;stroke-dasharray:6 7;pointer-events:none}
+.region-lbl{font-family:var(--mono);font-size:13px;letter-spacing:.18em;fill:var(--faint);pointer-events:none}
+.node{transition:opacity .15s;cursor:grab}
+.node.dim{opacity:.16}
+.node.connecting{cursor:crosshair}
+.node-bg{transition:stroke .12s,fill .12s}
+.node.cf .node-bg{stroke:#8fd4d4 !important;stroke-width:2.5}
+.node-focus{fill:none;stroke:var(--bone);stroke-width:2;stroke-dasharray:3 3;opacity:0;pointer-events:none}
+.node-title{font-family:var(--serif);font-size:14.5px;font-weight:600;fill:#f4efe3;pointer-events:none}
+.node-meta{font-family:var(--sans);font-size:10px;fill:#cdc6b5;pointer-events:none}
+.node-flags{font-family:var(--mono);font-size:9px;fill:var(--gold);opacity:.9;pointer-events:none}
+.node-num{font-family:var(--mono);font-size:9px;fill:var(--faint);text-anchor:end;pointer-events:none}
+.flagedge{fill:none;stroke:var(--gold);stroke-width:1.4;opacity:.62;pointer-events:none}
+.flagedge.hot{opacity:1;stroke-width:2.4}
+.flagedge-lbl{font-family:var(--mono);font-size:10px;fill:var(--gold);opacity:.85;text-anchor:middle;pointer-events:none}
+.link{fill:none;stroke:var(--teal);stroke-width:1.4;stroke-dasharray:5 4;opacity:.7;cursor:pointer}
+.link:hover,.link.hot{opacity:1;stroke-width:2.2}
+.link-hit{fill:none;stroke:transparent;stroke-width:14;cursor:pointer}
+.dim{opacity:.12 !important}
+.dangle-line{stroke:var(--gold);stroke-width:1;stroke-dasharray:2 3;opacity:.5}
+.dangle-dot{fill:var(--gold);opacity:.6}
+.dangle-lbl{font-family:var(--mono);font-size:9px;fill:var(--gold);opacity:.6;font-style:italic;pointer-events:none}
+.dangle.match .dangle-line,.dangle.match .dangle-dot,.dangle.match .dangle-lbl{opacity:1;stroke-width:1.6}
+
+/* ── drawer ──────────────────────────────────────────────────────────── */
+.drawer{
+  position:absolute;top:var(--barH);right:0;bottom:0;width:min(390px,92vw);z-index:18;
+  background:var(--bg2);border-left:1px solid var(--line);
+  padding:1rem 1.05rem calc(2rem + env(safe-area-inset-bottom,0px));
+  overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:-14px 0 34px rgba(0,0,0,.4);
+}
+.dr-head{display:flex;align-items:flex-start;gap:.5rem;margin-bottom:.8rem}
+.dr-title{
+  flex:1;background:transparent;border:none;border-bottom:1px solid var(--line);color:var(--bone);
+  font-family:var(--serif);font-size:1.25rem;font-weight:600;padding:.2rem 0;min-width:0;
+}
+.dr-title:focus{outline:none;border-bottom-color:var(--gold)}
+.dr-x{background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;padding:.25rem .3rem;line-height:1}
+.dr-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-bottom:.6rem}
+.dr-row2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.6rem}
+.drawer label{
+  display:flex;flex-direction:column;gap:.22rem;font-family:var(--mono);font-size:.62rem;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+}
+.drawer select,.drawer input,.drawer textarea{
+  background:var(--bg);border:1px solid var(--line);color:var(--bone);border-radius:4px;
+  padding:.42rem .45rem;font-family:var(--sans);font-size:.85rem;text-transform:none;letter-spacing:normal;width:100%;
+}
+.drawer textarea{resize:vertical;line-height:1.5}
+.drawer select:focus,.drawer input:focus,.drawer textarea:focus{outline:none;border-color:var(--gold)}
+.mono{font-family:var(--mono) !important;font-size:.74rem !important}
+.dr-field{margin-bottom:.65rem}
+.dr-hintlbl{text-transform:none;letter-spacing:normal;color:var(--faint);font-size:.6rem}
+.dr-choicehead{
+  display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:.62rem;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;
+}
+.mini{
+  background:rgba(212,178,106,.14);border:1px solid rgba(212,178,106,.4);color:var(--gold);
+  font-family:var(--mono);font-size:.64rem;padding:.25rem .5rem;border-radius:4px;cursor:pointer;text-transform:none;
+}
+.choice{display:grid;grid-template-columns:1fr 1.25fr auto;gap:.3rem;margin-bottom:.3rem;align-items:start}
+.ch-x{background:none;border:none;color:var(--faint);cursor:pointer;font-size:.8rem;padding:.35rem .2rem}
+.ch-x:hover{color:var(--rust)}
+.dr-foot{display:flex;justify-content:space-between;gap:.5rem;margin-top:1rem;padding-top:.8rem;border-top:1px solid var(--line)}
+.dr-warn{font-family:var(--mono);font-size:.58rem;color:var(--faint);line-height:1.5;margin-top:.15rem;text-transform:none;letter-spacing:normal}
+.dr-threads{font-family:var(--mono);font-size:.64rem;color:var(--muted);line-height:1.6;margin:-.2rem 0 .7rem}
+.dr-threads b{color:var(--gold);font-weight:400}
+.dr-threads i{color:var(--rust);font-style:normal}
+
+/* ── modal ───────────────────────────────────────────────────────────── */
+.modal-wrap{
+  position:absolute;inset:0;z-index:30;background:rgba(0,0,0,.6);
+  display:flex;align-items:center;justify-content:center;padding:1.2rem;
+}
+.modal{
+  background:var(--bg2);border:1px solid var(--line);border-radius:10px;width:min(600px,100%);
+  max-height:86vh;display:flex;flex-direction:column;padding:1.1rem;overflow-y:auto;
+}
+.modal-h{
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:.75rem;
+}
+.modal-lead{font-family:var(--serif);font-size:1.02rem;line-height:1.55;margin:0 0 .9rem}
+.modal-stats{
+  font-family:var(--mono);font-size:.72rem;color:var(--muted);line-height:1.9;
+  background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:.65rem .8rem;margin-bottom:.9rem;
+}
+.modal-stats b{color:var(--bone);font-weight:400}
+.modal-foot{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.4rem;flex-wrap:wrap}
+.note{
+  border:1px solid rgba(212,178,106,.3);background:rgba(212,178,106,.05);border-radius:6px;
+  padding:.7rem .8rem;margin-bottom:.9rem;
+}
+.note-h{
+  display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);
+}
+.note-lead{font-size:.78rem;color:var(--muted);line-height:1.5;margin:.5rem 0 .4rem}
+.note-list{margin:0;padding-left:1.05rem;max-height:180px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.note-list li{font-family:var(--mono);font-size:.66rem;line-height:1.65;color:var(--bone);margin-bottom:.3rem;opacity:.86}
+.drop{
+  border:1px dashed var(--line);border-radius:8px;padding:1.5rem 1rem;text-align:center;
+  color:var(--muted);font-family:var(--mono);font-size:.74rem;line-height:1.7;cursor:pointer;
+  transition:border-color .12s,background .12s;background:var(--bg);
+}
+.drop:hover,.drop.over{border-color:var(--gold);background:rgba(212,178,106,.06);color:var(--bone)}
+.drop b{color:var(--gold);font-weight:400}
+.err{color:var(--rust);font-family:var(--mono);font-size:.72rem;line-height:1.6;margin-top:.7rem}
+
+.toast{
+  position:absolute;left:50%;bottom:calc(1.2rem + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
+  z-index:40;background:rgba(30,28,24,.97);border:1px solid var(--line);border-radius:20px;
+  padding:.45rem .95rem;font-family:var(--mono);font-size:.7rem;color:var(--bone);
+  box-shadow:0 8px 24px rgba(0,0,0,.45);max-width:calc(100% - 2rem);text-align:center;
+}
+.toast.warn{border-color:rgba(217,138,118,.5);color:var(--rust)}
+
+@media (max-width:620px){
+  .brand-sub{display:none}
+  /* One compact scrolling row instead of six wrapped ones — the view controls
+     move into the ⋯ menu, and pinch covers zoom. */
+  /* nowrap matters: a wrapping column flex sizes its line to the widest child,
+     which lets the toolbar push the page sideways instead of scrolling. */
+  .bar{flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:.4rem;padding-bottom:.5rem}
+  .on-wide{display:none !important}
+  /* min-width:0 — without it the flex item refuses to shrink below its content
+     and the scroller pushes the page sideways instead of scrolling itself. */
+  .tools{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:.3rem;padding-bottom:1px;min-width:0}
+  .tools::-webkit-scrollbar{display:none}
+  .tools > *{flex:none}
+  .search{width:96px}
+  .drawer{top:auto;bottom:0;left:0;right:0;width:100%;height:74vh;border-left:none;border-top:1px solid var(--line);border-radius:12px 12px 0 0}
+  .dr-row3{grid-template-columns:1fr 1fr}
+  .panel.legend,.panel.coverage{left:.5rem;right:.5rem;max-width:none;width:auto}
+  .panel.menu{left:.5rem;right:.5rem;width:auto}
+  .modal{padding:.9rem}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:.001ms !important;animation-duration:.001ms !important}
+}
+</style>
+</head>
+<body>
+<div class="root" id="root">
+
+  <header class="bar" id="bar">
+    <div class="brand">
+      <span class="brand-serif">Thread Web</span>
+      <span class="brand-sub">Remnant Continent · encounter canvas</span>
+    </div>
+    <div class="tools">
+      <button id="btn-add" class="btn primary">+ Encounter</button>
+      <button id="btn-connect" class="btn">Connect</button>
+      <span class="grp on-wide">
+        <span class="sep"></span>
+        <button id="btn-zin" class="btn ghost" aria-label="Zoom in">+</button>
+        <button id="btn-zout" class="btn ghost" aria-label="Zoom out">–</button>
+        <span id="zoomval" class="zoom" aria-live="off">60%</span>
+        <button id="btn-fit" class="btn ghost">Fit</button>
+        <button id="btn-tidy" class="btn ghost">Tidy</button>
+        <span class="sep"></span>
+      </span>
+      <button id="btn-legend" class="btn" aria-expanded="false">Legend</button>
+      <button id="btn-coverage" class="btn chipbtn" aria-expanded="false"><span id="cov-chip">coverage</span></button>
+      <div class="seg on-wide" role="group" aria-label="Color nodes by">
+        <span class="seglbl">color</span>
+        <button id="btn-color-faction" class="segbtn on">faction</button>
+        <button id="btn-color-status" class="segbtn">status</button>
+      </div>
+      <input id="search" class="search" type="search" placeholder="search…" aria-label="Search encounters">
+      <span class="sep on-wide"></span>
+      <button id="btn-export" class="btn">Export</button>
+      <button id="btn-import" class="btn">Import</button>
+      <button id="btn-board" class="btn ghost" aria-label="Board actions" aria-expanded="false">⋯</button>
+    </div>
+  </header>
+
+  <div id="hint" class="hint" hidden></div>
+  <div id="legendpanel" class="panel legend" hidden></div>
+  <div id="coveragepanel" class="panel coverage" hidden></div>
+  <div id="boardmenu" class="panel menu" hidden></div>
+
+  <svg id="canvas" class="canvas" role="application" aria-label="Encounter canvas">
+    <defs>
+      <marker id="arrow-gold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#d4b26a"/>
+      </marker>
+      <marker id="arrow-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#4a9d9d"/>
+      </marker>
+    </defs>
+    <rect data-bg="1" x="0" y="0" width="100%" height="100%" fill="transparent"></rect>
+    <g id="world"></g>
+  </svg>
+
+  <aside id="drawer" class="drawer" hidden aria-label="Encounter editor"></aside>
+  <div id="modal" class="modal-wrap" hidden></div>
+</div>
+
+<noscript><p style="padding:2rem;font-family:Georgia,serif">Thread Web needs JavaScript.</p></noscript>
+
+<script>
+(function () {
+"use strict";
+
+/* ════════════════════════════════════════════════════════════════════════
+   THREAD WEB — Remnant Continent encounter canvas.
+   Single self-contained file: no backend, no build step, no network.
+   Cluster by type · color by faction (or status) · tie by shared flags ·
+   edit in plain language · export JSON for Claude to mechanize.
+   The data contract lives in exportBoard()/normalizeBoard() — keep it stable.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+var NS = "http://www.w3.org/2000/svg";
+var $ = function (sel) { return document.querySelector(sel); };
+
+/* ── domain ───────────────────────────────────────────────────────────── */
+
+var FACTIONS = {
+  none:      { label: "Frontier / none", color: "#a59d8c" },
+  versari:   { label: "Versari Korad",   color: "#3fb6b6" },
+  lakers:    { label: "Grand Lakers",    color: "#5b95e6" },
+  goldgrass: { label: "Goldgrass",       color: "#e0b53f" },
+  plainers:  { label: "Free Plainers",   color: "#e0634a" }
+};
+var TYPES = {
+  salvage: { label: "Salvage & Tech" },
+  uncanny: { label: "The Uncanny" },
+  hazard:  { label: "Frontier Hazard" },
+  parley:  { label: "Parley" },
+  social:  { label: "Social" }
+};
+var STATUSES = {
+  idea:       { label: "Idea",       color: "#6a655a" },
+  drafted:    { label: "Drafted",    color: "#e0b53f" },
+  structured: { label: "Structured", color: "#7a9b6e" }
+};
+var SCOPES = { universal: { label: "universal" }, gated: { label: "faction-gated" } };
+var UNKNOWN_COLOR = "#8a8478";
+
+// Enums are additive by contract: an unrecognised value from an older or newer
+// export is kept verbatim and shown as-is rather than being silently rewritten.
+function factionColor(f) { return (FACTIONS[f] && FACTIONS[f].color) || UNKNOWN_COLOR; }
+function statusColor(s)  { return (STATUSES[s] && STATUSES[s].color) || UNKNOWN_COLOR; }
+function typeLabel(t)    { return (TYPES[t] && TYPES[t].label) || String(t); }
+function factionLabel(f) { return (FACTIONS[f] && FACTIONS[f].label) || String(f); }
+function statusLabel(s)  { return (STATUSES[s] && STATUSES[s].label) || String(s); }
+
+var W = 180, H = 66, PADX = 30, PADY = 26;
+var K_MIN = 0.2, K_MAX = 2.6;
+
+/* ── seed board ───────────────────────────────────────────────────────── */
+
+var SEED = [
+  { id:"fe_humming_room", n:1, title:"The Humming Room", type:"salvage", faction:"versari", scope:"universal", status:"structured",
+    hook:"An old-world console still draws power in a sealed sub-level, patient through every winter since the end.",
+    teaches:"Restored machines persist and nobody fully understands them; salvage-now vs study-slow.",
+    choices:[{label:"Strip it for parts",fx:"+2 Resource"},{label:"Study the console",fx:"+1 Tech · sets studied_oldworld_machine"},{label:"Seal it and move on",fx:"—"}],
+    out:["studied_oldworld_machine"], in:[], notes:"", x:300, y:230 },
+  { id:"fe_cold_cellar", n:8, title:"The Cold Cellar", type:"salvage", faction:"goldgrass", scope:"universal", status:"drafted",
+    hook:"A sealed old-world store room, intact: medicine, seed stock, sealed rations the living world can't make.",
+    teaches:"Salvage vs inheritance — some goods can't be remade, and that scarcity is a temptation.",
+    choices:[{label:"Take it all",fx:"+Resource · −Reputation if locals knew"},{label:"Share with the community",fx:"−gain · +Reputation · +standing (agrarian) · sets shared_the_cellar"},{label:"Seed-bank it",fx:"QUEUE_DEFERRED: larger return later"}],
+    out:["shared_the_cellar"], in:[], notes:"", x:300, y:360 },
+  { id:"fe_one_who_listens", n:2, title:"The One Who Listens", type:"uncanny", faction:"none", scope:"universal", status:"structured",
+    hook:"A frontier Reader sits apart at the settlement's edge — fed, unmet in the eye, believed and unnamed.",
+    teaches:"Perception is real and unevenly distributed; communities revere and fear it at once.",
+    choices:[{label:"Ask what's ahead",fx:"PEEK 2 encounter cards"},{label:"Offer her a place",fx:"−Resource · +Reputation · sets befriended_reader"},{label:"Leave her be",fx:"—"}],
+    out:["befriended_reader"], in:[], notes:"", x:760, y:170 },
+  { id:"fe_still_water", n:6, title:"The Still Water", type:"uncanny", faction:"lakers", scope:"gated", status:"drafted",
+    hook:"A Laker boatman has pulled ashore where no sane pilot would, waiting for the lake to settle.",
+    teaches:"Water-sense, open and unembarrassed — the gift is believed without question.",
+    choices:[{label:"Wait with him",fx:"tempo cost · PEEK / deferred shelter"},{label:"Press on against warning",fx:"deferred −Strength/Resource"},{label:"Hire him to pilot",fx:"−Resource · lasting benefit · sets trusted_watersense"}],
+    out:["trusted_watersense"], in:[], notes:"Gated to Lakers/Clan Tempest — see engine dep.", x:960, y:200 },
+  { id:"fe_quiet_camp", n:9, title:"The Quiet Camp", type:"uncanny", faction:"none", scope:"universal", status:"drafted",
+    hook:"A camp with the fire still warm and the gear undisturbed. No blood, no struggle. They simply aren't here.",
+    teaches:"The thinned boundary — kept small and unexplained. Texture, not a threat.",
+    choices:[{label:"Search the camp",fx:"+Resource · a unit picks up wrongness"},{label:"Leave an offering",fx:"−Resource · sets respected_the_quiet"},{label:"Study it (gated)",fx:"needs befriended_reader OR trusted_watersense → PEEK / foreshadow"}],
+    out:["respected_the_quiet"], in:["befriended_reader","trusted_watersense"], notes:"Intentionally rare.", x:850, y:330 },
+  { id:"fe_dry_line", n:4, title:"The Dry Line", type:"hazard", faction:"none", scope:"universal", status:"drafted",
+    hook:"A creek that should be running isn't, and the grass downstream will follow it into dust.",
+    teaches:"Water is the quiet currency of this world; the land is still settling and the maps lie.",
+    choices:[{label:"Dig for the water table",fx:"−Resource · sets found_water"},{label:"Read the land and reroute",fx:"— safe pass"},{label:"Push through fast",fx:"−Strength/Movement"}],
+    out:["found_water"], in:[], notes:"", x:1290, y:260 },
+  { id:"fe_steel_for_steel", n:5, title:"Steel for Steel", type:"parley", faction:"plainers", scope:"universal", status:"drafted",
+    hook:"A hard band blocks the track. Their spokesman doesn't want to talk — he wants to see what you're made of.",
+    teaches:"The steel pole: a fair fight is the negotiation, and respect is the only currency that sticks.",
+    choices:[{label:"Face their champion",fx:"Strength contest · sets earned_steel_respect · +standing (raider)"},{label:"Pay the toll",fx:"−Resource · no respect"},{label:"Refuse and force through",fx:"opens hostility"}],
+    out:["earned_steel_respect"], in:[], notes:"Variant candidate if player IS Plainers.", x:450, y:710 },
+  { id:"fe_cracked_axle", n:3, title:"Cracked Axle", type:"social", faction:"none", scope:"universal", status:"structured",
+    hook:"A stranded caravan in country with no law but reputation. Help, trade, or take.",
+    teaches:"Out here reputation is the only law; both plains poles — trade and steel — are live paths.",
+    choices:[{label:"Lend aid and tools",fx:"−Resource · +Reputation · +standing (trade pole)"},{label:"Trade fairly",fx:"+Resource"},{label:"Take what you want",fx:"+2 Resource · −Reputation · +standing (raider pole)"}],
+    out:[], in:[], notes:"Needs self-faction token for standing lines.", x:1000, y:710 },
+  { id:"fe_tally_stone", n:7, title:"The Tally Stone", type:"social", faction:"goldgrass", scope:"universal", status:"drafted",
+    hook:"Two settlements share a boundary marker and a slow argument about which way it's been moved.",
+    teaches:"No higher authority exists yet — justice is whoever people will agree to heed.",
+    choices:[{label:"Rule for one side",fx:"+favor / −grudge"},{label:"Broker a split",fx:"−Resource · +Reputation · sets brokered_peace"},{label:"Walk away",fx:"— quarrel festers"}],
+    out:["brokered_peace"], in:[], notes:"", x:1150, y:750 }
+];
+
+/* ── persistence (swappable: localStorage today, a server tomorrow) ───── */
+
+var STORAGE_KEY = "remnant.threadweb.board.v1";
+var Store = {
+  load: function () {
+    return new Promise(function (resolve) {
+      var raw = null;
+      try { raw = window.localStorage.getItem(STORAGE_KEY); } catch (e) { /* private mode */ }
+      if (!raw) return resolve(null);
+      try { resolve(JSON.parse(raw)); } catch (e) { resolve(null); }
+    });
+  },
+  save: function (board) {
+    return new Promise(function (resolve) {
+      try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(board)); resolve(true); }
+      catch (e) { resolve(false); }
+    });
+  },
+  clear: function () {
+    return new Promise(function (resolve) {
+      try { window.localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      resolve(true);
+    });
+  }
+};
+
+/* ── data contract ────────────────────────────────────────────────────── */
+
+var ENCOUNTER_ORDER = ["id","n","title","type","faction","scope","status","hook",
+                       "teaches","choices","out","in","notes","x","y"];
+
+var idSeq = 0;
+function newId(prefix) {
+  idSeq += 1;
+  return (prefix || "fe_") + Date.now().toString(36) + idSeq.toString(36);
+}
+function str(v) { return typeof v === "string" ? v : (v == null ? "" : String(v)); }
+function num(v) { var n = typeof v === "number" ? v : parseFloat(v); return isFinite(n) ? n : null; }
+function flagList(v) {
+  if (Array.isArray(v)) return v.map(str).map(function (s) { return s.trim(); }).filter(Boolean);
+  if (typeof v === "string") return parseFlags(v);
+  return [];
+}
+function parseFlags(s) {
+  return str(s).split(",").map(function (x) { return x.trim(); }).filter(Boolean);
+}
+function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+function uniq(a) { var s = {}, o = []; a.forEach(function (v) { if (!s[v]) { s[v] = 1; o.push(v); } }); return o; }
+
+function normalizeEncounter(raw) {
+  var e = (raw && typeof raw === "object") ? raw : {};
+  var known = {
+    id: str(e.id).trim() || newId(),
+    n: (e.n === null || e.n === undefined || e.n === "") ? null : num(e.n),
+    title: str(e.title) || "Untitled encounter",
+    type: str(e.type) || "salvage",
+    faction: str(e.faction) || "none",
+    scope: str(e.scope) || "universal",
+    status: str(e.status) || "idea",
+    hook: str(e.hook),
+    teaches: str(e.teaches),
+    choices: Array.isArray(e.choices)
+      ? e.choices.map(function (c) { return { label: str(c && c.label), fx: str(c && c.fx) }; })
+      : [],
+    out: flagList(e.out),
+    in: flagList(e["in"]),
+    notes: str(e.notes),
+    x: num(e.x),
+    y: num(e.y)
+  };
+  // Anything we don't know about rides along untouched, so a future field added
+  // upstream survives a round-trip through this tool.
+  var extras = {}, present = {};
+  Object.keys(e).forEach(function (k) {
+    present[k] = true;
+    if (ENCOUNTER_ORDER.indexOf(k) === -1) extras[k] = e[k];
+  });
+  var enc = Object.assign(extras, known);
+  // Which keys the source actually carried. A merge applies only those, so a
+  // partial encounter from a chat can't blank the fields it left out.
+  Object.defineProperty(enc, "_present", {
+    value: present, enumerable: false, writable: true, configurable: true
+  });
+  return enc;
+}
+
+function normalizeLink(raw) {
+  var l = (raw && typeof raw === "object") ? raw : {};
+  var from = str(l.from).trim(), to = str(l.to).trim();
+  if (!from || !to || from === to) return null;
+  return { from: from, to: to };
+}
+
+function normalizeBoard(raw) {
+  var b = raw;
+  if (Array.isArray(b)) b = { encounters: b };                 // a bare encounter array
+  if (!b || typeof b !== "object") return null;
+  if (!Array.isArray(b.encounters)) {
+    if (b.encounter && typeof b.encounter === "object") b = { encounters: [b.encounter] };
+    else if (b.id && b.title) b = { encounters: [b] };          // a single encounter object
+    else return null;
+  }
+  var seen = {};
+  var encounters = b.encounters.map(normalizeEncounter).filter(function (e) {
+    if (seen[e.id]) return false;                               // last-wins would hide edits; first wins
+    seen[e.id] = 1; return true;
+  });
+  var links = (Array.isArray(b.links) ? b.links : []).map(normalizeLink).filter(Boolean);
+  var quests = Array.isArray(b.quests) ? JSON.parse(JSON.stringify(b.quests)) : [];
+  return { encounters: encounters, links: links, quests: quests };
+}
+
+function exportEncounter(e) {
+  var o = {};
+  ENCOUNTER_ORDER.forEach(function (k) { o[k] = e[k]; });
+  Object.keys(e).forEach(function (k) {
+    if (ENCOUNTER_ORDER.indexOf(k) === -1 && k.charAt(0) !== "_") o[k] = e[k];
+  });
+  return o;
+}
+
+// Travels inside every export. The file is the whole interface between this
+// tool and whoever mechanizes it, so it carries its own return-format contract.
+var HOW_TO_REPLY = [
+  "This file is a Thread Web board export. It is authoring intent in plain language, not engine JSON.",
+  "TO SEND WORK BACK: reply with a JSON file (or a single fenced ```json block the author can save as .json) shaped exactly like this file: a top-level object with \"encounters\" (array), optional \"links\" (array), optional \"quests\" (array). Do not invent other top-level keys.",
+  "THE BOARD MERGES BY ID. Include ONLY the encounters you added or changed — a partial board is expected and safe. Untouched encounters should be left out entirely.",
+  "IDS ARE THE MERGE KEY. To edit an existing encounter, repeat its \"id\" character-for-character; changing it creates a duplicate instead of an edit. For a new encounter, mint a new unique id with the \"fe_\" prefix in snake_case.",
+  "AN IMPORT NEVER DELETES. Nothing is removed by omitting it; deletions are done by hand in the tool. If something should go, say so in prose outside the JSON.",
+  "SEND WHOLE ENCOUNTER OBJECTS, not partial field patches: any field you include replaces the current value, and a field you omit keeps the value already on the board. Fields: id, n, title, type, faction, scope, status, hook, teaches, choices, out, in, notes, x, y.",
+  "OMIT \"x\" AND \"y\". The tool places new cards and preserves existing positions; only send coordinates to deliberately move a card.",
+  "ENUMS ARE CLOSED unless the author says otherwise — type: salvage | uncanny | hazard | parley | social · faction: none | versari | lakers | goldgrass | plainers · scope: universal | gated · status: idea | drafted | structured.",
+  "KEEP THE PROSE PROSE. hook, teaches, notes and every choices[].fx stay natural language (e.g. \"+1 Tech · sets studied_oldworld_machine\"). Engine effect types, conditions and recipient tokens belong in the mechanization output, never in this file.",
+  "FLAGS ARE THE GRAPH. \"out\" lists flags an encounter sets, \"in\" lists flags it requires. snake_case, reused verbatim across encounters — that is what draws the ties. A flag in \"out\" that nobody reads shows up as an open thread; a flag in \"in\" that nobody sets shows up as a need with no source.",
+  "LINKS are manual thematic ties only: { \"from\": \"<encounterId>\", \"to\": \"<encounterId>\" }. Flag ties are derived automatically — never list them here."
+];
+var HOW_TO_REPLY_CHAT =
+  "This is a Thread Web board export (plain-language authoring intent, not engine JSON). " +
+  "When you send encounters back, reply with a .json file or one fenced json block shaped like the export: " +
+  "{ \"encounters\": [...], \"links\": [...] }. The board merges by id, so include only the encounters you added " +
+  "or changed and repeat each existing id exactly — a changed id creates a duplicate instead of an edit. " +
+  "Send whole encounter objects rather than field patches, omit x/y, keep hook/teaches/notes/choices[].fx in plain " +
+  "language, and keep flags snake_case in out/in. Importing never deletes anything, so say in prose if something " +
+  "should be removed. The full contract is in meta.howToReplyToThisFile inside the file.";
+
+function exportBoard() {
+  var out = {
+    meta: {
+      tool: "thread-web",
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      importMode: "merge-by-id",
+      howToReplyToThisFile: HOW_TO_REPLY
+    },
+    encounters: board.encounters.map(exportEncounter),
+    links: board.links.map(function (l) { return { from: l.from, to: l.to }; })
+  };
+  if (board.quests && board.quests.length) out.quests = board.quests;   // §7, passthrough for now
+  return out;
+}
+
+/* ── layout ───────────────────────────────────────────────────────────── */
+
+// No two cards may overlap. The dragged card is authoritative and never moves.
+function separate(list, fixedId) {
+  var out = list.map(function (n) { return Object.assign({}, n); });
+  var needX = W + PADX, needY = H + PADY;
+  for (var pass = 0; pass < 10; pass++) {
+    var any = false;
+    for (var i = 0; i < out.length; i++) for (var j = i + 1; j < out.length; j++) {
+      var a = out[i], b = out[j];
+      var dx = b.x - a.x, dy = b.y - a.y;
+      var ox = needX - Math.abs(dx), oy = needY - Math.abs(dy);
+      if (ox > 0 && oy > 0) {
+        any = true;
+        if (ox <= oy) {
+          var dirx = dx < 0 ? -1 : 1;
+          if (a.id === fixedId) b.x += dirx * ox;
+          else if (b.id === fixedId) a.x -= dirx * ox;
+          else { a.x -= dirx * ox / 2; b.x += dirx * ox / 2; }
+        } else {
+          var diry = dy < 0 ? -1 : 1;
+          if (a.id === fixedId) b.y += diry * oy;
+          else if (b.id === fixedId) a.y -= diry * oy;
+          else { a.y -= diry * oy / 2; b.y += diry * oy / 2; }
+        }
+      }
+    }
+    if (!any) break;
+  }
+  return out;
+}
+
+/* ── state ────────────────────────────────────────────────────────────── */
+
+var board = { encounters: [], links: [], quests: [] };
+var view = { x: 30, y: 96, k: 0.6 };
+var selectedId = null;
+var mode = null;              // null | "connect"
+var connectFrom = null;
+var search = "";
+var colorBy = "faction";      // "faction" | "status"
+var hidden = { faction: {}, type: {}, status: {} };
+var panel = null;             // null | "legend" | "coverage" | "menu"
+var loaded = false;
+var storageOK = true;
+var nodeIndex = {};
+var derived = null;
+
+var canvas = $("#canvas"), world = $("#world"), bar = $("#bar");
+var drawerEl = $("#drawer"), modalEl = $("#modal"), hintEl = $("#hint");
+var legendEl = $("#legendpanel"), coverageEl = $("#coveragepanel"), menuEl = $("#boardmenu");
+var barH = 60;
+
+function getNode(id) { return nodeIndex[id] || null; }
+function syncIndex() {
+  nodeIndex = {};
+  board.encounters.forEach(function (e) { nodeIndex[e.id] = e; });
+}
+
+/* ── derived graph (never stored) ─────────────────────────────────────── */
+
+function derive() {
+  var producers = {}, consumers = {};
+  board.encounters.forEach(function (e) {
+    e.out.forEach(function (f) { (producers[f] = producers[f] || []).push(e.id); });
+    e["in"].forEach(function (f) { (consumers[f] = consumers[f] || []).push(e.id); });
+  });
+  var flagEdges = [];
+  board.encounters.forEach(function (src) {
+    src.out.forEach(function (f) {
+      (consumers[f] || []).forEach(function (tid) {
+        if (tid !== src.id) flagEdges.push({ from: src.id, to: tid, flag: f });
+      });
+    });
+  });
+  var dangling = {}, openFlags = [];
+  board.encounters.forEach(function (e) {
+    var d = e.out.filter(function (f) { return !(consumers[f] && consumers[f].length); });
+    if (d.length) { dangling[e.id] = d; openFlags = openFlags.concat(d); }
+  });
+  var unmet = [];
+  Object.keys(consumers).forEach(function (f) {
+    if (!(producers[f] && producers[f].length)) unmet.push(f);
+  });
+  return {
+    producers: producers, consumers: consumers, flagEdges: flagEdges,
+    dangling: dangling, openFlags: uniq(openFlags).sort(), unmet: unmet.sort()
+  };
+}
+
+function coverage() {
+  var d = derived;
+  var byFaction = {}, byType = {}, byStatus = {};
+  Object.keys(FACTIONS).forEach(function (k) { byFaction[k] = 0; });
+  Object.keys(TYPES).forEach(function (k) { byType[k] = 0; });
+  Object.keys(STATUSES).forEach(function (k) { byStatus[k] = 0; });
+  board.encounters.forEach(function (e) {
+    byFaction[e.faction] = (byFaction[e.faction] || 0) + 1;
+    byType[e.type] = (byType[e.type] || 0) + 1;
+    byStatus[e.status] = (byStatus[e.status] || 0) + 1;
+  });
+  var emptyPoles = Object.keys(byFaction).filter(function (k) { return !byFaction[k]; });
+  var emptyTypes = Object.keys(byType).filter(function (k) { return !byType[k]; });
+  return {
+    byFaction: byFaction, byType: byType, byStatus: byStatus,
+    emptyPoles: emptyPoles, emptyTypes: emptyTypes,
+    open: d.openFlags, unmet: d.unmet, total: board.encounters.length
+  };
+}
+
+/* ── filtering ────────────────────────────────────────────────────────── */
+
+function matchesSearch(e) {
+  var q = search.trim().toLowerCase();
+  if (!q) return true;
+  var hay = [e.title, e.hook, e.teaches, e.notes, e.id,
+             e.out.join(" "), e["in"].join(" "),
+             e.choices.map(function (c) { return c.label + " " + c.fx; }).join(" ")].join(" ").toLowerCase();
+  return hay.indexOf(q) !== -1;
+}
+function isVisible(e) {
+  if (hidden.faction[e.faction] || hidden.type[e.type] || hidden.status[e.status]) return false;
+  return matchesSearch(e);
+}
+
+/* ── DOM helpers ──────────────────────────────────────────────────────── */
+
+function svgEl(tag, attrs, parent) {
+  var el = document.createElementNS(NS, tag);
+  if (attrs) for (var k in attrs) { if (attrs[k] != null) el.setAttribute(k, attrs[k]); }
+  if (parent) parent.appendChild(el);
+  return el;
+}
+function el(tag, props, kids) {
+  var n = document.createElement(tag);
+  props = props || {};
+  for (var k in props) {
+    var v = props[k];
+    if (v == null) continue;
+    if (k === "class") n.className = v;
+    else if (k === "text") n.textContent = v;
+    else if (k === "on") { for (var ev in v) n.addEventListener(ev, v[ev]); }
+    else if (k === "style") { for (var s in v) n.style[s] = v[s]; }
+    else if (k in n && k !== "list") n[k] = v;
+    else n.setAttribute(k, v);
+  }
+  (kids || []).forEach(function (c) {
+    if (c == null) return;
+    n.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+  });
+  return n;
+}
+function clear(node) { while (node.firstChild) node.removeChild(node.firstChild); }
+
+var toastTimer = null;
+function toast(msg, warn) {
+  var old = $(".toast"); if (old) old.parentNode.removeChild(old);
+  var t = el("div", { class: "toast" + (warn ? " warn" : ""), text: msg, role: "status" });
+  $("#root").appendChild(t);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 3200);
+}
+
+/* ── canvas rendering ─────────────────────────────────────────────────── */
+
+var geomUpdaters = [];
+var textUpdaters = {};
+
+function applyView() {
+  world.setAttribute("transform", "translate(" + view.x + " " + view.y + ") scale(" + view.k + ")");
+  $("#zoomval").textContent = Math.round(view.k * 100) + "%";
+}
+
+function edgePath(a, b) {
+  var dx = b.x - a.x;
+  return "M " + a.x + " " + a.y + " C " + (a.x + dx * 0.5) + " " + a.y + ", " +
+         (b.x - dx * 0.5) + " " + b.y + ", " + b.x + " " + b.y;
+}
+
+function regionBox(type) {
+  var members = board.encounters.filter(function (e) { return e.type === type && isVisible(e); });
+  if (!members.length) return null;
+  var xs = members.map(function (m) { return m.x; }), ys = members.map(function (m) { return m.y; });
+  var pad = 48;
+  return {
+    x: Math.min.apply(null, xs) - W / 2 - pad,
+    y: Math.min.apply(null, ys) - H / 2 - pad - 14,
+    w: (Math.max.apply(null, xs) - Math.min.apply(null, xs)) + W + pad * 2,
+    h: (Math.max.apply(null, ys) - Math.min.apply(null, ys)) + H + pad * 2 + 14
+  };
+}
+
+function renderCanvas() {
+  syncIndex();
+  derived = derive();
+  geomUpdaters = [];
+  textUpdaters = {};
+  clear(world);
+
+  var gRegions = svgEl("g", null, world);
+  var gLinks   = svgEl("g", null, world);
+  var gFlags   = svgEl("g", null, world);
+  var gDangle  = svgEl("g", null, world);
+  var gNodes   = svgEl("g", null, world);
+
+  // type regions — the quiet wash behind each cluster
+  Object.keys(TYPES).concat(
+    uniq(board.encounters.map(function (e) { return e.type; })).filter(function (t) { return !TYPES[t]; })
+  ).forEach(function (t) {
+    var g = svgEl("g", null, gRegions);
+    var rect = svgEl("rect", { rx: 18, "class": "region" }, g);
+    var lbl = svgEl("text", { "class": "region-lbl" }, g);
+    lbl.textContent = typeLabel(t).toUpperCase();
+    geomUpdaters.push(function () {
+      var b = regionBox(t);
+      if (!b) { g.setAttribute("visibility", "hidden"); return; }
+      g.removeAttribute("visibility");
+      rect.setAttribute("x", b.x); rect.setAttribute("y", b.y);
+      rect.setAttribute("width", b.w); rect.setAttribute("height", b.h);
+      lbl.setAttribute("x", b.x + 16); lbl.setAttribute("y", b.y + 23);
+    });
+  });
+
+  // manual links — dashed teal
+  board.links.forEach(function (l) {
+    var a = getNode(l.from), b = getNode(l.to);
+    if (!a || !b) return;
+    var g = svgEl("g", null, gLinks);
+    var hit = svgEl("path", { "class": "link-hit" }, g);
+    var p = svgEl("path", { "class": "link", "marker-end": "url(#arrow-teal)" }, g);
+    var title = svgEl("title", null, g);
+    title.textContent = "manual link · " + a.title + " → " + b.title + " (tap to remove)";
+    var kill = function (ev) {
+      ev.stopPropagation();
+      if (window.confirm("Remove the manual link between “" + a.title + "” and “" + b.title + "”?")) delLink(l.from, l.to);
+    };
+    hit.addEventListener("click", kill);
+    p.addEventListener("click", kill);
+    geomUpdaters.push(function () {
+      var na = getNode(l.from), nb = getNode(l.to);
+      if (!na || !nb) return;
+      var d = edgePath(na, nb);
+      p.setAttribute("d", d); hit.setAttribute("d", d);
+      var dim = !(isVisible(na) && isVisible(nb));
+      var hot = selectedId && (l.from === selectedId || l.to === selectedId);
+      g.setAttribute("class", dim ? "dim" : "");
+      p.setAttribute("class", "link" + (hot ? " hot" : ""));
+    });
+  });
+
+  // flag ties — solid gold, labelled at the midpoint
+  derived.flagEdges.forEach(function (e) {
+    var a = getNode(e.from), b = getNode(e.to);
+    if (!a || !b) return;
+    var g = svgEl("g", null, gFlags);
+    var p = svgEl("path", { "class": "flagedge", "marker-end": "url(#arrow-gold)" }, g);
+    var lbl = svgEl("text", { "class": "flagedge-lbl" }, g);
+    lbl.textContent = e.flag;
+    geomUpdaters.push(function () {
+      var na = getNode(e.from), nb = getNode(e.to);
+      if (!na || !nb) return;
+      p.setAttribute("d", edgePath(na, nb));
+      lbl.setAttribute("x", (na.x + nb.x) / 2);
+      lbl.setAttribute("y", (na.y + nb.y) / 2 - 4);
+      var dim = !(isVisible(na) && isVisible(nb));
+      var hot = selectedId && (e.from === selectedId || e.to === selectedId);
+      g.setAttribute("class", dim ? "dim" : "");
+      p.setAttribute("class", "flagedge" + (hot ? " hot" : ""));
+    });
+  });
+
+  // open threads — frayed gold stubs
+  Object.keys(derived.dangling).forEach(function (id) {
+    derived.dangling[id].forEach(function (f, j) {
+      var g = svgEl("g", { "class": "dangle" }, gDangle);
+      var line = svgEl("path", { "class": "dangle-line" }, g);
+      var dot = svgEl("circle", { r: 3, "class": "dangle-dot" }, g);
+      var lbl = svgEl("text", { "class": "dangle-lbl" }, g);
+      lbl.textContent = f;
+      geomUpdaters.push(function () {
+        var nd = getNode(id);
+        if (!nd || !isVisible(nd)) { g.setAttribute("visibility", "hidden"); return; }
+        g.removeAttribute("visibility");
+        var sx = nd.x + W / 2, sy = nd.y - 8 + j * 15, ex = sx + 70;
+        line.setAttribute("d", "M " + sx + " " + sy + " L " + ex + " " + sy);
+        dot.setAttribute("cx", ex); dot.setAttribute("cy", sy);
+        lbl.setAttribute("x", ex + 6); lbl.setAttribute("y", sy + 3);
+        var q = search.trim().toLowerCase();
+        g.setAttribute("class", "dangle" + (q && f.toLowerCase().indexOf(q) !== -1 ? " match" : ""));
+      });
+    });
+  });
+
+  // nodes — opaque cards
+  board.encounters.forEach(function (e) {
+    var g = svgEl("g", { "class": "node", tabindex: "0", role: "button" }, gNodes);
+    var solid = svgEl("rect", { width: W, height: H, rx: 9, fill: "#211f1b" }, g);
+    var tint = svgEl("rect", { width: W, height: H, rx: 9, "class": "node-bg" }, g);
+    var spine = svgEl("rect", { width: 6, height: H, rx: 3 }, g);
+    var dot = svgEl("circle", { cx: W - 14, cy: 14, r: 4.5, stroke: "#1b1a17", "stroke-width": 1 }, g);
+    var title = svgEl("text", { x: 16, y: 24, "class": "node-title" }, g);
+    var meta = svgEl("text", { x: 16, y: 41, "class": "node-meta" }, g);
+    var flags = svgEl("text", { x: 16, y: 56, "class": "node-flags" }, g);
+    var numText = svgEl("text", { x: W - 12, y: 57, "class": "node-num" }, g);
+    var focus = svgEl("rect", { x: -3, y: -3, width: W + 6, height: H + 6, rx: 11, "class": "node-focus" }, g);
+    var titleTip = svgEl("title", null, g);
+
+    // Card text is refreshed on its own, so drawer edits don't rebuild the web.
+    textUpdaters[e.id] = function () {
+      var n = getNode(e.id) || e;
+      title.textContent = n.title.length > 21 ? n.title.slice(0, 20) + "…" : n.title;
+      meta.textContent = typeLabel(n.type) + " · " + (n.scope === "gated" ? "gated" : "universal");
+      flags.textContent = (n.out.length ? "sets " + n.out.length : "") +
+                          (n["in"].length ? (n.out.length ? "  " : "") + "needs " + n["in"].length : "") ||
+                          "no flags";
+      numText.textContent = n.n == null ? "" : String(n.n);
+      titleTip.textContent = n.title + " — " + factionLabel(n.faction) + " · " + statusLabel(n.status);
+      g.setAttribute("aria-label", n.title + ", " + typeLabel(n.type) + ", " +
+                     factionLabel(n.faction) + ", " + statusLabel(n.status));
+    };
+    textUpdaters[e.id]();
+
+    g.addEventListener("pointerdown", function (ev) { onNodeDown(ev, e.id); });
+    g.addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter" || ev.key === " ") {
+        ev.preventDefault();
+        if (mode === "connect") pickConnect(e.id); else select(e.id);
+      }
+    });
+
+    geomUpdaters.push(function () {
+      var n = getNode(e.id);
+      if (!n) return;
+      g.setAttribute("transform", "translate(" + (n.x - W / 2) + " " + (n.y - H / 2) + ")");
+      var col = colorBy === "status" ? statusColor(n.status) : factionColor(n.faction);
+      var other = colorBy === "status" ? factionColor(n.faction) : statusColor(n.status);
+      var sel = n.id === selectedId;
+      tint.setAttribute("fill", col + (sel ? "5e" : "40"));
+      tint.setAttribute("stroke", col);
+      tint.setAttribute("stroke-width", sel ? 2.5 : 1.6);
+      spine.setAttribute("fill", col);
+      dot.setAttribute("fill", other);
+      g.setAttribute("class", "node" + (isVisible(n) ? "" : " dim") + (sel ? " sel" : "") +
+                     (connectFrom === n.id ? " cf" : "") + (mode === "connect" ? " connecting" : ""));
+    });
+  });
+
+  renderGeometry();
+  renderCoverageChip();
+  if (panel === "coverage") renderCoveragePanel();
+  if (panel === "legend") renderLegend();
+}
+
+function renderGeometry() {
+  for (var i = 0; i < geomUpdaters.length; i++) geomUpdaters[i]();
+}
+
+/* ── viewport maths ───────────────────────────────────────────────────── */
+
+function viewportBox() {
+  var rect = canvas.getBoundingClientRect();
+  var pad = 16;
+  var top = barH + pad, bottom = rect.height - pad, left = pad, right = rect.width - pad;
+  if (!drawerEl.hidden) {
+    if (window.innerWidth > 620) right -= Math.min(390, window.innerWidth * 0.92);
+    else bottom -= rect.height * 0.74;
+  }
+  return { left: left, top: top, right: right, bottom: bottom,
+           w: Math.max(80, right - left), h: Math.max(80, bottom - top) };
+}
+
+// minK: don't zoom out past this even if the board won't fit. Used for the
+// opening view on a phone, where a true fit is too small to read.
+function fit(minK) {
+  if (!board.encounters.length) return;
+  var vb = viewportBox();
+  var xs = board.encounters.map(function (e) { return e.x; });
+  var ys = board.encounters.map(function (e) { return e.y; });
+  var minX = Math.min.apply(null, xs) - W, minY = Math.min.apply(null, ys) - H;
+  var maxY = Math.max.apply(null, ys) + H;
+  // Open-thread stubs trail off the right edge of their card; frame them too.
+  var maxX = Math.max.apply(null, board.encounters.map(function (e) {
+    return e.x + W + ((derived && derived.dangling[e.id]) ? 230 : 0);
+  }));
+  var k = clamp(Math.min(vb.w / (maxX - minX), vb.h / (maxY - minY)), K_MIN, 1.4);
+  if (typeof minK === "number" && k < minK) k = minK;
+  view = { k: k,
+           x: (vb.left + vb.right) / 2 - ((minX + maxX) / 2) * k,
+           y: (vb.top + vb.bottom) / 2 - ((minY + maxY) / 2) * k };
+  applyView();
+}
+
+function zoomBy(f) {
+  var vb = viewportBox();
+  var cx = (vb.left + vb.right) / 2, cy = (vb.top + vb.bottom) / 2;
+  zoomAt(cx, cy, f);
+}
+function zoomAt(cx, cy, f) {
+  var nk = clamp(view.k * f, K_MIN, K_MAX);
+  var wx = (cx - view.x) / view.k, wy = (cy - view.y) / view.k;
+  view = { k: nk, x: cx - wx * nk, y: cy - wy * nk };
+  applyView();
+}
+function centerWorld() {
+  var vb = viewportBox();
+  return { x: ((vb.left + vb.right) / 2 - view.x) / view.k, y: ((vb.top + vb.bottom) / 2 - view.y) / view.k };
+}
+
+/* ── pointer interaction ──────────────────────────────────────────────── */
+
+var drag = { active: false };
+var pointers = new Map();
+var pinch = null;
+
+function onBgDown(ev) {
+  var isBg = ev.target === canvas || ev.target.getAttribute("data-bg") === "1";
+  if (!isBg) return;
+  pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+  if (pointers.size >= 2) { drag.active = false; return; }
+  closePanel();
+  if (mode === "connect") { setConnectFrom(null); setMode(null); return; }
+  drag = { active: true, kind: "bg", id: null, startX: ev.clientX, startY: ev.clientY,
+           lastX: ev.clientX, lastY: ev.clientY, moved: false };
+}
+
+function onNodeDown(ev, id) {
+  ev.stopPropagation();
+  pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+  if (pointers.size >= 2) { drag.active = false; return; }
+  closePanel();
+  if (mode === "connect") { pickConnect(id); return; }
+  select(id);
+  drag = { active: true, kind: "node", id: id, startX: ev.clientX, startY: ev.clientY,
+           lastX: ev.clientX, lastY: ev.clientY, moved: false };
+}
+
+function doPinch() {
+  var vals = [];
+  pointers.forEach(function (v) { vals.push(v); });
+  if (vals.length < 2) return;
+  var a = vals[0], b = vals[1];
+  var dist = Math.hypot(a.x - b.x, a.y - b.y);
+  var rect = canvas.getBoundingClientRect();
+  var mx = (a.x + b.x) / 2 - rect.left, my = (a.y + b.y) / 2 - rect.top;
+  if (!pinch) {
+    pinch = { dist: dist, wx: (mx - view.x) / view.k, wy: (my - view.y) / view.k, k: view.k };
+    drag.active = false;
+    return;
+  }
+  var nk = clamp(pinch.k * (dist / pinch.dist), K_MIN, K_MAX);
+  view = { k: nk, x: mx - pinch.wx * nk, y: my - pinch.wy * nk };
+  applyView();
+}
+
+function onGlobalMove(ev) {
+  if (pointers.has(ev.pointerId)) pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+  if (pointers.size >= 2) { doPinch(); return; }
+  if (!drag.active) return;
+  var dx = ev.clientX - drag.lastX, dy = ev.clientY - drag.lastY;
+  drag.lastX = ev.clientX; drag.lastY = ev.clientY;
+  if (Math.abs(ev.clientX - drag.startX) + Math.abs(ev.clientY - drag.startY) > 4) drag.moved = true;
+  if (drag.kind === "bg") {
+    view.x += dx; view.y += dy;
+    applyView();
+  } else if (drag.kind === "node") {
+    var k = view.k;
+    board.encounters = separate(board.encounters.map(function (n) {
+      return n.id === drag.id ? Object.assign({}, n, { x: n.x + dx / k, y: n.y + dy / k }) : n;
+    }), drag.id);
+    syncIndex();
+    renderGeometry();
+  }
+}
+
+function onGlobalUp(ev) {
+  pointers["delete"](ev.pointerId);
+  if (pointers.size < 2) pinch = null;
+  if (pointers.size === 0) {
+    if (drag.active && drag.kind === "node" && drag.moved) scheduleSave();
+    if (drag.active && !drag.moved && drag.kind === "bg" && mode !== "connect") select(null);
+    drag.active = false;
+  }
+}
+
+function onWheel(ev) {
+  ev.preventDefault();
+  var rect = canvas.getBoundingClientRect();
+  zoomAt(ev.clientX - rect.left, ev.clientY - rect.top, ev.deltaY < 0 ? 1.12 : 0.89);
+}
+
+/* ── mutations ────────────────────────────────────────────────────────── */
+
+var saveTimer = null;
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(commitSave, 220);
+}
+function commitSave() {
+  if (!loaded) return;
+  Store.save({ encounters: board.encounters, links: board.links, quests: board.quests })
+    .then(function (ok) {
+      if (!ok && storageOK) {
+        storageOK = false;
+        toast("Couldn't autosave — export to a file to keep this board.", true);
+      } else if (ok) storageOK = true;
+    });
+}
+
+function select(id) {
+  selectedId = id;
+  renderDrawer();
+  renderGeometry();
+}
+
+function setMode(m) {
+  mode = m;
+  $("#btn-connect").className = "btn" + (m === "connect" ? " on" : "");
+  $("#btn-connect").textContent = m === "connect" ? "Linking…" : "Connect";
+  renderHint();
+  renderGeometry();
+}
+function setConnectFrom(id) { connectFrom = id; renderHint(); renderGeometry(); }
+
+function renderHint() {
+  if (mode !== "connect") { hintEl.hidden = true; return; }
+  hintEl.hidden = false;
+  hintEl.textContent = connectFrom
+    ? "Tap a second encounter to tie them. Tap empty space to cancel."
+    : "Tap an encounter to start a link.";
+}
+
+function pickConnect(id) {
+  if (!connectFrom) { setConnectFrom(id); return; }
+  if (connectFrom !== id) {
+    var exists = board.links.some(function (l) {
+      return (l.from === connectFrom && l.to === id) || (l.from === id && l.to === connectFrom);
+    });
+    if (!exists) board.links.push({ from: connectFrom, to: id });
+  }
+  connectFrom = null;
+  setMode(null);
+  renderCanvas();
+  scheduleSave();
+}
+
+function delLink(from, to) {
+  board.links = board.links.filter(function (l) { return !(l.from === from && l.to === to); });
+  renderCanvas();
+  scheduleSave();
+}
+
+function assign(id, props) {
+  board.encounters = board.encounters.map(function (n) {
+    return n.id === id ? Object.assign({}, n, props) : n;
+  });
+  syncIndex();
+}
+
+// Graph-changing edits (id, out, in) — the whole web has to be redrawn.
+function patch(id, props) {
+  if (!getNode(id)) return;
+  var nextId = props.id !== undefined ? str(props.id).trim() : null;
+  assign(id, props);
+  if (nextId && nextId !== id) {
+    // Ids are the round-trip key; if the author renames one, carry the links with it.
+    board.links = board.links.map(function (l) {
+      return { from: l.from === id ? nextId : l.from, to: l.to === id ? nextId : l.to };
+    });
+    if (selectedId === id) selectedId = nextId;
+    syncIndex();
+  }
+  renderCanvas();
+  scheduleSave();
+}
+
+// Card-facing edits (title, n, type, faction, scope, status) — refresh one card
+// and the geometry that follows from it (colors, type regions).
+function patchField(id, props) {
+  if (!getNode(id)) return;
+  assign(id, props);
+  if (textUpdaters[id]) textUpdaters[id]();
+  renderGeometry();
+  scheduleSave();
+}
+
+// Prose the card never shows. Only search results can depend on it.
+function patchProse(id, props) {
+  if (!getNode(id)) return;
+  assign(id, props);
+  if (search.trim()) setSearch(search);
+  scheduleSave();
+}
+
+function addEncounter() {
+  var c = centerWorld();
+  var id = newId();
+  board.encounters = separate(board.encounters.concat([{
+    id: id, n: null, title: "New encounter", type: "salvage", faction: "none",
+    scope: "universal", status: "idea", hook: "", teaches: "",
+    choices: [{ label: "", fx: "" }], out: [], "in": [], notes: "", x: c.x, y: c.y
+  }]), id);
+  syncIndex();
+  selectedId = id;
+  renderCanvas();
+  renderDrawer();
+  scheduleSave();
+  var t = drawerEl.querySelector(".dr-title");
+  if (t) { t.focus(); t.select(); }
+}
+
+function delEncounter(id) {
+  var n = getNode(id);
+  if (!n) return;
+  if (!window.confirm("Delete “" + n.title + "”? This can't be undone (export first if unsure).")) return;
+  board.encounters = board.encounters.filter(function (e) { return e.id !== id; });
+  board.links = board.links.filter(function (l) { return l.from !== id && l.to !== id; });
+  if (selectedId === id) selectedId = null;
+  renderCanvas();
+  renderDrawer();
+  scheduleSave();
+}
+
+function tidy() {
+  var order = Object.keys(TYPES).concat(
+    uniq(board.encounters.map(function (e) { return e.type; })).filter(function (t) { return !TYPES[t]; })
+  );
+  var groups = {};
+  board.encounters.forEach(function (e) { (groups[e.type] = groups[e.type] || []).push(e); });
+  var colW = 540, rowH = 380, perRow = 3, ti = 0, next = [];
+  order.forEach(function (t) {
+    var members = groups[t];
+    if (!members || !members.length) return;
+    var cx = (ti % perRow) * colW + 320, cy = Math.floor(ti / perRow) * rowH + 240;
+    ti++;
+    members.forEach(function (m, i) {
+      next.push(Object.assign({}, m, { x: cx + (i % 2) * (W + 44), y: cy + Math.floor(i / 2) * (H + 36) }));
+    });
+  });
+  board.encounters = separate(next, null);
+  renderCanvas();
+  scheduleSave();
+  setTimeout(fit, 60);
+}
+
+/* ── placement for imported nodes without coordinates ─────────────────── */
+
+function placeMissing(list) {
+  var c = centerWorld();
+  var placed = 0;
+  return list.map(function (e) {
+    if (e.x != null && e.y != null) return e;
+    var ring = Math.floor(placed / 8) + 1, a = (placed % 8) * (Math.PI / 4);
+    placed++;
+    return Object.assign({}, e, {
+      x: c.x + Math.cos(a) * ring * (W + PADX + 40),
+      y: c.y + Math.sin(a) * ring * (H + PADY + 60)
+    });
+  });
+}
+
+/* ── drawer ───────────────────────────────────────────────────────────── */
+
+function selectEl(value, options, onChange) {
+  var opts = options.map(function (o) {
+    return el("option", { value: o[0], text: o[1], selected: o[0] === value });
+  });
+  if (!options.some(function (o) { return o[0] === value; })) {
+    opts.unshift(el("option", { value: value, text: value + " (unknown)", selected: true }));
+  }
+  return el("select", { on: { change: function (e) { onChange(e.target.value); } } }, opts);
+}
+
+function renderDrawer() {
+  var e = selectedId ? getNode(selectedId) : null;
+  if (!e) {
+    drawerEl.hidden = true;
+    clear(drawerEl);
+    return;
+  }
+  var wasHidden = drawerEl.hidden;
+  drawerEl.hidden = false;
+  clear(drawerEl);
+  var id = e.id;
+
+  var d = derived || derive();
+  var openHere = (d.dangling[id] || []);
+  var unmetHere = e["in"].filter(function (f) { return d.unmet.indexOf(f) !== -1; });
+
+  drawerEl.appendChild(el("div", { class: "dr-head" }, [
+    el("input", {
+      class: "dr-title", value: e.title, "aria-label": "Title",
+      on: { input: function (ev) { patchField(id, { title: ev.target.value }); } }
+    }),
+    el("button", { class: "dr-x", text: "✕", "aria-label": "Close editor",
+      on: { click: function () { select(null); } } })
+  ]));
+
+  if (openHere.length || unmetHere.length) {
+    var threads = el("div", { class: "dr-threads" });
+    if (openHere.length) {
+      threads.appendChild(el("span", { text: "open thread" + (openHere.length > 1 ? "s" : "") + ": " }));
+      threads.appendChild(el("b", { text: openHere.join(", ") }));
+      if (unmetHere.length) threads.appendChild(el("span", { text: " · " }));
+    }
+    if (unmetHere.length) {
+      threads.appendChild(el("span", { text: "needs with no source: " }));
+      threads.appendChild(el("i", { text: unmetHere.join(", ") }));
+    }
+    drawerEl.appendChild(threads);
+  }
+
+  drawerEl.appendChild(el("div", { class: "dr-row3" }, [
+    el("label", { text: "Type" }, [selectEl(e.type,
+      Object.keys(TYPES).map(function (k) { return [k, TYPES[k].label]; }),
+      function (v) { patchField(id, { type: v }); })]),
+    el("label", { text: "Faction" }, [selectEl(e.faction,
+      Object.keys(FACTIONS).map(function (k) { return [k, FACTIONS[k].label]; }),
+      function (v) { patchField(id, { faction: v }); if (panel === "legend") renderLegend(); })]),
+    el("label", { text: "Status" }, [selectEl(e.status,
+      Object.keys(STATUSES).map(function (k) { return [k, STATUSES[k].label]; }),
+      function (v) { patchField(id, { status: v }); if (panel === "legend") renderLegend(); })])
+  ]));
+
+  drawerEl.appendChild(el("div", { class: "dr-row2" }, [
+    el("label", { text: "Scope" }, [selectEl(e.scope,
+      Object.keys(SCOPES).map(function (k) { return [k, SCOPES[k].label]; }),
+      function (v) { patchField(id, { scope: v }); })]),
+    el("label", { text: "Number" }, [el("input", {
+      class: "mono", type: "number", value: e.n == null ? "" : e.n, placeholder: "—",
+      on: { input: function (ev) {
+        var v = ev.target.value.trim();
+        patchField(id, { n: v === "" ? null : num(v) });
+      } }
+    })])
+  ]));
+
+  drawerEl.appendChild(el("label", { class: "dr-field" }, [
+    "id ",
+    el("span", { class: "dr-hintlbl", text: "stable key for the Claude round-trip" }),
+    el("input", { class: "mono", value: e.id,
+      on: { change: function (ev) {
+        var v = str(ev.target.value).trim();
+        if (!v) { ev.target.value = id; return; }
+        if (v !== id && getNode(v)) { toast("That id is already taken.", true); ev.target.value = id; return; }
+        patch(id, { id: v });
+        renderDrawer();
+      } } }),
+    el("div", { class: "dr-warn", text: "Changing an id makes Claude treat this as a new encounter." })
+  ]));
+
+  drawerEl.appendChild(el("label", { class: "dr-field" }, [
+    "Hook ", el("span", { class: "dr-hintlbl", text: "what the player sees" }),
+    el("textarea", { rows: 3, value: e.hook,
+      on: { input: function (ev) { patchProse(id, { hook: ev.target.value }); } } })
+  ]));
+
+  drawerEl.appendChild(el("label", { class: "dr-field" }, [
+    "Teaches ", el("span", { class: "dr-hintlbl", text: "the world-fact this exposes" }),
+    el("textarea", { rows: 3, value: e.teaches,
+      on: { input: function (ev) { patchProse(id, { teaches: ev.target.value }); } } })
+  ]));
+
+  var choiceWrap = el("div", { class: "dr-field" });
+  choiceWrap.appendChild(el("div", { class: "dr-choicehead" }, [
+    el("span", { text: "Choices" }),
+    el("button", { class: "mini", text: "+ add", on: { click: function () {
+      board.encounters = board.encounters.map(function (n) {
+        return n.id !== id ? n : Object.assign({}, n, { choices: n.choices.concat([{ label: "", fx: "" }]) });
+      });
+      renderCanvas(); renderDrawer(); scheduleSave();
+      var rows = drawerEl.querySelectorAll(".choice input");
+      if (rows.length) rows[rows.length - 2].focus();
+    } } })
+  ]));
+  e.choices.forEach(function (c, i) {
+    choiceWrap.appendChild(el("div", { class: "choice" }, [
+      el("input", { placeholder: "button text", value: c.label, "aria-label": "Choice label",
+        on: { input: function (ev) { patchChoice(id, i, { label: ev.target.value }); } } }),
+      el("input", { placeholder: "effect in plain words", value: c.fx, "aria-label": "Choice effect",
+        on: { input: function (ev) { patchChoice(id, i, { fx: ev.target.value }); } } }),
+      el("button", { class: "ch-x", text: "✕", "aria-label": "Remove choice",
+        on: { click: function () {
+          board.encounters = board.encounters.map(function (n) {
+            return n.id !== id ? n : Object.assign({}, n, {
+              choices: n.choices.filter(function (_, ci) { return ci !== i; })
+            });
+          });
+          renderCanvas(); renderDrawer(); scheduleSave();
+        } } })
+    ]));
+  });
+  choiceWrap.appendChild(el("div", { class: "dr-warn",
+    text: "Effects stay in plain language — Claude translates them into engine effects." }));
+  drawerEl.appendChild(choiceWrap);
+
+  drawerEl.appendChild(el("div", { class: "dr-row2" }, [
+    el("label", { class: "dr-field" }, [
+      "Sets flags ", el("span", { class: "dr-hintlbl", text: "comma-sep" }),
+      el("input", { class: "mono", value: e.out.join(", "), placeholder: "snake_case",
+        on: { change: function (ev) { patch(id, { out: parseFlags(ev.target.value) }); },
+              input: function (ev) { patchFlagsLive(id, "out", ev.target.value); } } })
+    ]),
+    el("label", { class: "dr-field" }, [
+      "Needs flags ", el("span", { class: "dr-hintlbl", text: "comma-sep" }),
+      el("input", { class: "mono", value: e["in"].join(", "), placeholder: "snake_case",
+        on: { change: function (ev) { patch(id, { "in": parseFlags(ev.target.value) }); },
+              input: function (ev) { patchFlagsLive(id, "in", ev.target.value); } } })
+    ])
+  ]));
+
+  drawerEl.appendChild(el("label", { class: "dr-field" }, [
+    "Notes for Claude ", el("span", { class: "dr-hintlbl", text: "engine caveats, variants" }),
+    el("textarea", { rows: 3, value: e.notes,
+      on: { input: function (ev) { patchProse(id, { notes: ev.target.value }); } } })
+  ]));
+
+  drawerEl.appendChild(el("div", { class: "dr-foot" }, [
+    el("button", { class: "btn ghost", text: "Link from here", on: { click: function () {
+      setMode("connect"); setConnectFrom(id);
+    } } }),
+    el("button", { class: "btn danger", text: "Delete", on: { click: function () { delEncounter(id); } } })
+  ]));
+
+  if (wasHidden) setTimeout(renderGeometry, 0);
+}
+
+function patchChoice(id, i, props) {
+  board.encounters = board.encounters.map(function (n) {
+    return n.id !== id ? n : Object.assign({}, n, {
+      choices: n.choices.map(function (c, ci) { return ci === i ? Object.assign({}, c, props) : c; })
+    });
+  });
+  syncIndex();
+  scheduleSave();
+}
+
+// Flags re-render the whole web, which would steal focus mid-typing; update the
+// data on every keystroke but only redraw once the field settles.
+var flagTimer = null;
+function patchFlagsLive(id, key, value) {
+  var p = {};
+  p[key] = parseFlags(value);
+  assign(id, p);
+  if (textUpdaters[id]) textUpdaters[id]();
+  clearTimeout(flagTimer);
+  flagTimer = setTimeout(function () { renderCanvas(); }, 420);
+  scheduleSave();
+}
+
+/* ── legend / coverage / menu panels ──────────────────────────────────── */
+
+function openPanel(which) {
+  panel = which;
+  legendEl.hidden = which !== "legend";
+  coverageEl.hidden = which !== "coverage";
+  menuEl.hidden = which !== "menu";
+  $("#btn-legend").className = "btn" + (which === "legend" ? " on" : "");
+  $("#btn-legend").setAttribute("aria-expanded", String(which === "legend"));
+  $("#btn-coverage").setAttribute("aria-expanded", String(which === "coverage"));
+  $("#btn-board").setAttribute("aria-expanded", String(which === "menu"));
+  if (which === "legend") renderLegend();
+  if (which === "coverage") renderCoveragePanel();
+  if (which === "menu") renderMenu();
+}
+function closePanel() { if (panel) openPanel(null); }
+function togglePanel(which) { openPanel(panel === which ? null : which); }
+
+function renderLegend() {
+  clear(legendEl);
+  var cov = coverage();
+  var cols = el("div", { class: "leg-cols" });
+
+  function group(title, entries, kind, counts) {
+    var g = el("div", { class: "leg-group" }, [el("div", { class: "leg-h", text: title })]);
+    entries.forEach(function (entry) {
+      var k = entry[0], label = entry[1], color = entry[2];
+      var btn = el("button", {
+        class: "leg-item" + (hidden[kind][k] ? " off" : ""),
+        "aria-pressed": String(!hidden[kind][k]),
+        on: { click: function () {
+          if (hidden[kind][k]) delete hidden[kind][k]; else hidden[kind][k] = true;
+          renderLegend(); renderGeometry();
+        } }
+      }, [
+        color
+          ? el("span", { class: "leg-dot", style: { background: color } })
+          : el("span", { class: "leg-sq" }),
+        el("span", { text: label }),
+        el("span", { class: "leg-count", text: String(counts[k] || 0) })
+      ]);
+      g.appendChild(btn);
+    });
+    cols.appendChild(g);
+  }
+
+  group("Faction" + (colorBy === "faction" ? " · color" : " · corner dot"),
+    Object.keys(FACTIONS).map(function (k) { return [k, FACTIONS[k].label, FACTIONS[k].color]; }),
+    "faction", cov.byFaction);
+  group("Type · cluster",
+    Object.keys(TYPES).map(function (k) { return [k, TYPES[k].label, null]; }),
+    "type", cov.byType);
+  group("Status" + (colorBy === "status" ? " · color" : " · corner dot"),
+    Object.keys(STATUSES).map(function (k) { return [k, STATUSES[k].label, STATUSES[k].color]; }),
+    "status", cov.byStatus);
+
+  legendEl.appendChild(cols);
+  legendEl.appendChild(el("div", { class: "leg-note",
+    text: "Toggle any row to dim non-matching nodes — the web keeps its shape." }));
+
+  var key = el("div", { class: "leg-edgekey" });
+  key.appendChild(el("span", { class: "k-gold" }));
+  key.appendChild(el("span", { text: " flag tie  ·  " }));
+  key.appendChild(el("span", { class: "k-teal" }));
+  key.appendChild(el("span", { text: " manual link  ·  " }));
+  key.appendChild(el("span", { class: "k-fray" }));
+  key.appendChild(el("span", { text: " open thread" }));
+  legendEl.appendChild(key);
+}
+
+function renderCoverageChip() {
+  var cov = coverage();
+  var chip = $("#cov-chip");
+  clear(chip);
+  chip.appendChild(el("span", { class: "chip-open", text: "⟡ " + cov.open.length + " open" }));
+  chip.appendChild(el("span", { text: " · " }));
+  chip.appendChild(el("span", {
+    class: cov.unmet.length ? "chip-warn" : "",
+    text: cov.unmet.length + " unmet"
+  }));
+  chip.appendChild(el("span", { text: " · " }));
+  chip.appendChild(el("span", {
+    class: cov.emptyPoles.length ? "chip-warn" : "chip-ok",
+    text: cov.emptyPoles.length + " empty"
+  }));
+  $("#btn-coverage").setAttribute("title",
+    cov.total + " encounters · " + cov.open.length + " open threads · " +
+    cov.unmet.length + " needs with no source · " + cov.emptyPoles.length + " empty faction poles");
+}
+
+function renderCoveragePanel() {
+  clear(coverageEl);
+  var cov = coverage();
+
+  coverageEl.appendChild(el("div", { class: "cov-lead",
+    text: cov.total + " encounter" + (cov.total === 1 ? "" : "s") + " on the board." }));
+
+  coverageEl.appendChild(el("div", { class: "cov-h", text: "Open threads · set, never read" }));
+  if (cov.open.length) {
+    var openWrap = el("div", { class: "cov-flags" });
+    cov.open.forEach(function (f) {
+      openWrap.appendChild(el("button", { class: "cov-flag", text: f, title: "Search for " + f,
+        on: { click: function () { $("#search").value = f; setSearch(f); } } }));
+    });
+    coverageEl.appendChild(openWrap);
+  } else {
+    coverageEl.appendChild(el("div", { class: "cov-empty", text: "none — every flag is consumed" }));
+  }
+
+  coverageEl.appendChild(el("div", { class: "cov-h", text: "Needs with no source" }));
+  if (cov.unmet.length) {
+    var unmetWrap = el("div", { class: "cov-flags" });
+    cov.unmet.forEach(function (f) {
+      unmetWrap.appendChild(el("button", { class: "cov-flag unmet", text: f, title: "Search for " + f,
+        on: { click: function () { $("#search").value = f; setSearch(f); } } }));
+    });
+    coverageEl.appendChild(unmetWrap);
+  } else {
+    coverageEl.appendChild(el("div", { class: "cov-empty", text: "none — every need has a source" }));
+  }
+
+  coverageEl.appendChild(el("div", { class: "cov-h", text: "Faction poles" }));
+  Object.keys(FACTIONS).forEach(function (k) {
+    var c = cov.byFaction[k] || 0;
+    coverageEl.appendChild(el("div", { class: "cov-row" + (c ? "" : " zero") }, [
+      el("span", { class: "k", text: FACTIONS[k].label }),
+      el("span", { class: "v", text: String(c) })
+    ]));
+  });
+
+  coverageEl.appendChild(el("div", { class: "cov-h", text: "Type distribution" }));
+  Object.keys(TYPES).forEach(function (k) {
+    var c = cov.byType[k] || 0;
+    coverageEl.appendChild(el("div", { class: "cov-row" + (c ? "" : " zero") }, [
+      el("span", { class: "k", text: TYPES[k].label }),
+      el("span", { class: "v", text: String(c) })
+    ]));
+  });
+
+  coverageEl.appendChild(el("div", { class: "cov-h", text: "Authoring progress" }));
+  Object.keys(STATUSES).forEach(function (k) {
+    coverageEl.appendChild(el("div", { class: "cov-row" }, [
+      el("span", { class: "k", text: STATUSES[k].label }),
+      el("span", { class: "v", text: String(cov.byStatus[k] || 0) })
+    ]));
+  });
+}
+
+function renderMenu() {
+  clear(menuEl);
+
+  // The view controls live in the toolbar on wide screens; on a phone the
+  // toolbar is one row, so they surface here instead.
+  if (window.innerWidth <= 620) {
+    menuEl.appendChild(el("button", { class: "menu-item", text: "Fit the whole board",
+      on: { click: function () { closePanel(); fit(); } } }));
+    menuEl.appendChild(el("button", { class: "menu-item", text: "Tidy into type clusters",
+      on: { click: function () { closePanel(); tidy(); } } }));
+    menuEl.appendChild(el("button", {
+      class: "menu-item",
+      text: colorBy === "faction" ? "Color nodes by status" : "Color nodes by faction",
+      on: { click: function () {
+        setColorBy(colorBy === "faction" ? "status" : "faction");
+        closePanel();
+        toast("Coloring by " + colorBy + ".");
+      } }
+    }));
+    menuEl.appendChild(el("div", { class: "menu-sep" }));
+  }
+
+  menuEl.appendChild(el("button", { class: "menu-item", text: "Reset to the nine seed encounters",
+    on: { click: function () {
+      closePanel();
+      if (!window.confirm("Replace the board with the nine seed encounters? Export first if you want to keep this one.")) return;
+      board = { encounters: separate(SEED.map(normalizeEncounter), null), links: [], quests: [] };
+      selectedId = null;
+      renderCanvas(); renderDrawer(); commitSave(); fit();
+      toast("Board reset to seed.");
+    } } }));
+  menuEl.appendChild(el("button", { class: "menu-item danger", text: "Clear the board",
+    on: { click: function () {
+      closePanel();
+      if (!window.confirm("Delete every encounter and link on this board? Export first if you want to keep it.")) return;
+      board = { encounters: [], links: [], quests: [] };
+      selectedId = null;
+      renderCanvas(); renderDrawer(); commitSave();
+      toast("Board cleared.");
+    } } }));
+  menuEl.appendChild(el("div", { class: "menu-sep" }));
+  menuEl.appendChild(el("div", { class: "menu-note",
+    text: "Autosaves to this browser only. Export a file to move the board to another device or into a chat." }));
+}
+
+/* ── export / import ──────────────────────────────────────────────────── */
+
+function closeModal() {
+  modalEl.hidden = true;
+  clear(modalEl);
+}
+
+function openModal(kids) {
+  clear(modalEl);
+  modalEl.hidden = false;
+  var box = el("div", { class: "modal", role: "dialog", "aria-modal": "true" }, kids);
+  box.addEventListener("pointerdown", function (ev) { ev.stopPropagation(); });
+  modalEl.appendChild(box);
+  return box;
+}
+modalEl.addEventListener("pointerdown", closeModal);
+
+// navigator.clipboard is unavailable on file:// and older mobile browsers, so
+// keep the textarea fallback.
+function copyText(text, btn) {
+  var done = function (ok) {
+    if (btn) {
+      var label = btn.textContent;
+      btn.textContent = ok ? "Copied" : "Press ⌘/Ctrl+C";
+      setTimeout(function () { btn.textContent = label; }, 1800);
+    }
+    if (!ok) toast("Couldn't reach the clipboard.", true);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function () { done(true); }, function () { fallback(); });
+  } else fallback();
+
+  function fallback() {
+    var ta = el("textarea", { value: text, style: { position: "fixed", opacity: "0", top: "0", left: "0" } });
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (err) { ok = false; }
+    document.body.removeChild(ta);
+    done(ok);
+  }
+}
+
+function stamp() {
+  var d = new Date(), p = function (n) { return (n < 10 ? "0" : "") + n; };
+  return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) +
+         "-" + p(d.getHours()) + p(d.getMinutes());
+}
+
+function downloadBoard() {
+  var data = exportBoard();
+  var text = JSON.stringify(data, null, 2);
+  var name = "thread-web-" + stamp() + ".json";
+  try {
+    var blob = new Blob([text], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = el("a", { href: url, download: name });
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(url); a.parentNode.removeChild(a); }, 500);
+    toast("Saved " + name);
+    return true;
+  } catch (err) {
+    toast("Download blocked by the browser.", true);
+    return false;
+  }
+}
+
+function openExport() {
+  closePanel();
+  var cov = coverage();
+  var stats = el("div", { class: "modal-stats" });
+  [["encounters", cov.total],
+   ["manual links", board.links.length],
+   ["quests", board.quests.length],
+   ["open threads", cov.open.length],
+   ["needs with no source", cov.unmet.length]].forEach(function (row) {
+    stats.appendChild(el("div", {}, [
+      el("b", { text: String(row[1]) }), el("span", { text: " " + row[0] })
+    ]));
+  });
+  var note = el("div", { class: "note" }, [
+    el("div", { class: "note-h" }, [
+      el("span", { text: "Included in the file · meta.howToReplyToThisFile" }),
+      el("button", { class: "mini", text: "Copy for chat", on: { click: function (ev) {
+        copyText(HOW_TO_REPLY_CHAT, ev.target);
+      } } })
+    ]),
+    el("p", { class: "note-lead",
+      text: "Every export carries this contract so the chat knows how to hand encounters back:" }),
+    el("ul", { class: "note-list" }, HOW_TO_REPLY.slice(1).map(function (line) {
+      return el("li", { text: line });
+    }))
+  ]);
+
+  openModal([
+    el("div", { class: "modal-h", text: "Export — hand this file to Claude to mechanize" }),
+    el("p", { class: "modal-lead",
+      text: "A single JSON file with every encounter, its plain-language fields and its flags. Ids stay stable, so re-importing what Claude sends back updates encounters in place instead of duplicating them." }),
+    stats,
+    note,
+    el("div", { class: "modal-foot" }, [
+      el("button", { class: "btn ghost", text: "Close", on: { click: closeModal } }),
+      el("button", { class: "btn primary", text: "Download .json", on: { click: function () {
+        if (downloadBoard()) closeModal();
+      } } })
+    ])
+  ]);
+}
+
+function summarizeMerge(incoming) {
+  var byId = {};
+  board.encounters.forEach(function (e) { byId[e.id] = e; });
+  var added = 0, changed = 0, same = 0;
+  incoming.encounters.forEach(function (inc) {
+    var cur = byId[inc.id];
+    if (!cur) { added++; return; }
+    var a = JSON.stringify(exportEncounter(Object.assign({}, cur, incomingPatch(inc))));
+    var b = JSON.stringify(exportEncounter(cur));
+    if (a === b) same++; else changed++;
+  });
+  var existingLinks = {};
+  board.links.forEach(function (l) { existingLinks[l.from + "→" + l.to] = 1; existingLinks[l.to + "→" + l.from] = 1; });
+  var newLinks = incoming.links.filter(function (l) { return !existingLinks[l.from + "→" + l.to]; }).length;
+  var questIds = {};
+  board.quests.forEach(function (q) { if (q && q.id) questIds[q.id] = 1; });
+  var newQuests = incoming.quests.filter(function (q) { return !(q && q.id && questIds[q.id]); }).length;
+  return { added: added, changed: changed, same: same, newLinks: newLinks,
+           quests: incoming.quests.length, newQuests: newQuests };
+}
+
+// An import that omits a field must not blank what's on the board: only the
+// keys the file actually carried are applied over the existing encounter.
+function incomingPatch(inc) {
+  var present = inc._present;
+  var o = {};
+  Object.keys(inc).forEach(function (k) {
+    if (present && !present[k]) return;
+    o[k] = inc[k];
+  });
+  if (o.x == null) delete o.x;
+  if (o.y == null) delete o.y;
+  return o;
+}
+
+function applyMerge(incoming) {
+  var byId = {};
+  board.encounters.forEach(function (e, i) { byId[e.id] = i; });
+  var next = board.encounters.slice();
+  incoming.encounters.forEach(function (inc) {
+    var i = byId[inc.id];
+    if (i === undefined) next.push(inc);
+    else next[i] = Object.assign({}, next[i], incomingPatch(inc));
+  });
+  board.encounters = separate(placeMissing(next), null);
+
+  var seen = {};
+  board.links.forEach(function (l) { seen[l.from + "→" + l.to] = 1; seen[l.to + "→" + l.from] = 1; });
+  incoming.links.forEach(function (l) {
+    var k = l.from + "→" + l.to;
+    if (seen[k]) return;
+    seen[k] = 1; seen[l.to + "→" + l.from] = 1;
+    board.links.push(l);
+  });
+  board.links = board.links.filter(function (l) {
+    return board.encounters.some(function (e) { return e.id === l.from; }) &&
+           board.encounters.some(function (e) { return e.id === l.to; });
+  });
+
+  var qIdx = {};
+  board.quests.forEach(function (q, i) { if (q && q.id) qIdx[q.id] = i; });
+  incoming.quests.forEach(function (q) {
+    if (q && q.id && qIdx[q.id] !== undefined) board.quests[qIdx[q.id]] = q;
+    else board.quests.push(q);
+  });
+
+  syncIndex();
+  renderCanvas();
+  renderDrawer();
+  commitSave();
+}
+
+function openImport() {
+  closePanel();
+  var errBox = el("div", { class: "err", hidden: true });
+  var footer = el("div", { class: "modal-foot" }, [
+    el("button", { class: "btn ghost", text: "Cancel", on: { click: closeModal } })
+  ]);
+  var drop = el("div", { class: "drop", tabindex: "0", role: "button" }, [
+    el("div", {}, [el("b", { text: "Choose a .json file" })]),
+    el("div", { text: "or drop one here" })
+  ]);
+  var file = el("input", { type: "file", accept: "application/json,.json", style: { display: "none" } });
+
+  var body = el("div", {}, [
+    el("div", { class: "modal-h", text: "Import — merge a board by id" }),
+    el("p", { class: "modal-lead",
+      text: "Encounters that share an id are updated in place; anything new is added. Nothing on the board is deleted, so a partial board from a chat is safe to import." }),
+    drop, file, errBox
+  ]);
+
+  function fail(msg) { errBox.hidden = false; errBox.textContent = msg; }
+
+  function handleText(text, name) {
+    var parsed;
+    try { parsed = JSON.parse(text); }
+    catch (err) { return fail("That file isn't valid JSON. " + err.message); }
+    var incoming = normalizeBoard(parsed);
+    if (!incoming || !incoming.encounters.length) {
+      return fail("No encounters found. Expecting { encounters: [...] } or a bare array of encounters.");
+    }
+    errBox.hidden = true;
+    var s = summarizeMerge(incoming);
+    clear(body);
+    var stats = el("div", { class: "modal-stats" });
+    [[s.added, "new encounter" + (s.added === 1 ? "" : "s") + " added"],
+     [s.changed, "existing encounter" + (s.changed === 1 ? "" : "s") + " updated in place"],
+     [s.same, "unchanged"],
+     [s.newLinks, "new manual link" + (s.newLinks === 1 ? "" : "s")],
+     [s.quests, "quest" + (s.quests === 1 ? "" : "s") + " in file (" + s.newQuests + " new)"]]
+      .forEach(function (row) {
+        stats.appendChild(el("div", {}, [el("b", { text: String(row[0]) }), el("span", { text: " " + row[1] })]));
+      });
+    body.appendChild(el("div", { class: "modal-h", text: "Import — " + (name || "board") }));
+    body.appendChild(el("p", { class: "modal-lead", text: "Merging by id. Nothing currently on the board is removed." }));
+    body.appendChild(stats);
+    clear(footer);
+    footer.appendChild(el("button", { class: "btn ghost", text: "Cancel", on: { click: closeModal } }));
+    footer.appendChild(el("button", { class: "btn primary", text: "Merge into board", on: { click: function () {
+      applyMerge(incoming);
+      closeModal();
+      toast(s.added + " added · " + s.changed + " updated");
+      setTimeout(fit, 40);
+    } } }));
+  }
+
+  function readFile(f) {
+    if (!f) return;
+    var r = new FileReader();
+    r.onload = function () { handleText(String(r.result), f.name); };
+    r.onerror = function () { fail("Couldn't read that file."); };
+    r.readAsText(f);
+  }
+
+  drop.addEventListener("click", function () { file.click(); });
+  drop.addEventListener("keydown", function (ev) {
+    if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); file.click(); }
+  });
+  file.addEventListener("change", function () { readFile(file.files && file.files[0]); });
+  ["dragenter", "dragover"].forEach(function (t) {
+    drop.addEventListener(t, function (ev) { ev.preventDefault(); drop.classList.add("over"); });
+  });
+  ["dragleave", "drop"].forEach(function (t) {
+    drop.addEventListener(t, function (ev) { ev.preventDefault(); drop.classList.remove("over"); });
+  });
+  drop.addEventListener("drop", function (ev) {
+    var f = ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0];
+    if (f) readFile(f);
+  });
+
+  openModal([body, footer]);
+}
+
+/* ── search & color-by ────────────────────────────────────────────────── */
+
+var searchTimer = null;
+function setSearch(v) {
+  search = v;
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(function () { renderGeometry(); }, 90);
+}
+function setColorBy(v) {
+  colorBy = v;
+  $("#btn-color-faction").className = "segbtn" + (v === "faction" ? " on" : "");
+  $("#btn-color-status").className = "segbtn" + (v === "status" ? " on" : "");
+  renderGeometry();
+  if (panel === "legend") renderLegend();
+}
+
+/* ── wiring ───────────────────────────────────────────────────────────── */
+
+function measureBar() {
+  barH = bar.offsetHeight || 60;
+  document.documentElement.style.setProperty("--barH", barH + "px");
+}
+
+$("#btn-add").addEventListener("click", function () { closePanel(); addEncounter(); });
+$("#btn-connect").addEventListener("click", function () {
+  closePanel();
+  setConnectFrom(null);
+  setMode(mode === "connect" ? null : "connect");
+});
+$("#btn-zin").addEventListener("click", function () { zoomBy(1.25); });
+$("#btn-zout").addEventListener("click", function () { zoomBy(0.8); });
+$("#btn-fit").addEventListener("click", function () { fit(); });
+$("#btn-tidy").addEventListener("click", function () { closePanel(); tidy(); });
+$("#btn-legend").addEventListener("click", function () { togglePanel("legend"); });
+$("#btn-coverage").addEventListener("click", function () { togglePanel("coverage"); });
+$("#btn-board").addEventListener("click", function () { togglePanel("menu"); });
+$("#btn-color-faction").addEventListener("click", function () { setColorBy("faction"); });
+$("#btn-color-status").addEventListener("click", function () { setColorBy("status"); });
+$("#btn-export").addEventListener("click", openExport);
+$("#btn-import").addEventListener("click", openImport);
+$("#search").addEventListener("input", function (ev) { setSearch(ev.target.value); });
+
+canvas.addEventListener("pointerdown", onBgDown);
+canvas.addEventListener("wheel", onWheel, { passive: false });
+window.addEventListener("pointermove", onGlobalMove);
+window.addEventListener("pointerup", onGlobalUp);
+window.addEventListener("pointercancel", onGlobalUp);
+window.addEventListener("resize", function () { measureBar(); });
+window.addEventListener("keydown", function (ev) {
+  if (ev.key === "Escape") {
+    if (!modalEl.hidden) { closeModal(); return; }
+    if (panel) { closePanel(); return; }
+    if (mode === "connect") { setConnectFrom(null); setMode(null); return; }
+    if (selectedId) select(null);
+  }
+});
+// A file dropped anywhere but the import target would otherwise navigate away.
+["dragover", "drop"].forEach(function (t) {
+  window.addEventListener(t, function (ev) {
+    if (modalEl.contains(ev.target)) return;
+    ev.preventDefault();
+    if (t === "drop" && ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files.length) {
+      toast("Open Import first, then drop the file there.");
+    }
+  });
+});
+document.addEventListener("visibilitychange", function () {
+  if (document.visibilityState === "hidden") commitSave();
+});
+window.addEventListener("pagehide", commitSave);
+
+try {
+  var ro = new ResizeObserver(measureBar);
+  ro.observe(bar);
+} catch (e) { /* older browsers: the resize listener covers it */ }
+
+/* ── boot ─────────────────────────────────────────────────────────────── */
+
+measureBar();
+setColorBy("faction");
+setMode(null);
+
+Store.load().then(function (saved) {
+  var b = saved ? normalizeBoard(saved) : null;
+  if (!b || !b.encounters.length) b = normalizeBoard({ encounters: SEED });
+  board = b;
+  board.encounters = separate(placeMissing(board.encounters), null);
+  syncIndex();
+  loaded = true;
+  renderCanvas();
+  renderDrawer();
+  setTimeout(function () { fit(window.innerWidth <= 620 ? 0.6 : 0); }, 60);
+  if (!saved) commitSave();
+});
+
+})();
+</script>
+</body>
+</html>

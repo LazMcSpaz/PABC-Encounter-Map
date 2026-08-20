@@ -132,6 +132,13 @@ body{
 }
 .cov-flag.unmet{background:rgba(217,138,118,.1);border-color:rgba(217,138,118,.35);color:var(--rust)}
 .cov-empty{font-family:var(--mono);font-size:.66rem;color:var(--faint)}
+.sys-row{border-top:1px solid rgba(57,53,45,.7);padding:.45rem 0}
+.sys-head{display:flex;align-items:baseline;gap:.5rem}
+.sys-type{font-family:var(--mono);font-size:.7rem;color:var(--gold)}
+.sys-type.warn{color:var(--rust)}
+.sys-count{font-family:var(--mono);font-size:.62rem;color:var(--faint);margin-left:auto}
+.sys-where{font-size:.72rem;color:var(--muted);margin-top:.12rem}
+.sys-note{font-size:.74rem;color:var(--bone);opacity:.8;line-height:1.5;margin-top:.2rem}
 .menu-item{
   display:block;width:100%;text-align:left;background:none;border:none;color:var(--bone);
   font-family:var(--mono);font-size:.72rem;padding:.55rem .6rem;border-radius:5px;cursor:pointer;
@@ -144,6 +151,10 @@ body{
 /* ── canvas ──────────────────────────────────────────────────────────── */
 .canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block;user-select:none;-webkit-user-select:none}
 .region{fill:rgba(255,255,255,.02);stroke:var(--line);stroke-width:1;stroke-dasharray:6 7;pointer-events:none}
+.questregion{fill:rgba(255,255,255,.028);stroke-width:1;stroke-opacity:.4;stroke-dasharray:3 5;pointer-events:none}
+.questregion-lbl{font-family:var(--mono);font-size:11px;letter-spacing:.14em;opacity:.75;pointer-events:none}
+.prereq{fill:none;stroke:var(--muted);stroke-width:1.2;opacity:.45;pointer-events:none}
+.prereq.hot{opacity:.95;stroke-width:2}
 .region-lbl{font-family:var(--mono);font-size:13px;letter-spacing:.18em;fill:var(--faint);pointer-events:none}
 .node{transition:opacity .15s;cursor:grab}
 .node.dim{opacity:.16}
@@ -210,6 +221,11 @@ body{
 .dr-foot{display:flex;justify-content:space-between;gap:.5rem;margin-top:1rem;padding-top:.8rem;border-top:1px solid var(--line)}
 .dr-warn{font-family:var(--mono);font-size:.58rem;color:var(--faint);line-height:1.5;margin-top:.15rem;text-transform:none;letter-spacing:normal}
 .dr-threads{font-family:var(--mono);font-size:.64rem;color:var(--muted);line-height:1.6;margin:-.2rem 0 .7rem}
+.dr-engine{border:1px solid var(--line);border-radius:6px;padding:.6rem .7rem;margin-top:.9rem;background:var(--bg)}
+.dr-engine-h{font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:.4rem}
+.eng-line{display:flex;gap:.5rem;font-family:var(--mono);font-size:.64rem;line-height:1.5;padding:.1rem 0}
+.eng-k{color:var(--faint);flex:none;min-width:82px}
+.eng-v{color:var(--bone);opacity:.85;word-break:break-word;min-width:0}
 .dr-threads b{color:var(--gold);font-weight:400}
 .dr-threads i{color:var(--rust);font-style:normal}
 
@@ -253,6 +269,96 @@ body{
 .drop b{color:var(--gold);font-weight:400}
 .err{color:var(--rust);font-family:var(--mono);font-size:.72rem;line-height:1.6;margin-top:.7rem}
 
+/* ── playtest ────────────────────────────────────────────────────────── */
+.play-wrap{
+  position:absolute;inset:0;z-index:34;background:rgba(14,13,11,.93);
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;padding:1rem;
+}
+.play-stage{
+  width:min(680px,100%);max-height:100%;display:flex;flex-direction:column;
+  background:var(--bg2);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,.55);
+}
+.play-head{
+  display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;
+  padding:.6rem .9rem;border-bottom:1px solid var(--line);background:#1e1c18;
+}
+.play-track{font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.play-track b{color:var(--gold);font-weight:400}
+.play-body{padding:1.1rem 1.1rem .9rem;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.play-eyebrow{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:.35rem}
+.play-title{font-family:var(--serif);font-size:1.55rem;font-weight:600;margin:0 0 .25rem;line-height:1.2}
+.play-sub{font-family:var(--mono);font-size:.63rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.9rem}
+.play-sub .spine{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:.4rem;vertical-align:-1px}
+.play-hook{font-family:var(--serif);font-size:1.06rem;line-height:1.7;margin:0 0 .9rem}
+.play-teaches{
+  border-left:2px solid rgba(212,178,106,.35);padding:.15rem 0 .15rem .75rem;margin:0 0 1.1rem;
+  color:var(--muted);font-size:.83rem;line-height:1.6;font-style:italic;
+}
+.play-teaches b{font-style:normal;font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--faint);display:block;margin-bottom:.2rem;font-weight:400}
+.choice-btn{
+  display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);
+  border-radius:8px;padding:.7rem .8rem;margin-bottom:.5rem;cursor:pointer;color:var(--bone);
+  font-family:var(--sans);transition:border-color .12s,background .12s;
+}
+.choice-btn:hover{border-color:rgba(212,178,106,.55);background:#2c2922}
+.choice-btn.locked{opacity:.45;cursor:not-allowed}
+.choice-btn.locked:hover{border-color:var(--line);background:var(--panel)}
+.choice-key{font-family:var(--mono);font-size:.62rem;color:var(--faint);margin-right:.45rem}
+.choice-lbl{font-family:var(--serif);font-size:1.02rem}
+.choice-fx{font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-top:.3rem;line-height:1.55}
+.chips{display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.4rem}
+.chip{font-family:var(--mono);font-size:.6rem;padding:.15rem .4rem;border-radius:4px;border:1px solid}
+.chip.gain{color:var(--gold);border-color:rgba(212,178,106,.4);background:rgba(212,178,106,.08)}
+.chip.need{color:var(--rust);border-color:rgba(217,138,118,.4);background:rgba(217,138,118,.09)}
+.chip.have{color:var(--sage);border-color:rgba(122,155,110,.45);background:rgba(122,155,110,.1)}
+.chip.plain{color:var(--muted);border-color:var(--line);background:var(--bg)}
+.pick-h{
+  font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--faint);margin:1.1rem 0 .4rem;display:flex;align-items:center;gap:.5rem;
+}
+.pick-h:first-child{margin-top:0}
+.pick-h.unlocked{color:var(--gold)}
+.pick-item{
+  display:flex;align-items:center;gap:.6rem;width:100%;text-align:left;background:var(--panel);
+  border:1px solid var(--line);border-left-width:4px;border-radius:7px;padding:.55rem .7rem;
+  margin-bottom:.35rem;cursor:pointer;color:var(--bone);font-family:var(--sans);
+  transition:border-color .12s,background .12s;
+}
+.pick-item:hover{background:#2c2922}
+.pick-body{flex:1;min-width:0}
+.pick-title{font-family:var(--serif);font-size:.98rem;display:block}
+.pick-meta{font-family:var(--mono);font-size:.6rem;color:var(--muted);display:block;margin-top:.15rem}
+.pick-why{font-family:var(--mono);font-size:.6rem;color:var(--gold);flex:none;max-width:45%;text-align:right}
+.play-foot{
+  padding:.65rem .9rem calc(.65rem + env(safe-area-inset-bottom,0px));
+  border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap;align-items:center;
+}
+.play-gained{
+  border:1px solid rgba(212,178,106,.3);background:rgba(212,178,106,.06);border-radius:8px;
+  padding:.7rem .8rem;margin-bottom:1rem;
+}
+.play-gained .lbl{font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.play-quiet{font-family:var(--mono);font-size:.68rem;color:var(--faint);line-height:1.6}
+.play-ledger{font-family:var(--mono);font-size:.66rem;color:var(--gold);opacity:.85;margin-top:.2rem}
+.ask-note{color:var(--faint);font-style:italic}
+.play-body select{
+  background:var(--bg);border:1px solid var(--line);color:var(--bone);border-radius:4px;
+  padding:.45rem .5rem;font-family:var(--sans);font-size:.88rem;width:100%;
+}
+.play-body select:focus{outline:none;border-color:var(--gold)}
+.sum-h{font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:1.1rem 0 .35rem}
+.sum-h:first-child{margin-top:0}
+.sum-step{display:flex;gap:.6rem;padding:.3rem 0;border-bottom:1px solid rgba(57,53,45,.5);font-size:.84rem}
+.sum-step .num{font-family:var(--mono);font-size:.66rem;color:var(--faint);flex:none;width:1.4rem}
+.sum-step .what{flex:1;min-width:0}
+.sum-step .took{color:var(--muted);font-size:.78rem;display:block;margin-top:.1rem}
+.sum-step .took i{color:var(--gold);font-style:normal;font-family:var(--mono);font-size:.66rem}
+.sum-note{font-size:.82rem;color:var(--muted);line-height:1.6;margin:.2rem 0 .5rem}
+.sum-note b{color:var(--bone);font-weight:400}
+
 .toast{
   position:absolute;left:50%;bottom:calc(1.2rem + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
   z-index:40;background:rgba(30,28,24,.97);border:1px solid var(--line);border-radius:20px;
@@ -280,6 +386,12 @@ body{
   .panel.legend,.panel.coverage{left:.5rem;right:.5rem;max-width:none;width:auto}
   .panel.menu{left:.5rem;right:.5rem;width:auto}
   .modal{padding:.9rem}
+  .play-wrap{padding:0}
+  .play-stage{width:100%;height:100%;max-height:100%;border:none;border-radius:0}
+  .play-body{padding:1rem .85rem .8rem}
+  .play-title{font-size:1.35rem}
+  .pick-why{max-width:38%}
+  .kbd-hint{display:none}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{transition-duration:.001ms !important;animation-duration:.001ms !important}
@@ -296,6 +408,7 @@ body{
     </div>
     <div class="tools">
       <button id="btn-add" class="btn primary">+ Encounter</button>
+      <button id="btn-play" class="btn">Play</button>
       <button id="btn-connect" class="btn">Connect</button>
       <span class="grp on-wide">
         <span class="sep"></span>
@@ -308,6 +421,7 @@ body{
       </span>
       <button id="btn-legend" class="btn" aria-expanded="false">Legend</button>
       <button id="btn-coverage" class="btn chipbtn" aria-expanded="false"><span id="cov-chip">coverage</span></button>
+      <button id="btn-systems" class="btn" aria-expanded="false">Systems</button>
       <div class="seg on-wide" role="group" aria-label="Color nodes by">
         <span class="seglbl">color</span>
         <button id="btn-color-faction" class="segbtn on">faction</button>
@@ -324,6 +438,7 @@ body{
   <div id="hint" class="hint" hidden></div>
   <div id="legendpanel" class="panel legend" hidden></div>
   <div id="coveragepanel" class="panel coverage" hidden></div>
+  <div id="systemspanel" class="panel coverage" hidden></div>
   <div id="boardmenu" class="panel menu" hidden></div>
 
   <svg id="canvas" class="canvas" role="application" aria-label="Encounter canvas">
@@ -334,12 +449,16 @@ body{
       <marker id="arrow-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
         <path d="M0,0 L10,5 L0,10 z" fill="#4a9d9d"/>
       </marker>
+      <marker id="arrow-bone" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#9a9484"/>
+      </marker>
     </defs>
     <rect data-bg="1" x="0" y="0" width="100%" height="100%" fill="transparent"></rect>
     <g id="world"></g>
   </svg>
 
   <aside id="drawer" class="drawer" hidden aria-label="Encounter editor"></aside>
+  <div id="play" class="play-wrap" hidden aria-label="Playtest"></div>
   <div id="modal" class="modal-wrap" hidden></div>
 </div>
 
@@ -374,7 +493,12 @@ var TYPES = {
   uncanny: { label: "The Uncanny" },
   hazard:  { label: "Frontier Hazard" },
   parley:  { label: "Parley" },
-  social:  { label: "Social" }
+  social:  { label: "Social" },
+  // Kinds the encounter-builder's own format distinguishes. Beats cluster by
+  // quest instead of by type, so they get no type region of their own.
+  world:   { label: "Settlement / world" },
+  field:   { label: "Field encounter" },
+  beat:    { label: "Quest beat", inQuest: true }
 };
 var STATUSES = {
   idea:       { label: "Idea",       color: "#6a655a" },
@@ -393,7 +517,7 @@ function factionLabel(f) { return (FACTIONS[f] && FACTIONS[f].label) || String(f
 function statusLabel(s)  { return (STATUSES[s] && STATUSES[s].label) || String(s); }
 
 var W = 180, H = 66, PADX = 30, PADY = 26;
-var K_MIN = 0.2, K_MAX = 2.6;
+var K_MIN = 0.06, K_MAX = 2.6;
 
 /* ── seed board ───────────────────────────────────────────────────────── */
 
@@ -507,7 +631,11 @@ function normalizeEncounter(raw) {
     hook: str(e.hook),
     teaches: str(e.teaches),
     choices: Array.isArray(e.choices)
-      ? e.choices.map(function (c) { return { label: str(c && c.label), fx: str(c && c.fx) }; })
+      ? e.choices.map(function (c) {
+          var o = { label: str(c && c.label), fx: str(c && c.fx) };
+          if (c && c.engine) o.engine = c.engine;      // effects, condition, outcomeText
+          return o;
+        })
       : [],
     out: flagList(e.out),
     in: flagList(e["in"]),
@@ -538,12 +666,80 @@ function normalizeLink(raw) {
   return { from: from, to: to };
 }
 
+// A beat is an encounter internally — same fields, same graph — plus its quest
+// position (deliver, prereqs). exportQuests() puts it back into §7 shape.
+var BEAT_ORDER = ["id", "title", "deliver", "text", "choices", "out", "in", "prereqs", "notes"];
+
+function normalizeBeat(raw, quest, i) {
+  var b = (raw && typeof raw === "object") ? raw : {};
+  var enc = normalizeEncounter({
+    id: b.id, title: b.title || ((quest.title || "Quest") + " · beat " + (i + 1)),
+    type: "beat", faction: b.faction || quest.faction || "none",
+    scope: b.scope || "universal", status: b.status || "structured",
+    hook: b.text !== undefined ? b.text : b.hook, teaches: b.teaches,
+    choices: b.choices, out: b.out, "in": b["in"], notes: b.notes,
+    x: b.x, y: b.y
+  });
+  enc.deliver = str(b.deliver) || "auto";
+  enc.prereqs = Array.isArray(b.prereqs) ? b.prereqs.map(str).filter(Boolean) : [];
+  if (typeof b.ordinal === "number") enc.ordinal = b.ordinal;
+  // Anything else the beat carried (deliverCondition, art, engine payload) rides along.
+  Object.keys(b).forEach(function (k) {
+    if (BEAT_ORDER.indexOf(k) === -1 && ["ordinal", "text", "faction", "scope", "status", "x", "y", "teaches"].indexOf(k) === -1) {
+      enc[k] = b[k];
+    }
+  });
+  return enc;
+}
+
+function exportBeat(b) {
+  var o = {};
+  BEAT_ORDER.forEach(function (k) {
+    o[k] = k === "text" ? b.hook : b[k];
+  });
+  if (typeof b.ordinal === "number") o.ordinal = b.ordinal;
+  if (b.x != null) { o.x = b.x; o.y = b.y; }
+  Object.keys(b).forEach(function (k) {
+    if (BEAT_ORDER.indexOf(k) !== -1) return;
+    if (k.charAt(0) === "_") return;
+    if (["hook", "teaches", "type", "ordinal", "x", "y"].indexOf(k) !== -1) return;
+    o[k] = b[k];
+  });
+  return o;
+}
+
+function normalizeQuest(raw) {
+  var q = (raw && typeof raw === "object") ? raw : {};
+  var out = {};
+  Object.keys(q).forEach(function (k) { if (k !== "beats") out[k] = q[k]; });
+  out.id = str(q.id).trim() || newId("q_");
+  out.title = str(q.title) || "Untitled quest";
+  out.mode = str(q.mode) || "single-player";
+  out.notes = str(q.notes);
+  out.beats = (Array.isArray(q.beats) ? q.beats : []).map(function (b, i) {
+    return normalizeBeat(b, out, i);
+  });
+  return out;
+}
+
+function exportQuest(q) {
+  var o = {};
+  Object.keys(q).forEach(function (k) {
+    if (k === "beats" || k.charAt(0) === "_") return;
+    o[k] = q[k];
+  });
+  o.beats = questBeatsInOrder(q).map(exportBeat);
+  return o;
+}
+
 function normalizeBoard(raw) {
   var b = raw;
   if (Array.isArray(b)) b = { encounters: b };                 // a bare encounter array
   if (!b || typeof b !== "object") return null;
+  if (isEngineFile(b)) return engineToBoard(b);                // the builder's table-grouped export
   if (!Array.isArray(b.encounters)) {
-    if (b.encounter && typeof b.encounter === "object") b = { encounters: [b.encounter] };
+    if (Array.isArray(b.quests) && b.quests.length) b = Object.assign({ encounters: [] }, b);
+    else if (b.encounter && typeof b.encounter === "object") b = { encounters: [b.encounter] };
     else if (b.id && b.title) b = { encounters: [b] };          // a single encounter object
     else return null;
   }
@@ -553,8 +749,10 @@ function normalizeBoard(raw) {
     seen[e.id] = 1; return true;
   });
   var links = (Array.isArray(b.links) ? b.links : []).map(normalizeLink).filter(Boolean);
-  var quests = Array.isArray(b.quests) ? JSON.parse(JSON.stringify(b.quests)) : [];
-  return { encounters: encounters, links: links, quests: quests };
+  var quests = (Array.isArray(b.quests) ? b.quests : []).map(normalizeQuest);
+  var out = { encounters: encounters, links: links, quests: quests };
+  if (b.engine) out.engine = b.engine;
+  return out;
 }
 
 function exportEncounter(e) {
@@ -579,7 +777,10 @@ var HOW_TO_REPLY = [
   "ENUMS ARE CLOSED unless the author says otherwise — type: salvage | uncanny | hazard | parley | social · faction: none | versari | lakers | goldgrass | plainers · scope: universal | gated · status: idea | drafted | structured.",
   "KEEP THE PROSE PROSE. hook, teaches, notes and every choices[].fx stay natural language (e.g. \"+1 Tech · sets studied_oldworld_machine\"). Engine effect types, conditions and recipient tokens belong in the mechanization output, never in this file.",
   "FLAGS ARE THE GRAPH. \"out\" lists flags an encounter sets, \"in\" lists flags it requires. snake_case, reused verbatim across encounters — that is what draws the ties. A flag in \"out\" that nobody reads shows up as an open thread; a flag in \"in\" that nobody sets shows up as a need with no source.",
-  "LINKS are manual thematic ties only: { \"from\": \"<encounterId>\", \"to\": \"<encounterId>\" }. Flag ties are derived automatically — never list them here."
+  "LINKS are manual thematic ties only: { \"from\": \"<encounterId>\", \"to\": \"<encounterId>\" }. Flag ties are derived automatically — never list them here.",
+  "QUESTS live in the optional top-level \"quests\" array: { id, title, mode, notes, beats: [...] }. A beat is { id, title, deliver (auto | discovered | conditional), text, choices, out, in, prereqs, notes } — \"text\" is the beat's hook and \"prereqs\" lists the beat ids that must come first. Beats merge by their own id inside their quest, so send only the beats you changed; the rest of the chain stays.",
+  "ENGINE FILES: if you are handing back the encounter-builder's own table-grouped JSON (world_encounters, field_encounters, quests, quest_beats, quest_beat_prereqs, choices, effects), send exactly that shape and nothing else — the tool reads it directly, keeps every effect and condition verbatim, and can hand the file back unchanged. Never mix that shape with the board shape in one file.",
+  "EFFECTS AND CONDITIONS in an engine file are yours to write but never to quietly drop: an effect type the tool cannot simulate is preserved, exported unchanged, and reported rather than removed."
 ];
 var HOW_TO_REPLY_CHAT =
   "This is a Thread Web board export (plain-language authoring intent, not engine JSON). " +
@@ -588,7 +789,9 @@ var HOW_TO_REPLY_CHAT =
   "or changed and repeat each existing id exactly — a changed id creates a duplicate instead of an edit. " +
   "Send whole encounter objects rather than field patches, omit x/y, keep hook/teaches/notes/choices[].fx in plain " +
   "language, and keep flags snake_case in out/in. Importing never deletes anything, so say in prose if something " +
-  "should be removed. The full contract is in meta.howToReplyToThisFile inside the file.";
+  "should be removed. Quests go in a top-level \"quests\" array and their beats merge by beat id the same way. " +
+  "If you are returning the encounter-builder's own table-grouped JSON instead, send that shape on its own — the " +
+  "tool imports it directly. The full contract is in meta.howToReplyToThisFile inside the file.";
 
 function exportBoard() {
   var out = {
@@ -602,11 +805,340 @@ function exportBoard() {
     encounters: board.encounters.map(exportEncounter),
     links: board.links.map(function (l) { return { from: l.from, to: l.to }; })
   };
-  if (board.quests && board.quests.length) out.quests = board.quests;   // §7, passthrough for now
+  if (board.quests && board.quests.length) out.quests = board.quests.map(exportQuest);   // §7
+  if (board.engine) out.engine = board.engine;   // the builder rows, kept whole
   return out;
 }
 
+/* ════════════════════════════════════════════════════════════════════════
+   ENGINE FORMAT — the encounter-builder's table-grouped JSON
+   (world_encounters, field_encounters, quests, quest_beats,
+    quest_beat_prereqs, choices, effects).
+
+   Import reads it into the board; nothing is dropped. Every source row is kept
+   verbatim under board.engine so the file can be handed back unchanged, and
+   each node/choice keeps a pointer into its own rows. Effects and conditions
+   the tool doesn't simulate are preserved and reported, never stripped.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+var ENGINE_TABLES = ["world_encounters", "field_encounters", "quests",
+                     "quest_beats", "quest_beat_prereqs", "choices", "effects"];
+
+function isEngineFile(b) {
+  if (!b || typeof b !== "object") return false;
+  var hit = 0;
+  ENGINE_TABLES.forEach(function (t) { if (Array.isArray(b[t])) hit++; });
+  return hit >= 3 && Array.isArray(b.choices) && Array.isArray(b.effects);
+}
+
+// Effect types the run can actually carry out. Anything else is preserved,
+// listed in Systems, and logged as an engine ask when a run hits it.
+var SIMULATED_EFFECTS = {
+  SET_PLAYER_FLAG: 1, ADJUST_RESOURCE: 1, ADJUST_TRACK: 1, ADJUST_STANDING: 1,
+  ADJUST_HONOR: 1, ADJUST_MENACE: 1, ADVANCE_QUEST: 1, COMPLETE_QUEST: 1,
+  QUEUE_DEFERRED: 1, ROLL: 1, CONTEST: 1, FORCE_CHOICE: 1, PEEK: 1,
+  DELIVER_ENCOUNTER: 1
+};
+var SIMULATED_CONDITIONS = {
+  has_flag: 1, count_flags: 1, all: 1, any: 1, not: 1, op: 1, score: 1, "if": 1
+};
+
+function effParams(e) {
+  var p = (e && (e.paramsJson || e.params)) || {};
+  return (typeof p === "object" && p) ? p : {};
+}
+
+function walkEffects(list, fn) {
+  (list || []).forEach(function (e) {
+    if (!e || typeof e !== "object" || !e.type) return;
+    fn(e);
+    var p = effParams(e);
+    ["effects", "onSuccess", "onFail", "onWin", "onLose"].forEach(function (k) {
+      if (Array.isArray(p[k])) walkEffects(p[k], fn);
+    });
+    (p.options || []).forEach(function (o) {
+      if (o && Array.isArray(o.effects)) walkEffects(o.effects, fn);
+    });
+  });
+}
+
+function flagsSetBy(effects) {
+  var out = [];
+  walkEffects(effects, function (e) {
+    if (e.type === "SET_PLAYER_FLAG") {
+      var p = effParams(e);
+      if (p.flag && p.value !== false) out.push(String(p.flag));
+    }
+  });
+  return uniq(out);
+}
+
+function flagsReadBy(cond) {
+  var out = [];
+  (function walk(c) {
+    if (Array.isArray(c)) return c.forEach(walk);
+    if (!c || typeof c !== "object") return;
+    Object.keys(c).forEach(function (k) {
+      if (k === "has_flag" && c[k] && c[k].flag) out.push(String(c[k].flag));
+      walk(c[k]);
+    });
+  })(cond);
+  return uniq(out);
+}
+
+function conditionOps(cond) {
+  var out = [];
+  (function walk(c) {
+    if (Array.isArray(c)) return c.forEach(walk);
+    if (!c || typeof c !== "object") return;
+    Object.keys(c).forEach(function (k) {
+      if (["has_flag", "count_flags", "all", "any", "not", "op", "score", "if"].indexOf(k) !== -1) out.push(k);
+      walk(c[k]);
+    });
+  })(cond);
+  return uniq(out);
+}
+
+var SIGN = function (n) { return (n > 0 ? "+" : "") + n; };
+
+// One effect as a line of plain language — this is what fills choices[].fx, so
+// the whole tool (search, the drawer, the run) reads engine content natively.
+function effectPhrase(e) {
+  var p = effParams(e);
+  switch (e.type) {
+    case "SET_PLAYER_FLAG":
+      return (p.value === false ? "clears " : "sets ") + p.flag;
+    case "ADJUST_RESOURCE": return SIGN(p.amount) + " " + p.resource;
+    case "ADJUST_TRACK":    return p.track + " " + SIGN(p.amount);
+    case "ADJUST_STANDING": return "standing " + SIGN(p.amount) + " with " + factionLabel(p.faction);
+    case "ADJUST_HONOR":    return "honor " + SIGN(p.amount);
+    case "ADJUST_MENACE":   return "menace " + SIGN(p.amount);
+    case "ADJUST_BASE_STRENGTH": return "base strength " + SIGN(p.amount);
+    case "MODIFY_STAT":     return p.stat + " " + SIGN(p.amount) + (p.duration ? " for " + p.duration : "");
+    case "ADVANCE_QUEST":   return "advances to " + p.beatId;
+    case "COMPLETE_QUEST":  return "completes " + p.questId;
+    case "QUEUE_DEFERRED":
+      return "in " + p.delayRounds + " round" + (p.delayRounds === 1 ? "" : "s") + ": " +
+             (p.effects || []).map(effectPhrase).join(", ");
+    case "ROLL":
+      return p.chance + "% chance → " + (p.onSuccess || []).map(effectPhrase).join(", ") +
+             " · else " + (p.onFail || []).map(effectPhrase).join(", ");
+    case "CONTEST":
+      return "contest vs strength " + p.opponentStrength + " → win: " +
+             (p.onWin || []).map(effectPhrase).join(", ") + " · lose: " +
+             (p.onLose || []).map(effectPhrase).join(", ");
+    case "FORCE_CHOICE":
+      return "forced choice: " + (p.options || []).map(function (o) { return o.label; }).join(" / ");
+    case "PEEK": return "peek " + p.count + " of " + p.deck;
+    default:
+      return e.type.toLowerCase().replace(/_/g, " ");
+  }
+}
+
+function fxFromEffects(effects) {
+  var parts = (effects || []).map(effectPhrase).filter(Boolean);
+  return parts.join(" · ");
+}
+
+// A one-line English gloss of a condition, for the drawer and the run.
+function conditionPhrase(c) {
+  if (c === null || c === undefined) return "";
+  if (typeof c !== "object") return String(c);
+  if (c.has_flag) return "has " + c.has_flag.flag;
+  if (c.count_flags) return "count of " + c.count_flags.prefix + "* flags";
+  if (c.not) return "not (" + conditionPhrase(c.not) + ")";
+  if (c.all) return c.all.map(conditionPhrase).join(" and ");
+  if (c.any) return c.any.map(conditionPhrase).join(" or ");
+  if (c.score) return (c.score.kind || "score");
+  if (c.op) {
+    var ops = { eq: "is", ne: "is not", lt: "<", lte: "≤", gt: ">", gte: "≥" };
+    return conditionPhrase(c.left) + " " + (ops[c.op] || c.op) + " " + conditionPhrase(c.right);
+  }
+  return JSON.stringify(c);
+}
+
+// The file names its faction-gated chains in _readme.faction_coverage as prose
+// with real quest ids in it ("Goldgrass 3 (q_notes, q_seasons, q_hire)").
+// Reading those ids recovers ownership the tables don't state anywhere else;
+// anything not named stays frontier/none.
+function questFactionsFromReadme(src) {
+  var out = {};
+  var rd = src && src._readme;
+  var text = rd && rd.faction_coverage &&
+             (rd.faction_coverage.gated_chains || rd.faction_coverage);
+  if (typeof text !== "string") return out;
+  var names = [
+    [/versari/i, "versari"], [/laker/i, "lakers"],
+    [/goldgrass/i, "goldgrass"], [/plainer/i, "plainers"]
+  ];
+  text.split("·").forEach(function (part) {
+    var faction = null;
+    names.forEach(function (n) { if (!faction && n[0].test(part)) faction = n[1]; });
+    if (!faction) return;
+    var ids = part.match(/q_[a-z0-9_]+/gi) || [];
+    ids.forEach(function (id) { out[id] = faction; });
+  });
+  return out;
+}
+
+function engineToBoard(src) {
+  var choicesByParent = {}, effectsByChoice = {};
+  (src.choices || []).forEach(function (c) {
+    (choicesByParent[c.parentId] = choicesByParent[c.parentId] || []).push(c);
+  });
+  Object.keys(choicesByParent).forEach(function (k) {
+    choicesByParent[k].sort(function (a, b) { return (a.ordinal || 0) - (b.ordinal || 0); });
+  });
+  (src.effects || []).forEach(function (e) {
+    (effectsByChoice[e.parentId] = effectsByChoice[e.parentId] || []).push(e);
+  });
+  Object.keys(effectsByChoice).forEach(function (k) {
+    effectsByChoice[k].sort(function (a, b) { return (a.ordinal || 0) - (b.ordinal || 0); });
+  });
+
+  // Build a node's choices, and collect the flags its effects set and its
+  // conditions read — that is what draws the web.
+  function buildChoices(parentId) {
+    var rows = choicesByParent[parentId] || [];
+    var out = [], sets = [], needs = [];
+    rows.forEach(function (c) {
+      var effects = effectsByChoice[c.id] || [];
+      sets = sets.concat(flagsSetBy(effects));
+      needs = needs.concat(flagsReadBy(c.condition));
+      out.push({
+        label: str(c.label),
+        fx: fxFromEffects(effects) || "—",
+        engine: {
+          id: c.id, ordinal: c.ordinal,
+          outcomeText: str(c.outcomeText),
+          condition: c.condition || null,
+          effects: effects
+        }
+      });
+    });
+    return { choices: out, sets: uniq(sets), needs: uniq(needs) };
+  }
+
+  // Only claim a faction the data actually states: a choice gated on the active
+  // player being one. Anything else stays frontier/none.
+  function factionOf(parentIds) {
+    var found = "none", gated = false;
+    parentIds.forEach(function (pid) {
+      (choicesByParent[pid] || []).forEach(function (c) {
+        (function scan(x) {
+          if (Array.isArray(x)) return x.forEach(scan);
+          if (!x || typeof x !== "object") return;
+          if (x.op === "eq" && x.left === "active" && typeof x.right === "string" && FACTIONS[x.right]) {
+            found = x.right; gated = true;
+          }
+          Object.keys(x).forEach(function (k) { scan(x[k]); });
+        })(c.condition);
+      });
+    });
+    return { faction: found, gated: gated };
+  }
+
+  var encounters = [];
+
+  (src.world_encounters || []).forEach(function (w) {
+    var built = buildChoices(w.id);
+    var f = factionOf([w.id]);
+    encounters.push(normalizeEncounter({
+      id: w.id, title: w.title, type: "world", faction: f.faction,
+      scope: f.gated ? "gated" : "universal", status: "structured",
+      hook: w.text, teaches: "",
+      choices: built.choices, out: built.sets,
+      "in": uniq(built.needs.concat(flagsReadBy(w.triggerCondition)).concat(flagsReadBy(w.triggerStrength))),
+      notes: "",
+      engine: {
+        kind: "world_encounter", mode: w.mode, recipient: w.recipient,
+        art: w.art, triggerCondition: w.triggerCondition || null,
+        triggerStrength: w.triggerStrength
+      }
+    }));
+  });
+
+  (src.field_encounters || []).forEach(function (fe) {
+    var built = buildChoices(fe.id);
+    var f = factionOf([fe.id]);
+    encounters.push(normalizeEncounter({
+      id: fe.id, title: fe.title, type: "field", faction: f.faction,
+      scope: f.gated ? "gated" : "universal", status: "structured",
+      hook: fe.text, teaches: "",
+      choices: built.choices, out: built.sets, "in": built.needs, notes: "",
+      engine: { kind: "field_encounter", copies: fe.copies, art: fe.art }
+    }));
+  });
+
+  var prereqsByBeat = {};
+  (src.quest_beat_prereqs || []).forEach(function (p) {
+    (prereqsByBeat[p.beatId] = prereqsByBeat[p.beatId] || []).push(p.prereqBeatId);
+  });
+
+  var beatsByQuest = {};
+  (src.quest_beats || []).forEach(function (b) {
+    (beatsByQuest[b.questId] = beatsByQuest[b.questId] || []).push(b);
+  });
+
+  var declared = questFactionsFromReadme(src);
+  var quests = (src.quests || []).map(function (q) {
+    var rows = (beatsByQuest[q.id] || []).slice().sort(function (a, b) {
+      return (a.ordinal || 0) - (b.ordinal || 0);
+    });
+    var qf = factionOf(rows.map(function (b) { return b.id; }));
+    if (declared[q.id]) { qf = { faction: declared[q.id], gated: true }; }
+    return normalizeQuest({
+      id: q.id, title: q.title, mode: q.mode, notes: "",
+      faction: qf.faction,
+      beats: rows.map(function (b, i) {
+        var built = buildChoices(b.id);
+        return {
+          id: b.id,
+          title: (q.title || "Quest") + " · " + (i + 1),
+          deliver: b.deliver,
+          text: b.text,
+          ordinal: typeof b.ordinal === "number" ? b.ordinal : i,
+          choices: built.choices,
+          out: built.sets,
+          "in": uniq(built.needs.concat(flagsReadBy(b.deliverCondition))),
+          prereqs: prereqsByBeat[b.id] || [],
+          notes: "",
+          faction: qf.faction,
+          scope: qf.gated ? "gated" : "universal",
+          engine: {
+            kind: "quest_beat", questId: q.id, art: b.art,
+            placementFilter: b.placementFilter || null,
+            deliverCondition: b.deliverCondition || null
+          }
+        };
+      })
+    });
+  });
+
+  return {
+    encounters: encounters,
+    links: [],
+    quests: quests,
+    // The source, kept whole: this is what an engine export hands back.
+    engine: { source: src, importedAt: new Date().toISOString() }
+  };
+}
+
 /* ── layout ───────────────────────────────────────────────────────────── */
+
+// Positions are separated in place across every node — encounters and beats
+// alike — so a node's identity and container never change with its coordinates.
+function separateInPlace(fixedId) {
+  var placed = separate(allNodes().map(function (n) {
+    return { id: n.id, x: n.x, y: n.y };
+  }), fixedId);
+  var byId = {};
+  placed.forEach(function (p) { byId[p.id] = p; });
+  allNodes().forEach(function (n) {
+    var p = byId[n.id];
+    if (p) { n.x = p.x; n.y = p.y; }
+  });
+}
 
 // No two cards may overlap. The dragged card is authoritative and never moves.
 function separate(list, fixedId) {
@@ -657,24 +1189,93 @@ var derived = null;
 var canvas = $("#canvas"), world = $("#world"), bar = $("#bar");
 var drawerEl = $("#drawer"), modalEl = $("#modal"), hintEl = $("#hint");
 var legendEl = $("#legendpanel"), coverageEl = $("#coveragepanel"), menuEl = $("#boardmenu");
+var systemsEl = $("#systemspanel");
 var barH = 60;
 
+var nodeList = [];
+
 function getNode(id) { return nodeIndex[id] || null; }
+function getQuest(id) {
+  var q = null;
+  (board.quests || []).forEach(function (x) { if (x && x.id === id) q = x; });
+  return q;
+}
+
+// Encounters and quest beats share one node space: both sit on the canvas, both
+// carry out/in, so the flag graph, filters, search and the run treat them alike.
+// Beats keep their quest membership on _questId and serialize back to the §7
+// quest shape on export.
+function allNodes() { return nodeList; }
+
 function syncIndex() {
   nodeIndex = {};
-  board.encounters.forEach(function (e) { nodeIndex[e.id] = e; });
+  nodeList = [];
+  board.encounters.forEach(function (e) {
+    e._kind = "encounter";
+    nodeIndex[e.id] = e;
+    nodeList.push(e);
+  });
+  (board.quests || []).forEach(function (q) {
+    (q.beats || []).forEach(function (b, i) {
+      b._kind = "beat";
+      b._questId = q.id;
+      b._ordinal = typeof b.ordinal === "number" ? b.ordinal : i;
+      nodeIndex[b.id] = b;
+      nodeList.push(b);
+    });
+  });
+}
+
+/* ── quests & beats ───────────────────────────────────────────────────── */
+
+// Ordinal first, then prereqs as a tie-break, so a chain reads in play order
+// even when ordinals are absent.
+function questBeatsInOrder(q) {
+  var beats = (q.beats || []).slice();
+  beats.sort(function (a, b) {
+    var ao = typeof a._ordinal === "number" ? a._ordinal : 0;
+    var bo = typeof b._ordinal === "number" ? b._ordinal : 0;
+    if (ao !== bo) return ao - bo;
+    if ((a.prereqs || []).indexOf(b.id) !== -1) return 1;
+    if ((b.prereqs || []).indexOf(a.id) !== -1) return -1;
+    return 0;
+  });
+  return beats;
+}
+
+function prereqEdges() {
+  var out = [];
+  allNodes().forEach(function (n) {
+    (n.prereqs || []).forEach(function (pid) {
+      if (getNode(pid)) out.push({ from: pid, to: n.id });
+    });
+  });
+  return out;
+}
+
+function questBox(q) {
+  var members = (q.beats || []).filter(isVisible);
+  if (!members.length) return null;
+  var xs = members.map(function (m) { return m.x; }), ys = members.map(function (m) { return m.y; });
+  var pad = 40;
+  return {
+    x: Math.min.apply(null, xs) - W / 2 - pad,
+    y: Math.min.apply(null, ys) - H / 2 - pad - 14,
+    w: (Math.max.apply(null, xs) - Math.min.apply(null, xs)) + W + pad * 2,
+    h: (Math.max.apply(null, ys) - Math.min.apply(null, ys)) + H + pad * 2 + 14
+  };
 }
 
 /* ── derived graph (never stored) ─────────────────────────────────────── */
 
 function derive() {
   var producers = {}, consumers = {};
-  board.encounters.forEach(function (e) {
+  allNodes().forEach(function (e) {
     e.out.forEach(function (f) { (producers[f] = producers[f] || []).push(e.id); });
     e["in"].forEach(function (f) { (consumers[f] = consumers[f] || []).push(e.id); });
   });
   var flagEdges = [];
-  board.encounters.forEach(function (src) {
+  allNodes().forEach(function (src) {
     src.out.forEach(function (f) {
       (consumers[f] || []).forEach(function (tid) {
         if (tid !== src.id) flagEdges.push({ from: src.id, to: tid, flag: f });
@@ -682,7 +1283,7 @@ function derive() {
     });
   });
   var dangling = {}, openFlags = [];
-  board.encounters.forEach(function (e) {
+  allNodes().forEach(function (e) {
     var d = e.out.filter(function (f) { return !(consumers[f] && consumers[f].length); });
     if (d.length) { dangling[e.id] = d; openFlags = openFlags.concat(d); }
   });
@@ -702,7 +1303,7 @@ function coverage() {
   Object.keys(FACTIONS).forEach(function (k) { byFaction[k] = 0; });
   Object.keys(TYPES).forEach(function (k) { byType[k] = 0; });
   Object.keys(STATUSES).forEach(function (k) { byStatus[k] = 0; });
-  board.encounters.forEach(function (e) {
+  allNodes().forEach(function (e) {
     byFaction[e.faction] = (byFaction[e.faction] || 0) + 1;
     byType[e.type] = (byType[e.type] || 0) + 1;
     byStatus[e.status] = (byStatus[e.status] || 0) + 1;
@@ -712,7 +1313,7 @@ function coverage() {
   return {
     byFaction: byFaction, byType: byType, byStatus: byStatus,
     emptyPoles: emptyPoles, emptyTypes: emptyTypes,
-    open: d.openFlags, unmet: d.unmet, total: board.encounters.length
+    open: d.openFlags, unmet: d.unmet, total: allNodes().length
   };
 }
 
@@ -786,7 +1387,7 @@ function edgePath(a, b) {
 }
 
 function regionBox(type) {
-  var members = board.encounters.filter(function (e) { return e.type === type && isVisible(e); });
+  var members = allNodes().filter(function (e) { return e.type === type && isVisible(e); });
   if (!members.length) return null;
   var xs = members.map(function (m) { return m.x; }), ys = members.map(function (m) { return m.y; });
   var pad = 48;
@@ -812,8 +1413,8 @@ function renderCanvas() {
   var gNodes   = svgEl("g", null, world);
 
   // type regions — the quiet wash behind each cluster
-  Object.keys(TYPES).concat(
-    uniq(board.encounters.map(function (e) { return e.type; })).filter(function (t) { return !TYPES[t]; })
+  Object.keys(TYPES).filter(function (t) { return !TYPES[t].inQuest; }).concat(
+    uniq(allNodes().map(function (e) { return e.type; })).filter(function (t) { return !TYPES[t]; })
   ).forEach(function (t) {
     var g = svgEl("g", null, gRegions);
     var rect = svgEl("rect", { rx: 18, "class": "region" }, g);
@@ -826,6 +1427,40 @@ function renderCanvas() {
       rect.setAttribute("x", b.x); rect.setAttribute("y", b.y);
       rect.setAttribute("width", b.w); rect.setAttribute("height", b.h);
       lbl.setAttribute("x", b.x + 16); lbl.setAttribute("y", b.y + 23);
+    });
+  });
+
+  // quest containers — beats cluster by their quest, not by type
+  (board.quests || []).forEach(function (q) {
+    if (!q.beats || !q.beats.length) return;
+    var g = svgEl("g", null, gRegions);
+    var rect = svgEl("rect", { rx: 16, "class": "questregion" }, g);
+    var lbl = svgEl("text", { "class": "questregion-lbl" }, g);
+    lbl.textContent = q.title.toUpperCase();
+    geomUpdaters.push(function () {
+      var b = questBox(q);
+      if (!b) { g.setAttribute("visibility", "hidden"); return; }
+      g.removeAttribute("visibility");
+      rect.setAttribute("x", b.x); rect.setAttribute("y", b.y);
+      rect.setAttribute("width", b.w); rect.setAttribute("height", b.h);
+      rect.setAttribute("stroke", factionColor(q.faction || "none"));
+      lbl.setAttribute("x", b.x + 14); lbl.setAttribute("y", b.y + 21);
+      lbl.setAttribute("fill", factionColor(q.faction || "none"));
+    });
+  });
+
+  // prereq edges — sequence, drawn quiet so it never competes with the threads
+  prereqEdges().forEach(function (e) {
+    var g = svgEl("g", null, gLinks);
+    var p = svgEl("path", { "class": "prereq", "marker-end": "url(#arrow-bone)" }, g);
+    geomUpdaters.push(function () {
+      var a = getNode(e.from), b = getNode(e.to);
+      if (!a || !b) return;
+      p.setAttribute("d", edgePath(a, b));
+      var dim = !(isVisible(a) && isVisible(b));
+      var hot = selectedId && (e.from === selectedId || e.to === selectedId);
+      g.setAttribute("class", dim ? "dim" : "");
+      p.setAttribute("class", "prereq" + (hot ? " hot" : ""));
     });
   });
 
@@ -900,7 +1535,7 @@ function renderCanvas() {
   });
 
   // nodes — opaque cards
-  board.encounters.forEach(function (e) {
+  allNodes().forEach(function (e) {
     var g = svgEl("g", { "class": "node", tabindex: "0", role: "button" }, gNodes);
     var solid = svgEl("rect", { width: W, height: H, rx: 9, fill: "#211f1b" }, g);
     var tint = svgEl("rect", { width: W, height: H, rx: 9, "class": "node-bg" }, g);
@@ -916,14 +1551,19 @@ function renderCanvas() {
     // Card text is refreshed on its own, so drawer edits don't rebuild the web.
     textUpdaters[e.id] = function () {
       var n = getNode(e.id) || e;
-      title.textContent = n.title.length > 21 ? n.title.slice(0, 20) + "…" : n.title;
-      meta.textContent = typeLabel(n.type) + " · " + (n.scope === "gated" ? "gated" : "universal");
+      var beat = n._kind === "beat";
+      var q = beat ? getQuest(n._questId) : null;
+      var label = beat ? (q ? q.title : "Quest") + " · beat " + ((n._ordinal || 0) + 1) : n.title;
+      title.textContent = label.length > 21 ? label.slice(0, 20) + "…" : label;
+      meta.textContent = beat
+        ? "delivered " + (n.deliver || "auto") + (n.scope === "gated" ? " · gated" : "")
+        : typeLabel(n.type) + " · " + (n.scope === "gated" ? "gated" : "universal");
       flags.textContent = (n.out.length ? "sets " + n.out.length : "") +
                           (n["in"].length ? (n.out.length ? "  " : "") + "needs " + n["in"].length : "") ||
                           "no flags";
-      numText.textContent = n.n == null ? "" : String(n.n);
+      numText.textContent = beat ? String((n._ordinal || 0) + 1) : (n.n == null ? "" : String(n.n));
       titleTip.textContent = n.title + " — " + factionLabel(n.faction) + " · " + statusLabel(n.status);
-      g.setAttribute("aria-label", n.title + ", " + typeLabel(n.type) + ", " +
+      g.setAttribute("aria-label", n.title + ", " + (beat ? "quest beat" : typeLabel(n.type)) + ", " +
                      factionLabel(n.faction) + ", " + statusLabel(n.status));
     };
     textUpdaters[e.id]();
@@ -946,6 +1586,8 @@ function renderCanvas() {
       tint.setAttribute("fill", col + (sel ? "5e" : "40"));
       tint.setAttribute("stroke", col);
       tint.setAttribute("stroke-width", sel ? 2.5 : 1.6);
+      if (n._kind === "beat") tint.setAttribute("stroke-dasharray", "7 4");
+      else tint.removeAttribute("stroke-dasharray");
       spine.setAttribute("fill", col);
       dot.setAttribute("fill", other);
       g.setAttribute("class", "node" + (isVisible(n) ? "" : " dim") + (sel ? " sel" : "") +
@@ -980,14 +1622,14 @@ function viewportBox() {
 // minK: don't zoom out past this even if the board won't fit. Used for the
 // opening view on a phone, where a true fit is too small to read.
 function fit(minK) {
-  if (!board.encounters.length) return;
+  if (!allNodes().length) return;
   var vb = viewportBox();
-  var xs = board.encounters.map(function (e) { return e.x; });
-  var ys = board.encounters.map(function (e) { return e.y; });
+  var xs = allNodes().map(function (e) { return e.x; });
+  var ys = allNodes().map(function (e) { return e.y; });
   var minX = Math.min.apply(null, xs) - W, minY = Math.min.apply(null, ys) - H;
   var maxY = Math.max.apply(null, ys) + H;
   // Open-thread stubs trail off the right edge of their card; frame them too.
-  var maxX = Math.max.apply(null, board.encounters.map(function (e) {
+  var maxX = Math.max.apply(null, allNodes().map(function (e) {
     return e.x + W + ((derived && derived.dangling[e.id]) ? 230 : 0);
   }));
   var k = clamp(Math.min(vb.w / (maxX - minX), vb.h / (maxY - minY)), K_MIN, 1.4);
@@ -1072,10 +1714,9 @@ function onGlobalMove(ev) {
     applyView();
   } else if (drag.kind === "node") {
     var k = view.k;
-    board.encounters = separate(board.encounters.map(function (n) {
-      return n.id === drag.id ? Object.assign({}, n, { x: n.x + dx / k, y: n.y + dy / k }) : n;
-    }), drag.id);
-    syncIndex();
+    var moved = getNode(drag.id);
+    if (moved) { moved.x += dx / k; moved.y += dy / k; }
+    separateInPlace(drag.id);
     renderGeometry();
   }
 }
@@ -1105,7 +1746,8 @@ function scheduleSave() {
 }
 function commitSave() {
   if (!loaded) return;
-  Store.save({ encounters: board.encounters, links: board.links, quests: board.quests })
+  Store.save({ encounters: board.encounters, links: board.links,
+               quests: (board.quests || []).map(exportQuest), engine: board.engine || null })
     .then(function (ok) {
       if (!ok && storageOK) {
         storageOK = false;
@@ -1158,10 +1800,11 @@ function delLink(from, to) {
 }
 
 function assign(id, props) {
-  board.encounters = board.encounters.map(function (n) {
-    return n.id === id ? Object.assign({}, n, props) : n;
-  });
-  syncIndex();
+  var n = getNode(id);
+  if (!n) return;
+  var wasId = n.id;
+  Object.assign(n, props);
+  if (n.id !== wasId) syncIndex();
 }
 
 // Graph-changing edits (id, out, in) — the whole web has to be redrawn.
@@ -1202,12 +1845,13 @@ function patchProse(id, props) {
 function addEncounter() {
   var c = centerWorld();
   var id = newId();
-  board.encounters = separate(board.encounters.concat([{
+  board.encounters.push({
     id: id, n: null, title: "New encounter", type: "salvage", faction: "none",
     scope: "universal", status: "idea", hook: "", teaches: "",
     choices: [{ label: "", fx: "" }], out: [], "in": [], notes: "", x: c.x, y: c.y
-  }]), id);
+  });
   syncIndex();
+  separateInPlace(id);
   selectedId = id;
   renderCanvas();
   renderDrawer();
@@ -1220,8 +1864,18 @@ function delEncounter(id) {
   var n = getNode(id);
   if (!n) return;
   if (!window.confirm("Delete “" + n.title + "”? This can't be undone (export first if unsure).")) return;
-  board.encounters = board.encounters.filter(function (e) { return e.id !== id; });
+  if (n._kind === "beat") {
+    var q = getQuest(n._questId);
+    if (q) q.beats = q.beats.filter(function (b) { return b.id !== id; });
+    // A prereq pointing at a deleted beat would strand the ones after it.
+    allNodes().forEach(function (o) {
+      if (o.prereqs) o.prereqs = o.prereqs.filter(function (p) { return p !== id; });
+    });
+  } else {
+    board.encounters = board.encounters.filter(function (e) { return e.id !== id; });
+  }
   board.links = board.links.filter(function (l) { return l.from !== id && l.to !== id; });
+  syncIndex();
   if (selectedId === id) selectedId = null;
   renderCanvas();
   renderDrawer();
@@ -1234,17 +1888,41 @@ function tidy() {
   );
   var groups = {};
   board.encounters.forEach(function (e) { (groups[e.type] = groups[e.type] || []).push(e); });
-  var colW = 540, rowH = 380, perRow = 3, ti = 0, next = [];
+  var colW = 540, rowH = 380, perRow = 3, ti = 0, bottom = 240;
   order.forEach(function (t) {
     var members = groups[t];
     if (!members || !members.length) return;
     var cx = (ti % perRow) * colW + 320, cy = Math.floor(ti / perRow) * rowH + 240;
     ti++;
     members.forEach(function (m, i) {
-      next.push(Object.assign({}, m, { x: cx + (i % 2) * (W + 44), y: cy + Math.floor(i / 2) * (H + 36) }));
+      m.x = cx + (i % 2) * (W + 44);
+      m.y = cy + Math.floor(i / 2) * (H + 36);
+      bottom = Math.max(bottom, m.y);
     });
   });
-  board.encounters = separate(next, null);
+
+  // Quests below the encounter clusters: each a two-column block of its beats
+  // in prereq order, so a chain reads down the block.
+  var quests = (board.quests || []).filter(function (q) { return q.beats && q.beats.length; });
+  var cellW = 2 * (W + 44) + 140;
+  var perQuestRow = Math.max(4, Math.ceil(Math.sqrt(quests.length)));
+  var y = bottom + rowH;
+  for (var i = 0; i < quests.length; i += perQuestRow) {
+    var band = quests.slice(i, i + perQuestRow), tallest = 0;
+    band.forEach(function (q, qi) {
+      var beats = questBeatsInOrder(q);
+      var qx = qi * cellW + 320;
+      beats.forEach(function (b, bi) {
+        b.x = qx + (bi % 2) * (W + 44);
+        b.y = y + Math.floor(bi / 2) * (H + 36);
+      });
+      tallest = Math.max(tallest, Math.ceil(beats.length / 2) * (H + 36));
+    });
+    y += tallest + 190;
+  }
+
+  syncIndex();
+  separateInPlace(null);
   renderCanvas();
   scheduleSave();
   setTimeout(fit, 60);
@@ -1252,17 +1930,15 @@ function tidy() {
 
 /* ── placement for imported nodes without coordinates ─────────────────── */
 
-function placeMissing(list) {
+function placeMissingInPlace() {
   var c = centerWorld();
   var placed = 0;
-  return list.map(function (e) {
-    if (e.x != null && e.y != null) return e;
+  allNodes().forEach(function (e) {
+    if (e.x != null && e.y != null) return;
     var ring = Math.floor(placed / 8) + 1, a = (placed % 8) * (Math.PI / 4);
     placed++;
-    return Object.assign({}, e, {
-      x: c.x + Math.cos(a) * ring * (W + PADX + 40),
-      y: c.y + Math.sin(a) * ring * (H + PADY + 60)
-    });
+    e.x = c.x + Math.cos(a) * ring * (W + PADX + 40);
+    e.y = c.y + Math.sin(a) * ring * (H + PADY + 60);
   });
 }
 
@@ -1372,9 +2048,7 @@ function renderDrawer() {
   choiceWrap.appendChild(el("div", { class: "dr-choicehead" }, [
     el("span", { text: "Choices" }),
     el("button", { class: "mini", text: "+ add", on: { click: function () {
-      board.encounters = board.encounters.map(function (n) {
-        return n.id !== id ? n : Object.assign({}, n, { choices: n.choices.concat([{ label: "", fx: "" }]) });
-      });
+      getNode(id).choices.push({ label: "", fx: "" });
       renderCanvas(); renderDrawer(); scheduleSave();
       var rows = drawerEl.querySelectorAll(".choice input");
       if (rows.length) rows[rows.length - 2].focus();
@@ -1388,11 +2062,8 @@ function renderDrawer() {
         on: { input: function (ev) { patchChoice(id, i, { fx: ev.target.value }); } } }),
       el("button", { class: "ch-x", text: "✕", "aria-label": "Remove choice",
         on: { click: function () {
-          board.encounters = board.encounters.map(function (n) {
-            return n.id !== id ? n : Object.assign({}, n, {
-              choices: n.choices.filter(function (_, ci) { return ci !== i; })
-            });
-          });
+          var nd = getNode(id);
+          nd.choices = nd.choices.filter(function (_, ci) { return ci !== i; });
           renderCanvas(); renderDrawer(); scheduleSave();
         } } })
     ]));
@@ -1416,11 +2087,63 @@ function renderDrawer() {
     ])
   ]));
 
+  if (e._kind === "beat") {
+    var quest = getQuest(e._questId);
+    drawerEl.appendChild(el("div", { class: "dr-row2" }, [
+      el("label", { text: "Quest" }, [el("input", {
+        class: "mono", value: quest ? quest.title : e._questId,
+        on: { change: function (ev) {
+          if (quest) { quest.title = ev.target.value; renderCanvas(); scheduleSave(); }
+        } }
+      })]),
+      el("label", { text: "Deliver" }, [selectEl(e.deliver || "auto",
+        [["auto", "auto"], ["discovered", "discovered"], ["conditional", "conditional"]],
+        function (v) { patchField(id, { deliver: v }); })])
+    ]));
+    drawerEl.appendChild(el("label", { class: "dr-field" }, [
+      "Prereq beats ", el("span", { class: "dr-hintlbl", text: "comma-sep beat ids" }),
+      el("input", { class: "mono", value: (e.prereqs || []).join(", "),
+        on: { change: function (ev) {
+          patch(id, { prereqs: parseFlags(ev.target.value) });
+        } } })
+    ]));
+  }
+
   drawerEl.appendChild(el("label", { class: "dr-field" }, [
     "Notes for Claude ", el("span", { class: "dr-hintlbl", text: "engine caveats, variants" }),
     el("textarea", { rows: 3, value: e.notes,
       on: { input: function (ev) { patchProse(id, { notes: ev.target.value }); } } })
   ]));
+
+  // Engine rows are shown, never silently edited here: the tool has no business
+  // rewriting an effect it doesn't own.
+  var eng = e.engine;
+  var mech = (e.choices || []).filter(function (c) { return c.engine; });
+  if (eng || mech.length) {
+    var box = el("div", { class: "dr-engine" });
+    box.appendChild(el("div", { class: "dr-engine-h", text: "From the encounter builder" }));
+    if (eng && eng.kind) box.appendChild(engLine("row", eng.kind));
+    if (eng && eng.mode) box.appendChild(engLine("mode", eng.mode));
+    if (eng && eng.copies !== undefined) box.appendChild(engLine("copies", String(eng.copies)));
+    if (eng && eng.recipient) box.appendChild(engLine("recipient", eng.recipient));
+    if (eng && eng.triggerCondition) box.appendChild(engLine("trigger", conditionPhrase(eng.triggerCondition)));
+    if (eng && eng.triggerStrength !== undefined) {
+      box.appendChild(engLine("weight", typeof eng.triggerStrength === "object"
+        ? "conditional" : String(eng.triggerStrength)));
+    }
+    if (eng && eng.deliverCondition) box.appendChild(engLine("delivers when", conditionPhrase(eng.deliverCondition)));
+    if (eng && eng.placementFilter) box.appendChild(engLine("placement", JSON.stringify(eng.placementFilter)));
+    if (eng && eng.art) box.appendChild(engLine("art", eng.art));
+    mech.forEach(function (c) {
+      var types = [];
+      walkEffects(c.engine.effects, function (x) { types.push(x.type); });
+      box.appendChild(engLine(c.engine.id, uniq(types).join(", ") || "no effects"));
+    });
+    box.appendChild(el("div", { class: "dr-warn",
+      text: "Effects and conditions are carried through export unchanged. Editing a title, body or "
+          + "choice label here writes back; nothing else does." }));
+    drawerEl.appendChild(box);
+  }
 
   drawerEl.appendChild(el("div", { class: "dr-foot" }, [
     el("button", { class: "btn ghost", text: "Link from here", on: { click: function () {
@@ -1432,13 +2155,17 @@ function renderDrawer() {
   if (wasHidden) setTimeout(renderGeometry, 0);
 }
 
+function engLine(k, v) {
+  return el("div", { class: "eng-line" }, [
+    el("span", { class: "eng-k", text: k }),
+    el("span", { class: "eng-v", text: String(v) })
+  ]);
+}
+
 function patchChoice(id, i, props) {
-  board.encounters = board.encounters.map(function (n) {
-    return n.id !== id ? n : Object.assign({}, n, {
-      choices: n.choices.map(function (c, ci) { return ci === i ? Object.assign({}, c, props) : c; })
-    });
-  });
-  syncIndex();
+  var n = getNode(id);
+  if (!n || !n.choices[i]) return;
+  Object.assign(n.choices[i], props);
   scheduleSave();
 }
 
@@ -1461,13 +2188,17 @@ function openPanel(which) {
   panel = which;
   legendEl.hidden = which !== "legend";
   coverageEl.hidden = which !== "coverage";
+  systemsEl.hidden = which !== "systems";
   menuEl.hidden = which !== "menu";
   $("#btn-legend").className = "btn" + (which === "legend" ? " on" : "");
+  $("#btn-systems").className = "btn" + (which === "systems" ? " on" : "");
   $("#btn-legend").setAttribute("aria-expanded", String(which === "legend"));
   $("#btn-coverage").setAttribute("aria-expanded", String(which === "coverage"));
+  $("#btn-systems").setAttribute("aria-expanded", String(which === "systems"));
   $("#btn-board").setAttribute("aria-expanded", String(which === "menu"));
   if (which === "legend") renderLegend();
   if (which === "coverage") renderCoveragePanel();
+  if (which === "systems") renderSystems();
   if (which === "menu") renderMenu();
 }
 function closePanel() { if (panel) openPanel(null); }
@@ -1549,8 +2280,11 @@ function renderCoveragePanel() {
   clear(coverageEl);
   var cov = coverage();
 
+  var beats = allNodes().filter(function (n) { return n._kind === "beat"; }).length;
   coverageEl.appendChild(el("div", { class: "cov-lead",
-    text: cov.total + " encounter" + (cov.total === 1 ? "" : "s") + " on the board." }));
+    text: (cov.total - beats) + " encounter" + (cov.total - beats === 1 ? "" : "s") +
+          (beats ? " and " + beats + " quest beats across " + (board.quests || []).length + " quests" : "") +
+          " on the board." }));
 
   coverageEl.appendChild(el("div", { class: "cov-h", text: "Open threads · set, never read" }));
   if (cov.open.length) {
@@ -1603,6 +2337,158 @@ function renderCoveragePanel() {
   });
 }
 
+/* ── systems: what the content asks the engine for ────────────────────── */
+
+// Every effect type and condition operator the board uses, whether the run can
+// carry it out, and the authors' own notes about what is still missing. This is
+// the reconciliation surface: nothing here is a change to the content, only a
+// reading of it.
+function systemsReport() {
+  var effTypes = {}, condOps = {}, notes = [], engineChoices = 0;
+  allNodes().forEach(function (n) {
+    (n.choices || []).forEach(function (c) {
+      if (!c.engine) return;
+      engineChoices++;
+      walkEffects(c.engine.effects, function (e) {
+        var row = effTypes[e.type] = effTypes[e.type] || { count: 0, notes: [], where: [] };
+        row.count++;
+        if (row.where.length < 4 && row.where.indexOf(n.title) === -1) row.where.push(n.title);
+        if (e._note) {
+          row.notes.push(e._note);
+          notes.push({ id: e.id || "", type: e.type, note: e._note, where: n.title });
+        }
+      });
+      conditionOps(c.engine.condition).forEach(function (op) {
+        condOps[op] = (condOps[op] || 0) + 1;
+      });
+    });
+    var eng = n.engine || {};
+    [eng.triggerCondition, eng.deliverCondition, eng.triggerStrength].forEach(function (c) {
+      conditionOps(c).forEach(function (op) { condOps[op] = (condOps[op] || 0) + 1; });
+    });
+  });
+
+  var readme = (board.engine && board.engine.source && board.engine.source._readme) || null;
+
+  // Flag-level validation across every node, beats included.
+  var d = derived || derive();
+  var seeds = {};
+  if (readme && readme.deliberate_seeds) {
+    String(readme.deliberate_seeds).split(/[,\s]+/).forEach(function (w) {
+      if (/^[a-z0-9_]{4,}$/.test(w)) seeds[w] = 1;
+    });
+  }
+
+  return {
+    effTypes: effTypes, condOps: condOps, notes: notes, readme: readme,
+    engineChoices: engineChoices,
+    unmet: d.unmet, open: d.openFlags, seeds: seeds
+  };
+}
+
+function renderSystems() {
+  clear(systemsEl);
+  var r = systemsReport();
+
+  var effKeys = Object.keys(r.effTypes).sort(function (a, b) {
+    return r.effTypes[b].count - r.effTypes[a].count;
+  });
+
+  if (!effKeys.length) {
+    systemsEl.appendChild(el("div", { class: "cov-lead",
+      text: "No engine-format content on this board yet." }));
+    systemsEl.appendChild(el("div", { class: "leg-note",
+      text: "Import an encounter-builder JSON (world_encounters / quests / choices / effects) " +
+            "and this panel reports every effect type and condition it uses, which of them the " +
+            "run can carry out, and the notes its authors left about what the engine still owes." }));
+    return;
+  }
+
+  systemsEl.appendChild(el("div", { class: "cov-lead",
+    text: r.engineChoices + " mechanized choices across " + effKeys.length + " effect types." }));
+
+  var missing = effKeys.filter(function (t) { return !SIMULATED_EFFECTS[t]; });
+  systemsEl.appendChild(el("div", { class: "cov-h", text: "Effects the run cannot carry out (" + missing.length + ")" }));
+  if (missing.length) {
+    systemsEl.appendChild(el("div", { class: "leg-note",
+      text: "Preserved exactly as authored and exported unchanged. A run records each one as " +
+            "“the engine would…” rather than pretending it happened." }));
+    missing.forEach(function (t) {
+      var row = r.effTypes[t];
+      systemsEl.appendChild(el("div", { class: "sys-row" }, [
+        el("div", { class: "sys-head" }, [
+          el("span", { class: "sys-type", text: t }),
+          el("span", { class: "sys-count", text: String(row.count) })
+        ]),
+        el("div", { class: "sys-where", text: row.where.join(" · ") }),
+        row.notes.length ? el("div", { class: "sys-note", text: row.notes[0] }) : null
+      ]));
+    });
+  } else {
+    systemsEl.appendChild(el("div", { class: "cov-empty", text: "none — the run models every effect used" }));
+  }
+
+  systemsEl.appendChild(el("div", { class: "cov-h", text: "Effects the run applies" }));
+  var applied = effKeys.filter(function (t) { return SIMULATED_EFFECTS[t]; });
+  systemsEl.appendChild(el("div", { class: "cov-flags" }, applied.map(function (t) {
+    return el("span", { class: "cov-flag", text: t + " " + r.effTypes[t].count });
+  })));
+
+  var ops = Object.keys(r.condOps).sort();
+  if (ops.length) {
+    systemsEl.appendChild(el("div", { class: "cov-h", text: "Condition operators" }));
+    systemsEl.appendChild(el("div", { class: "cov-flags" }, ops.map(function (o) {
+      return el("span", { class: "cov-flag" + (SIMULATED_CONDITIONS[o] ? "" : " unmet"),
+                          text: o + " " + r.condOps[o] });
+    })));
+  }
+
+  if (r.notes.length) {
+    systemsEl.appendChild(el("div", { class: "cov-h", text: "Authors' notes on the content (" + r.notes.length + ")" }));
+    r.notes.forEach(function (n) {
+      systemsEl.appendChild(el("div", { class: "sys-row" }, [
+        el("div", { class: "sys-head" }, [
+          el("span", { class: "sys-type", text: n.type }),
+          el("span", { class: "sys-count", text: n.id })
+        ]),
+        el("div", { class: "sys-where", text: n.where }),
+        el("div", { class: "sys-note", text: n.note })
+      ]));
+    });
+  }
+
+  // The file's own readme, rendered rather than buried in the JSON.
+  var rd = r.readme;
+  if (rd) {
+    if (rd.required_systems) {
+      systemsEl.appendChild(el("div", { class: "cov-h", text: "Required systems (from the file)" }));
+      Object.keys(rd.required_systems).forEach(function (k) {
+        systemsEl.appendChild(el("div", { class: "sys-row" }, [
+          el("div", { class: "sys-head" }, [el("span", { class: "sys-type", text: k })]),
+          el("div", { class: "sys-note", text: String(rd.required_systems[k]) })
+        ]));
+      });
+    }
+    if (rd.known_breaks_pre_existing) {
+      systemsEl.appendChild(el("div", { class: "cov-h", text: "Known breaks (from the file)" }));
+      Object.keys(rd.known_breaks_pre_existing).forEach(function (k) {
+        systemsEl.appendChild(el("div", { class: "sys-row" }, [
+          el("div", { class: "sys-head" }, [el("span", { class: "sys-type warn", text: k })]),
+          el("div", { class: "sys-note", text: String(rd.known_breaks_pre_existing[k]) })
+        ]));
+      });
+    }
+  }
+
+  systemsEl.appendChild(el("div", { class: "cov-h", text: "Flags read that nothing writes (" + r.unmet.length + ")" }));
+  systemsEl.appendChild(r.unmet.length
+    ? el("div", { class: "cov-flags" }, r.unmet.map(function (f) {
+        return el("button", { class: "cov-flag unmet", text: f,
+          on: { click: function () { $("#search").value = f; setSearch(f); closePanel(); } } });
+      }))
+    : el("div", { class: "cov-empty", text: "none" }));
+}
+
 function renderMenu() {
   clear(menuEl);
 
@@ -1643,6 +2529,11 @@ function renderMenu() {
       renderCanvas(); renderDrawer(); commitSave();
       toast("Board cleared.");
     } } }));
+  if (board.engine && board.engine.source) {
+    menuEl.appendChild(el("div", { class: "menu-sep" }));
+    menuEl.appendChild(el("button", { class: "menu-item", text: "Export back to the encounter builder",
+      on: { click: function () { closePanel(); openEngineExport(); } } }));
+  }
   menuEl.appendChild(el("div", { class: "menu-sep" }));
   menuEl.appendChild(el("div", { class: "menu-note",
     text: "Autosaves to this browser only. Export a file to move the board to another device or into a chat." }));
@@ -1698,9 +2589,11 @@ function stamp() {
 }
 
 function downloadBoard() {
-  var data = exportBoard();
+  return downloadJSON(exportBoard(), "thread-web-" + stamp() + ".json");
+}
+
+function downloadJSON(data, name) {
   var text = JSON.stringify(data, null, 2);
-  var name = "thread-web-" + stamp() + ".json";
   try {
     var blob = new Blob([text], { type: "application/json" });
     var url = URL.createObjectURL(blob);
@@ -1760,9 +2653,12 @@ function openExport() {
 
 function summarizeMerge(incoming) {
   var byId = {};
-  board.encounters.forEach(function (e) { byId[e.id] = e; });
+  allNodes().forEach(function (e) { byId[e.id] = e; });
   var added = 0, changed = 0, same = 0;
-  incoming.encounters.forEach(function (inc) {
+  var all = incoming.encounters.concat(
+    (incoming.quests || []).reduce(function (acc, q) { return acc.concat(q.beats || []); }, [])
+  );
+  all.forEach(function (inc) {
     var cur = byId[inc.id];
     if (!cur) { added++; return; }
     var a = JSON.stringify(exportEncounter(Object.assign({}, cur, incomingPatch(inc))));
@@ -1796,13 +2692,11 @@ function incomingPatch(inc) {
 function applyMerge(incoming) {
   var byId = {};
   board.encounters.forEach(function (e, i) { byId[e.id] = i; });
-  var next = board.encounters.slice();
   incoming.encounters.forEach(function (inc) {
     var i = byId[inc.id];
-    if (i === undefined) next.push(inc);
-    else next[i] = Object.assign({}, next[i], incomingPatch(inc));
+    if (i === undefined) board.encounters.push(inc);
+    else Object.assign(board.encounters[i], incomingPatch(inc));
   });
-  board.encounters = separate(placeMissing(next), null);
 
   var seen = {};
   board.links.forEach(function (l) { seen[l.from + "→" + l.to] = 1; seen[l.to + "→" + l.from] = 1; });
@@ -1812,22 +2706,121 @@ function applyMerge(incoming) {
     seen[k] = 1; seen[l.to + "→" + l.from] = 1;
     board.links.push(l);
   });
-  board.links = board.links.filter(function (l) {
-    return board.encounters.some(function (e) { return e.id === l.from; }) &&
-           board.encounters.some(function (e) { return e.id === l.to; });
-  });
 
+  // Quests merge by id, and so do their beats — a chat handing back one revised
+  // beat must not drop the rest of the chain.
   var qIdx = {};
   board.quests.forEach(function (q, i) { if (q && q.id) qIdx[q.id] = i; });
   incoming.quests.forEach(function (q) {
-    if (q && q.id && qIdx[q.id] !== undefined) board.quests[qIdx[q.id]] = q;
-    else board.quests.push(q);
+    if (!q || !q.id) return;
+    if (qIdx[q.id] === undefined) { board.quests.push(q); return; }
+    var cur = board.quests[qIdx[q.id]];
+    Object.keys(q).forEach(function (k) { if (k !== "beats") cur[k] = q[k]; });
+    var bIdx = {};
+    cur.beats.forEach(function (b, i) { bIdx[b.id] = i; });
+    (q.beats || []).forEach(function (b) {
+      if (bIdx[b.id] === undefined) cur.beats.push(b);
+      else Object.assign(cur.beats[bIdx[b.id]], incomingPatch(b));
+    });
   });
 
+  var fromEngine = !!incoming.engine;
+  if (fromEngine) board.engine = incoming.engine;
+
   syncIndex();
+  board.links = board.links.filter(function (l) { return getNode(l.from) && getNode(l.to); });
+  placeMissingInPlace();
+  separateInPlace(null);
+
+  // The builder's format carries no coordinates, so a spiral of 160 cards would
+  // be the first thing seen. Lay it out properly instead.
+  if (fromEngine) { tidy(); return; }
+
   renderCanvas();
   renderDrawer();
   commitSave();
+}
+
+// Hand the builder its own file back. Every row is the row that came in; only
+// the prose fields the tool can edit are written through, and the count of
+// those is reported so nothing changes silently. Effects and conditions are
+// never touched.
+function engineExport() {
+  if (!board.engine || !board.engine.source) return null;
+  var src = JSON.parse(JSON.stringify(board.engine.source));
+  var touched = { titles: 0, texts: 0, labels: 0 };
+
+  function writeNode(row, textKey) {
+    var n = getNode(row.id);
+    if (!n) return;
+    if (row.title !== undefined && n.title !== row.title && n._kind !== "beat") {
+      row.title = n.title; touched.titles++;
+    }
+    if (n.hook !== row[textKey]) { row[textKey] = n.hook; touched.texts++; }
+  }
+  (src.world_encounters || []).forEach(function (r) { writeNode(r, "text"); });
+  (src.field_encounters || []).forEach(function (r) { writeNode(r, "text"); });
+  (src.quest_beats || []).forEach(function (r) { writeNode(r, "text"); });
+  (src.quests || []).forEach(function (q) {
+    var quest = getQuest(q.id);
+    if (quest && quest.title !== q.title) { q.title = quest.title; touched.titles++; }
+  });
+
+  var labelById = {};
+  allNodes().forEach(function (n) {
+    (n.choices || []).forEach(function (c) {
+      if (c.engine && c.engine.id) labelById[c.engine.id] = c;
+    });
+  });
+  (src.choices || []).forEach(function (row) {
+    var c = labelById[row.id];
+    if (!c) return;
+    if (c.label !== row.label) { row.label = c.label; touched.labels++; }
+    if (c.engine.outcomeText !== row.outcomeText && c.engine.outcomeText !== undefined) {
+      row.outcomeText = c.engine.outcomeText; touched.texts++;
+    }
+  });
+
+  return { data: src, touched: touched };
+}
+
+function openEngineExport() {
+  closePanel();
+  var out = engineExport();
+  if (!out) { toast("No engine file on this board — import one first.", true); return; }
+  var src = out.data, t = out.touched;
+  var stats = el("div", { class: "modal-stats" });
+  ENGINE_TABLES.forEach(function (k) {
+    if (Array.isArray(src[k])) {
+      stats.appendChild(el("div", {}, [
+        el("b", { text: String(src[k].length) }), el("span", { text: " " + k.replace(/_/g, " ") })
+      ]));
+    }
+  });
+  openModal([
+    el("div", { class: "modal-h", text: "Export — back to the encounter builder" }),
+    el("p", { class: "modal-lead",
+      text: "The file you imported, returned in its own table-grouped shape. Every effect, " +
+            "condition, ordinal and id is the one that came in — including the calls no engine " +
+            "implements yet." }),
+    stats,
+    el("div", { class: "note" }, [
+      el("div", { class: "note-h" }, [el("span", { text: "Edits written through" })]),
+      el("p", { class: "note-lead",
+        text: t.titles + " title(s), " + t.texts + " body text(s) and " + t.labels +
+              " choice label(s) differ from the import and are written back. " +
+              "Everything else stays in the Thread Web export instead: new encounters, changed " +
+              "flags, links, and beat titles — quest_beats rows carry no title field, so the ones " +
+              "shown on the canvas are the tool's own." })
+    ]),
+    el("div", { class: "modal-foot" }, [
+      el("button", { class: "btn ghost", text: "Close", on: { click: closeModal } }),
+      el("button", { class: "btn primary", text: "Download engine .json", on: { click: function () {
+        downloadJSON(src, "remnant-content-" + stamp() + ".json");
+        closeModal();
+      } } })
+    ])
+  ]);
 }
 
 function openImport() {
@@ -1911,6 +2904,857 @@ function openImport() {
   openModal([body, footer]);
 }
 
+/* ════════════════════════════════════════════════════════════════════════
+   PLAYTEST — walk the board the way a session would, one encounter at a
+   time, carrying a wallet of flags. Read-only: a run never edits the board.
+
+   The data model puts flags on the encounter (out / in) while the prose says
+   which choice sets or needs them, so the run reads the fx text to work out
+   choice-level grants and gates, and shows every inference on screen — a
+   choice that sets nothing, or a flag no choice can reach, is a finding.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+var playEl = $("#play");
+var run = null;
+
+/* ── engine state & the effect interpreter ────────────────────────────── */
+
+function newRunState(faction) {
+  return {
+    phase: "setup", faction: faction || "any", turn: 0, round: 0,
+    wallet: {}, visited: {}, path: [], lockedSeen: [],
+    resources: {}, tracks: {}, standing: {}, honor: 0, menace: 0,
+    quests: {}, deferred: [], asks: [], rolls: [], techLevel: 0
+  };
+}
+
+// Condition language: has_flag / count_flags / all / any / not / op+score.
+// Anything unrecognised returns true and is recorded, so an unknown gate opens
+// the content rather than hiding it.
+function evalCondition(c, unknown) {
+  if (c === null || c === undefined) return true;
+  if (typeof c === "boolean") return c;
+  if (typeof c !== "object") return !!c;
+  if (c.has_flag) return !!run.wallet[c.has_flag.flag];
+  if (c.not) return !evalCondition(c.not, unknown);
+  if (c.all) return c.all.every(function (x) { return evalCondition(x, unknown); });
+  if (c.any) return c.any.some(function (x) { return evalCondition(x, unknown); });
+  if (c.op) {
+    var l = evalValue(c.left, unknown), r = evalValue(c.right, unknown);
+    switch (c.op) {
+      case "eq":  return l === r;
+      case "ne":  return l !== r;
+      case "lt":  return l < r;
+      case "lte": return l <= r;
+      case "gt":  return l > r;
+      case "gte": return l >= r;
+    }
+  }
+  if (unknown) unknown.push(Object.keys(c).join(","));
+  return true;
+}
+
+function evalValue(v, unknown) {
+  if (v === null || v === undefined) return v;
+  if (typeof v === "number" || typeof v === "boolean") return v;
+  if (typeof v === "string") {
+    if (v === "active") return run.faction;                       // faction-of-active-player
+    if (v === "players.active.techLevel") return run.techLevel;
+    return v;
+  }
+  if (typeof v === "object") {
+    if (v.count_flags) {
+      var pre = v.count_flags.prefix || "";
+      return Object.keys(run.wallet).filter(function (f) { return f.indexOf(pre) === 0; }).length;
+    }
+    if (v.score) {
+      var k = v.score.kind;
+      if (k === "menace") return run.menace;
+      if (k === "honor") return run.honor;
+      if (run.tracks[k] !== undefined) return run.tracks[k];
+      return 0;
+    }
+    if (v.has_flag) return !!run.wallet[v.has_flag.flag];
+  }
+  if (unknown) unknown.push(JSON.stringify(v).slice(0, 40));
+  return v;
+}
+
+// A conditional value: {"if":[cond, value, cond, value, …, fallback]}
+function evalIf(v) {
+  if (!v || typeof v !== "object" || !Array.isArray(v["if"])) return v;
+  var arr = v["if"];
+  for (var i = 0; i + 1 < arr.length; i += 2) {
+    if (evalCondition(arr[i])) return arr[i + 1];
+  }
+  return arr.length % 2 ? arr[arr.length - 1] : null;
+}
+
+function bump(obj, key, amount) {
+  if (!key) return;
+  obj[key] = (obj[key] || 0) + (Number(amount) || 0);
+}
+
+// Carry out one effect. Everything the run can model is applied; everything it
+// can't is recorded verbatim as an ask — never dropped, never rewritten.
+function applyEffect(e, log) {
+  if (!e || !e.type) return;
+  var p = effParams(e);
+  switch (e.type) {
+    case "SET_PLAYER_FLAG":
+      if (p.value === false) { delete run.wallet[p.flag]; log.cleared.push(p.flag); }
+      else if (!run.wallet[p.flag]) { run.wallet[p.flag] = true; log.gained.push(p.flag); }
+      break;
+    case "ADJUST_RESOURCE": bump(run.resources, p.resource, p.amount); log.lines.push(effectPhrase(e)); break;
+    case "ADJUST_TRACK":    bump(run.tracks, p.track, p.amount);       log.lines.push(effectPhrase(e)); break;
+    case "ADJUST_STANDING": bump(run.standing, p.faction, p.amount);   log.lines.push(effectPhrase(e)); break;
+    case "ADJUST_HONOR":    run.honor  += Number(p.amount) || 0;       log.lines.push(effectPhrase(e)); break;
+    case "ADJUST_MENACE":   run.menace += Number(p.amount) || 0;       log.lines.push(effectPhrase(e)); break;
+    case "ADVANCE_QUEST":
+      run.quests[p.questId] = { beatId: p.beatId, complete: false };
+      log.lines.push(effectPhrase(e));
+      break;
+    case "COMPLETE_QUEST":
+      run.quests[p.questId] = { beatId: null, complete: true };
+      log.completed.push(p.questId);
+      break;
+    case "QUEUE_DEFERRED":
+      run.deferred.push({
+        due: run.round + (Number(p.delayRounds) || 0),
+        effects: p.effects || [],
+        from: log.source, note: e._note || ""
+      });
+      log.lines.push(effectPhrase(e));
+      break;
+    case "ROLL":
+      var chance = Number(p.chance) || 0;
+      if (p.chanceIfFlag && typeof p.chanceIfFlag === "object") {
+        Object.keys(p.chanceIfFlag).forEach(function (f) {
+          if (run.wallet[f]) chance = Number(p.chanceIfFlag[f]) || chance;
+        });
+      }
+      var hit = Math.random() * 100 < chance;
+      run.rolls.push({ chance: chance, hit: hit, source: log.source });
+      log.lines.push("rolled " + chance + "% → " + (hit ? "success" : "failure"));
+      (hit ? (p.onSuccess || []) : (p.onFail || [])).forEach(function (s) { applyEffect(s, log); });
+      break;
+    case "CONTEST":
+      // No unit model here, so the run asks the designer which branch to walk.
+      log.pending.push({ kind: "contest", effect: e });
+      break;
+    case "FORCE_CHOICE":
+      log.pending.push({ kind: "force", effect: e });
+      break;
+    case "PEEK":
+      log.lines.push(effectPhrase(e));
+      break;
+    case "DELIVER_ENCOUNTER":
+      log.lines.push("delivers " + (p.encounterId || p.id || "an encounter"));
+      break;
+    default:
+      // Preserved exactly as authored, surfaced as something the engine owes.
+      run.asks.push({ type: e.type, id: e.id || "", params: p, note: e._note || "", source: log.source });
+      log.asks.push({ type: e.type, phrase: effectPhrase(e), note: e._note || "" });
+  }
+}
+
+function newLog(source) {
+  return { source: source, gained: [], cleared: [], completed: [], lines: [], asks: [], pending: [] };
+}
+
+function applyEffects(effects, log) {
+  (effects || []).forEach(function (e) { applyEffect(e, log); });
+  return log;
+}
+
+// Deferred effects land when their round arrives.
+function advanceRound(log) {
+  run.round += 1;
+  var due = run.deferred.filter(function (d) { return d.due <= run.round; });
+  run.deferred = run.deferred.filter(function (d) { return d.due > run.round; });
+  due.forEach(function (d) { applyEffects(d.effects, log); });
+  return due.length;
+}
+
+// A beat is in the pool only once its prereqs are met and its quest has
+// reached it; encounters answer their own trigger condition.
+function beatReady(n) {
+  if (n._kind !== "beat") {
+    var eng = n.engine;
+    if (eng && eng.triggerCondition) return evalCondition(eng.triggerCondition);
+    return true;
+  }
+  var unmet = (n.prereqs || []).some(function (p) { return !run.visited[p]; });
+  if (unmet) return false;
+  var q = run.quests[n._questId];
+  if (q && q.complete) return false;
+  if (n.deliver === "conditional" && n.engine && n.engine.deliverCondition) {
+    return evalCondition(n.engine.deliverCondition);
+  }
+  return true;
+}
+
+function mentions(text, flag) {
+  // Flags are snake_case; match on a whole token so `found_water` doesn't
+  // match inside `found_water_deep`.
+  var i = String(text).indexOf(flag);
+  while (i !== -1) {
+    var before = i === 0 ? "" : text.charAt(i - 1);
+    var after = text.charAt(i + flag.length);
+    if (!/[A-Za-z0-9_]/.test(before) && !/[A-Za-z0-9_]/.test(after)) return true;
+    i = text.indexOf(flag, i + 1);
+  }
+  return false;
+}
+
+// What one choice grants and requires. Engine content states it outright in
+// its effects and condition; hand-written content has it only in the fx prose,
+// so that gets read instead.
+function readChoice(enc, choice, encGrantsAll) {
+  if (choice.engine) {
+    return {
+      engine: true,
+      grants: flagsSetBy(choice.engine.effects),
+      needs: flagsReadBy(choice.engine.condition),
+      condition: choice.engine.condition || null,
+      anyOf: false
+    };
+  }
+  var fx = String(choice.fx || "");
+  var grants = enc.out.filter(function (f) { return mentions(fx, f); });
+  if (encGrantsAll) grants = enc.out.slice();
+  var needs = enc["in"].filter(function (f) { return mentions(fx, f); });
+  return { grants: grants, needs: needs, anyOf: needs.length > 1 && /\bor\b/i.test(fx) };
+}
+
+// If no choice names any out-flag, the encounter grants them however it ends.
+function grantsAll(enc) {
+  if (!enc.out.length) return false;
+  if (enc.choices.some(function (c) { return !!c.engine; })) return false;
+  return !enc.choices.some(function (c) {
+    return enc.out.some(function (f) { return mentions(String(c.fx || ""), f); });
+  });
+}
+
+function choiceLocked(read, wallet) {
+  if (read.engine) {
+    if (!read.condition) return null;
+    if (evalCondition(read.condition)) return null;
+    var missing = read.needs.filter(function (f) { return !wallet[f]; });
+    return missing.length ? missing : [conditionPhrase(read.condition)];
+  }
+  if (!read.needs.length) return null;
+  var missing = read.needs.filter(function (f) { return !wallet[f]; });
+  if (!missing.length) return null;
+  if (read.anyOf && missing.length < read.needs.length) return null;   // OR satisfied
+  return missing;
+}
+
+// scope:"gated" means faction-restricted at spawn.
+function gatedOut(enc) {
+  return enc.scope === "gated" && enc.faction !== "none" &&
+         run.faction !== "any" && enc.faction !== run.faction;
+}
+
+function playable() {
+  return allNodes().filter(function (e) {
+    return !run.visited[e.id] && !gatedOut(e) && beatReady(e);
+  });
+}
+
+function pickTitle(e) {
+  if (e._kind !== "beat") return e.title;
+  var q = getQuest(e._questId);
+  return q ? q.title : e.title;
+}
+
+function unlockReason(enc) {
+  var held = (enc["in"] || []).filter(function (f) { return run.wallet[f]; });
+  if (enc._kind === "beat" && (enc.prereqs || []).length) {
+    var prev = getNode(enc.prereqs[0]);
+    return ["continues after " + (prev ? "beat " + ((prev._ordinal || 0) + 1) : "its prereq")]
+      .concat(held.map(function (f) { return "holds " + f; }));
+  }
+  if (!held.length) return null;
+  return held.map(function (f) { return "holds " + f; });
+}
+
+function openPlay() {
+  closePanel();
+  closeModal();
+  select(null);
+  if (!allNodes().length) { toast("Nothing to play — the board is empty.", true); return; }
+  run = newRunState("any");
+  playEl.hidden = false;
+  renderPlay();
+}
+
+function exitPlay(force) {
+  if (!force && run && run.path.length && run.phase !== "summary") {
+    if (!window.confirm("Leave this run? The summary is only shown at the end.")) return;
+  }
+  run = null;
+  playEl.hidden = true;
+  clear(playEl);
+}
+
+function playStage(headKids, bodyKids, footKids) {
+  clear(playEl);
+  var stage = el("div", { class: "play-stage", role: "dialog", "aria-modal": "true" }, [
+    el("div", { class: "play-head" }, headKids),
+    el("div", { class: "play-body" }, bodyKids),
+    el("div", { class: "play-foot" }, footKids)
+  ]);
+  playEl.appendChild(stage);
+  var body = stage.querySelector(".play-body");
+  if (body) body.scrollTop = 0;
+  return stage;
+}
+
+function ledgerParts() {
+  var parts = [];
+  Object.keys(run.resources).forEach(function (k) {
+    if (run.resources[k]) parts.push(k + " " + SIGN(run.resources[k]));
+  });
+  Object.keys(run.tracks).forEach(function (k) {
+    if (run.tracks[k]) parts.push(k + " " + SIGN(run.tracks[k]));
+  });
+  if (run.honor) parts.push("honor " + SIGN(run.honor));
+  if (run.menace) parts.push("menace " + SIGN(run.menace));
+  Object.keys(run.standing).forEach(function (k) {
+    if (run.standing[k]) parts.push(factionLabel(k) + " " + SIGN(run.standing[k]));
+  });
+  return parts;
+}
+
+function playHead() {
+  var flags = Object.keys(run.wallet).length;
+  var head = el("div", {}, [
+    el("div", { class: "play-track" }, [
+      el("span", { text: "Playtest · " }),
+      el("b", { text: "turn " + run.turn }),
+      el("span", { text: " · round " + run.round }),
+      el("span", { text: " · " + (run.faction === "any" ? "no faction" : factionLabel(run.faction)) }),
+      el("span", { text: " · " }),
+      el("b", { text: flags + " flag" + (flags === 1 ? "" : "s") }),
+      run.deferred.length ? el("span", { text: " · " + run.deferred.length + " deferred" }) : null
+    ])
+  ]);
+  var parts = ledgerParts();
+  if (parts.length) head.appendChild(el("div", { class: "play-ledger", text: parts.join("  ·  ") }));
+  return [
+    head,
+    el("button", { class: "btn ghost", text: "Exit", on: { click: function () { exitPlay(false); } } })
+  ];
+}
+
+function walletChips() {
+  var flags = Object.keys(run.wallet).sort();
+  if (!flags.length) return el("div", { class: "play-quiet", text: "no flags yet" });
+  return el("div", { class: "chips" }, flags.map(function (f) {
+    return el("span", { class: "chip have", text: f });
+  }));
+}
+
+function renderPlay() {
+  if (!run) return;
+  if (run.phase === "setup") return renderPlaySetup();
+  if (run.phase === "encounter") return renderPlayEncounter();
+  if (run.phase === "pending") return renderPlayPending();
+  if (run.phase === "result") return renderPlayResult();
+  if (run.phase === "next") return renderPlayNext();
+  if (run.phase === "summary") return renderPlaySummary();
+}
+
+function renderPlaySetup() {
+  var counts = {};
+  allNodes().forEach(function (e) { counts[e.faction] = (counts[e.faction] || 0) + 1; });
+  var options = [["any", "No faction — nothing is gated out"]].concat(
+    Object.keys(FACTIONS).filter(function (k) { return k !== "none"; })
+      .map(function (k) { return [k, FACTIONS[k].label]; })
+  );
+  var sel = selectEl(run.faction, options, function (v) { run.faction = v; });
+
+  playStage(
+    [el("div", { class: "play-track" }, [el("b", { text: "Playtest" })]),
+     el("button", { class: "btn ghost", text: "Exit", on: { click: function () { exitPlay(true); } } })],
+    [
+      el("div", { class: "play-eyebrow", text: "Set up the run" }),
+      el("h2", { class: "play-title", text: "Walk the board as a player" }),
+      el("p", { class: "play-hook",
+        text: "Pick an encounter, take a choice, and carry the flags it sets forward. " +
+              "Encounters your new flags reach are surfaced first, so a thread can be followed " +
+              "end to end. Nothing you do here changes the board." }),
+      el("label", { class: "dr-field", style: { display: "block", maxWidth: "320px" } }, [
+        el("div", { class: "play-eyebrow", text: "Playing as" }), sel
+      ]),
+      el("p", { class: "play-quiet",
+        text: "Faction only affects encounters marked gated — those spawn for their own faction. " +
+              allNodes().filter(function (e) { return e.scope === "gated"; }).length +
+              " encounter(s) on this board are gated." })
+    ],
+    [
+      el("span", { class: "play-quiet", text: allNodes().length + " cards in the pool" }),
+      el("button", { class: "btn primary", text: "Begin", on: { click: function () {
+        run.phase = "next";
+        renderPlay();
+      } } })
+    ]
+  );
+}
+
+function renderPlayEncounter() {
+  var enc = getNode(run.current);
+  if (!enc) { run.phase = "next"; return renderPlay(); }
+  var all = grantsAll(enc);
+  var col = factionColor(enc.faction);
+
+  var body = [
+    el("div", { class: "play-eyebrow",
+      text: enc._kind === "beat"
+        ? (getQuest(enc._questId) ? getQuest(enc._questId).title : "Quest")
+        : "Encounter " + run.turn }),
+    el("h2", { class: "play-title", text: enc.title }),
+    el("div", { class: "play-sub" }, [
+      el("span", { class: "spine", style: { background: col } }),
+      el("span", { text: (enc._kind === "beat"
+                    ? "beat " + ((enc._ordinal || 0) + 1) + " · delivered " + (enc.deliver || "auto")
+                    : typeLabel(enc.type)) + " · " + factionLabel(enc.faction) +
+                          (enc.scope === "gated" ? " · gated" : "") })
+    ]),
+    el("p", { class: "play-hook", text: enc.hook || "(no hook written yet)" })
+  ];
+  if (enc.teaches) {
+    body.push(el("p", { class: "play-teaches" }, [
+      el("b", { text: "teaches" }), el("span", { text: enc.teaches })
+    ]));
+  }
+
+  if (!enc.choices.length) {
+    body.push(el("div", { class: "play-quiet", text: "This encounter has no choices written yet." }));
+  }
+
+  enc.choices.forEach(function (c, i) {
+    var read = readChoice(enc, c, all);
+    var missing = choiceLocked(read, run.wallet);
+    var chips = [];
+    read.grants.forEach(function (f) { chips.push(el("span", { class: "chip gain", text: "sets " + f })); });
+    if (missing) {
+      chips.push(el("span", { class: "chip need",
+        text: "needs " + missing.join(read.anyOf ? " or " : " + ") }));
+    } else if (read.needs.length) {
+      chips.push(el("span", { class: "chip have", text: "unlocked by " + read.needs.join(" / ") }));
+    }
+    if (!read.grants.length && !missing) chips.push(el("span", { class: "chip plain", text: "sets nothing" }));
+
+    body.push(el("button", {
+      class: "choice-btn" + (missing ? " locked" : ""),
+      disabled: !!missing,
+      on: { click: function () { if (!missing) takeChoice(enc, i, read); } }
+    }, [
+      el("div", {}, [
+        el("span", { class: "choice-key", text: String(i + 1) }),
+        el("span", { class: "choice-lbl", text: c.label || "(unlabelled choice)" })
+      ]),
+      el("div", { class: "choice-fx", text: c.fx || "—" }),
+      chips.length ? el("div", { class: "chips" }, chips) : null
+    ]));
+
+    if (missing) {
+      run.lockedSeen.push({ enc: enc.title, choice: c.label || "(unlabelled)", missing: missing.slice() });
+    }
+  });
+
+  playStage(playHead(), body, [
+    el("span", { class: "play-quiet kbd-hint", text: "press 1–9 to choose" }),
+    el("button", { class: "btn ghost", text: "Skip this one", on: { click: function () {
+      run.visited[enc.id] = true;
+      run.path.push({ id: enc.id, title: enc.title, choice: null, gained: [] });
+      run.phase = "next";
+      renderPlay();
+    } } })
+  ]);
+}
+
+function takeChoice(enc, i, read) {
+  var choice = enc.choices[i];
+  var log = newLog(enc.title + " · " + (choice.label || "choice " + (i + 1)));
+
+  if (read.engine) {
+    applyEffects(choice.engine.effects, log);          // the authored effects, run for real
+  } else {
+    read.grants.forEach(function (f) {
+      if (!run.wallet[f]) { run.wallet[f] = true; log.gained.push(f); }
+    });
+  }
+
+  run.visited[enc.id] = true;
+  run.path.push({
+    id: enc.id, title: enc.title,
+    choice: choice.label || "(unlabelled)",
+    fx: choice.fx || "",
+    gained: log.gained.slice(),
+    outcomeText: choice.engine ? choice.engine.outcomeText : ""
+  });
+
+  if (log.pending.length) {                            // a branch the run can't decide alone
+    run.pending = { log: log, enc: enc, queue: log.pending.slice() };
+    log.pending = [];
+    run.phase = "pending";
+    renderPlay();
+    return;
+  }
+  finishChoice(log, enc);
+}
+
+// Rounds tick per encounter played, which is what makes QUEUE_DEFERRED land.
+function finishChoice(log, enc) {
+  var landed = advanceRound(log);
+  run.lastGain = {
+    enc: enc, log: log, gained: log.gained, opened: opensNow(log.gained), deferredLanded: landed
+  };
+  run.pending = null;
+  run.phase = "result";
+  renderPlay();
+}
+
+function renderPlayPending() {
+  var pend = run.pending;
+  var item = pend.queue[0];
+  var p = effParams(item.effect);
+  var body = [el("div", { class: "play-eyebrow", text: "The engine needs a result" })];
+
+  if (item.kind === "contest") {
+    body.push(el("h2", { class: "play-title", text: "Contest" }));
+    body.push(el("p", { class: "play-hook",
+      text: "This choice runs a contest against strength " + p.opponentStrength +
+            (p.allyStrength ? " with allies at " + p.allyStrength : "") +
+            ". The run has no unit model, so pick the branch you want to walk." }));
+    [["Win", p.onWin], ["Lose", p.onLose]].forEach(function (opt) {
+      body.push(el("button", { class: "choice-btn", on: { click: function () {
+        applyEffects(opt[1] || [], pend.log);
+        stepPending();
+      } } }, [
+        el("div", {}, [el("span", { class: "choice-lbl", text: opt[0] })]),
+        el("div", { class: "choice-fx", text: (opt[1] || []).map(effectPhrase).join(" · ") || "—" })
+      ]));
+    });
+  } else {
+    body.push(el("h2", { class: "play-title", text: "Forced choice" }));
+    body.push(el("p", { class: "play-hook", text: "The effect forces a further choice." }));
+    (p.options || []).forEach(function (o) {
+      body.push(el("button", { class: "choice-btn", on: { click: function () {
+        applyEffects(o.effects || [], pend.log);
+        stepPending();
+      } } }, [
+        el("div", {}, [el("span", { class: "choice-lbl", text: o.label || "(unlabelled)" })]),
+        el("div", { class: "choice-fx", text: (o.effects || []).map(effectPhrase).join(" · ") || "—" })
+      ]));
+    });
+  }
+
+  playStage(playHead(), body, [
+    el("span", { class: "play-quiet", text: "authored as " + item.effect.type })
+  ]);
+}
+
+function stepPending() {
+  var pend = run.pending;
+  pend.queue.shift();
+  if (pend.log.pending.length) {          // a nested effect forced another branch
+    pend.queue = pend.queue.concat(pend.log.pending);
+    pend.log.pending = [];
+  }
+  if (pend.queue.length) { renderPlay(); return; }
+  finishChoice(pend.log, pend.enc);
+}
+
+// Which unvisited encounters those new flags just reached.
+function opensNow(gained) {
+  if (!gained.length) return [];
+  return playable().filter(function (e) {
+    return e["in"].some(function (f) { return gained.indexOf(f) !== -1; });
+  });
+}
+
+function renderPlayResult() {
+  var g = run.lastGain;
+  var log = g.log || newLog("");
+  var body = [];
+
+  // What the player is told, when the content says it.
+  var last = run.path[run.path.length - 1];
+  if (last && last.outcomeText) {
+    body.push(el("p", { class: "play-hook", text: last.outcomeText }));
+  }
+
+  if (log.lines.length) {
+    body.push(el("div", { class: "pick-h", text: "effects applied" }));
+    body.push(el("div", { class: "play-quiet", style: { marginBottom: ".7rem" },
+      text: log.lines.join(" · ") }));
+  }
+
+  if (log.completed.length) {
+    body.push(el("div", { class: "pick-h unlocked", text: "quest complete" }));
+    body.push(el("div", { class: "chips", style: { marginBottom: ".7rem" } },
+      log.completed.map(function (q) {
+        var quest = getQuest(q);
+        return el("span", { class: "chip have", text: quest ? quest.title : q });
+      })));
+  }
+
+  // Engine calls the run can't carry out: shown, with the author's own note.
+  if (log.asks.length) {
+    body.push(el("div", { class: "pick-h", text: "the engine would" }));
+    log.asks.forEach(function (a) {
+      body.push(el("div", { class: "sum-note" }, [
+        el("b", { text: a.type }),
+        el("span", { text: " — " + a.phrase }),
+        a.note ? el("span", { class: "ask-note", text: " " + a.note }) : null
+      ]));
+    });
+  }
+
+  if (g.deferredLanded) {
+    body.push(el("div", { class: "play-quiet", style: { marginBottom: ".7rem" },
+      text: g.deferredLanded + " deferred effect" + (g.deferredLanded === 1 ? "" : "s") +
+            " landed this round." }));
+  }
+
+  if (g.gained.length) {
+    body.push(el("div", { class: "play-gained" }, [
+      el("div", { class: "lbl", text: "flags gained" }),
+      el("div", { class: "chips" }, g.gained.map(function (f) {
+        return el("span", { class: "chip gain", text: f });
+      }))
+    ]));
+  } else {
+    body.push(el("div", { class: "play-gained" }, [
+      el("div", { class: "lbl", text: "no flags gained" }),
+      el("div", { class: "play-quiet", style: { marginTop: ".3rem" },
+        text: "That choice sets nothing the board can follow — worth checking if it should." })
+    ]));
+  }
+
+  if (g.opened.length) {
+    body.push(el("div", { class: "pick-h unlocked", text: "that opened" }));
+    g.opened.forEach(function (e) {
+      body.push(el("div", { class: "pick-item", style: { borderLeftColor: factionColor(e.faction), cursor: "default" } }, [
+        el("div", { class: "pick-body" }, [
+          el("span", { class: "pick-title", text: e.title }),
+          el("span", { class: "pick-meta", text: typeLabel(e.type) + " · " + factionLabel(e.faction) })
+        ])
+      ]));
+    });
+  }
+
+  body.push(el("div", { class: "pick-h", text: "flags in hand" }));
+  body.push(walletChips());
+
+  playStage(playHead(), body, [
+    el("span", { class: "play-quiet kbd-hint", text: "press Enter to continue" }),
+    el("button", { class: "btn primary", text: "Continue", on: { click: function () {
+      run.phase = "next";
+      renderPlay();
+    } } })
+  ]);
+}
+
+function renderPlayNext() {
+  var pool = playable();
+  if (!pool.length) { run.phase = "summary"; return renderPlay(); }
+
+  var unlocked = [], rest = [];
+  pool.forEach(function (e) {
+    var why = unlockReason(e);
+    (why ? unlocked : rest).push({ e: e, why: why });
+  });
+  var byTitle = function (a, b) { return a.e.title.localeCompare(b.e.title); };
+  unlocked.sort(byTitle);
+  rest.sort(function (a, b) {
+    if (a.e.type !== b.e.type) return a.e.type.localeCompare(b.e.type);
+    return byTitle(a, b);
+  });
+
+  function item(row) {
+    return el("button", {
+      class: "pick-item",
+      style: { borderLeftColor: factionColor(row.e.faction) },
+      on: { click: function () {
+        run.current = row.e.id;
+        run.turn += 1;
+        run.phase = "encounter";
+        renderPlay();
+      } }
+    }, [
+      el("div", { class: "pick-body" }, [
+        el("span", { class: "pick-title", text: pickTitle(row.e) }),
+        el("span", { class: "pick-meta",
+          text: (row.e._kind === "beat"
+                  ? "beat " + ((row.e._ordinal || 0) + 1) + " · " + (row.e.deliver || "auto")
+                  : typeLabel(row.e.type)) + " · " + factionLabel(row.e.faction) +
+                (row.e.out.length ? " · sets " + row.e.out.length : "") })
+      ]),
+      row.why ? el("span", { class: "pick-why", text: row.why.join(", ") }) : null
+    ]);
+  }
+
+  var body = [];
+  if (!run.turn) {
+    body.push(el("div", { class: "play-eyebrow", text: "Where does the run begin?" }));
+  }
+  if (unlocked.length) {
+    body.push(el("div", { class: "pick-h unlocked",
+      text: "your flags reach these (" + unlocked.length + ")" }));
+    unlocked.forEach(function (r) { body.push(item(r)); });
+  }
+  body.push(el("div", { class: "pick-h",
+    text: (unlocked.length ? "everything else " : "available ") + "(" + rest.length + ")" }));
+  if (rest.length) rest.forEach(function (r) { body.push(item(r)); });
+  else body.push(el("div", { class: "play-quiet", text: "nothing else left in the pool" }));
+
+  if (Object.keys(run.wallet).length) {
+    body.push(el("div", { class: "pick-h", text: "flags in hand" }));
+    body.push(walletChips());
+  }
+
+  playStage(playHead(), body, [
+    el("span", { class: "play-quiet", text: run.path.length + " played · " + pool.length + " left" }),
+    el("button", { class: "btn", text: "End run", on: { click: function () {
+      run.phase = "summary";
+      renderPlay();
+    } } })
+  ]);
+}
+
+function renderPlaySummary() {
+  var body = [];
+  var held = Object.keys(run.wallet).sort();
+
+  body.push(el("div", { class: "play-eyebrow", text: "Run summary" }));
+  body.push(el("h2", { class: "play-title",
+    text: run.path.length + " encounter" + (run.path.length === 1 ? "" : "s") + " played" }));
+
+  if (run.path.length) {
+    body.push(el("div", { class: "sum-h", text: "the path" }));
+    run.path.forEach(function (step, i) {
+      body.push(el("div", { class: "sum-step" }, [
+        el("span", { class: "num", text: String(i + 1) }),
+        el("span", { class: "what" }, [
+          el("span", { text: step.title }),
+          el("span", { class: "took" }, step.choice
+            ? [el("span", { text: "→ " + step.choice + (step.gained.length ? "  " : "") }),
+               step.gained.length ? el("i", { text: "+" + step.gained.join(", +") }) : null]
+            : [el("span", { text: "→ skipped" })])
+        ])
+      ]));
+    });
+  }
+
+  body.push(el("div", { class: "sum-h", text: "flags held (" + held.length + ")" }));
+  body.push(held.length
+    ? el("div", { class: "chips" }, held.map(function (f) { return el("span", { class: "chip have", text: f }); }))
+    : el("div", { class: "play-quiet", text: "none" }));
+
+  // Everything the board can set, that this run never picked up.
+  var allOut = uniq(allNodes().reduce(function (a, e) { return a.concat(e.out); }, [])).sort();
+  var missed = allOut.filter(function (f) { return !run.wallet[f]; });
+  body.push(el("div", { class: "sum-h", text: "flags this run never picked up (" + missed.length + ")" }));
+  body.push(missed.length
+    ? el("div", { class: "chips" }, missed.map(function (f) { return el("span", { class: "chip plain", text: f }); }))
+    : el("div", { class: "play-quiet", text: "none — the run touched every flag on the board" }));
+
+  var gated = allNodes().filter(function (e) {
+    return !run.visited[e.id] && e.scope === "gated" && e.faction !== "none" &&
+           run.faction !== "any" && e.faction !== run.faction;
+  });
+  if (gated.length) {
+    body.push(el("div", { class: "sum-h", text: "gated out by faction (" + gated.length + ")" }));
+    gated.forEach(function (e) {
+      body.push(el("div", { class: "sum-note" }, [
+        el("b", { text: e.title }), el("span", { text: " — spawns for " + factionLabel(e.faction) })
+      ]));
+    });
+  }
+
+  var unvisited = allNodes().filter(function (e) {
+    return !run.visited[e.id] && gated.indexOf(e) === -1;
+  });
+  body.push(el("div", { class: "sum-h", text: "never reached (" + unvisited.length + ")" }));
+  body.push(unvisited.length
+    ? el("div", { class: "chips" }, unvisited.map(function (e) {
+        return el("span", { class: "chip plain", text: e.title });
+      }))
+    : el("div", { class: "play-quiet", text: "the run covered the whole board" }));
+
+  // Authoring findings the walk turned up.
+  var locked = {};
+  run.lockedSeen.forEach(function (l) { locked[l.enc + " · " + l.choice] = l; });
+  var lockedList = Object.keys(locked);
+  if (lockedList.length) {
+    body.push(el("div", { class: "sum-h", text: "choices you couldn't take (" + lockedList.length + ")" }));
+    lockedList.forEach(function (k) {
+      body.push(el("div", { class: "sum-note" }, [
+        el("b", { text: locked[k].enc + " · " + locked[k].choice }),
+        el("span", { text: " — needs " + locked[k].missing.join(", ") })
+      ]));
+    });
+  }
+
+  var unreachable = [];
+  allNodes().forEach(function (e) {
+    if (grantsAll(e) || !e.out.length) return;
+    e.out.forEach(function (f) {
+      var reachable = e.choices.some(function (c) { return mentions(String(c.fx || ""), f); });
+      if (!reachable) unreachable.push({ enc: e.title, flag: f });
+    });
+  });
+  if (unreachable.length) {
+    body.push(el("div", { class: "sum-h", text: "flags no choice sets (" + unreachable.length + ")" }));
+    body.push(el("div", { class: "play-quiet",
+      text: "Other choices in these encounters name a flag, so the run reads them as choice-specific — " +
+            "but nothing sets these, which means no player can ever get them." }));
+    unreachable.forEach(function (u) {
+      body.push(el("div", { class: "sum-note" }, [
+        el("b", { text: u.flag }), el("span", { text: " — in " + u.enc })
+      ]));
+    });
+  }
+
+  playStage(
+    [el("div", { class: "play-track" }, [el("b", { text: "Playtest · complete" })]),
+     el("button", { class: "btn ghost", text: "Close", on: { click: function () { exitPlay(true); } } })],
+    body,
+    [
+      el("button", { class: "btn ghost", text: "Run again", on: { click: function () {
+        var f = run.faction;
+        run = newRunState(f);
+        run.phase = "next";
+        renderPlay();
+      } } }),
+      el("button", { class: "btn primary", text: "Back to the board", on: { click: function () { exitPlay(true); } } })
+    ]
+  );
+}
+
+function playKey(ev) {
+  if (!run || playEl.hidden) return;
+  if (ev.key === "Escape") { ev.preventDefault(); exitPlay(false); return; }
+  if (run.phase === "encounter" && /^[1-9]$/.test(ev.key)) {
+    var i = parseInt(ev.key, 10) - 1;
+    var enc = getNode(run.current);
+    if (!enc || !enc.choices[i]) return;
+    var read = readChoice(enc, enc.choices[i], grantsAll(enc));
+    if (choiceLocked(read, run.wallet)) return;
+    ev.preventDefault();
+    takeChoice(enc, i, read);
+  } else if (run.phase === "result" && ev.key === "Enter") {
+    ev.preventDefault();
+    run.phase = "next";
+    renderPlay();
+  }
+}
+
 /* ── search & color-by ────────────────────────────────────────────────── */
 
 var searchTimer = null;
@@ -1946,6 +3790,7 @@ $("#btn-fit").addEventListener("click", function () { fit(); });
 $("#btn-tidy").addEventListener("click", function () { closePanel(); tidy(); });
 $("#btn-legend").addEventListener("click", function () { togglePanel("legend"); });
 $("#btn-coverage").addEventListener("click", function () { togglePanel("coverage"); });
+$("#btn-systems").addEventListener("click", function () { togglePanel("systems"); });
 $("#btn-board").addEventListener("click", function () { togglePanel("menu"); });
 $("#btn-color-faction").addEventListener("click", function () { setColorBy("faction"); });
 $("#btn-color-status").addEventListener("click", function () { setColorBy("status"); });
@@ -1959,7 +3804,9 @@ window.addEventListener("pointermove", onGlobalMove);
 window.addEventListener("pointerup", onGlobalUp);
 window.addEventListener("pointercancel", onGlobalUp);
 window.addEventListener("resize", function () { measureBar(); });
+$("#btn-play").addEventListener("click", openPlay);
 window.addEventListener("keydown", function (ev) {
+  if (run && !playEl.hidden) { playKey(ev); return; }   // the run owns the keyboard
   if (ev.key === "Escape") {
     if (!modalEl.hidden) { closeModal(); return; }
     if (panel) { closePanel(); return; }
@@ -1997,8 +3844,9 @@ Store.load().then(function (saved) {
   var b = saved ? normalizeBoard(saved) : null;
   if (!b || !b.encounters.length) b = normalizeBoard({ encounters: SEED });
   board = b;
-  board.encounters = separate(placeMissing(board.encounters), null);
+  placeMissingInPlace();
   syncIndex();
+  separateInPlace(null);
   loaded = true;
   renderCanvas();
   renderDrawer();

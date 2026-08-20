@@ -29,6 +29,7 @@ is how a board travels**, between machines and into a chat.
 | Control | What it does |
 |---|---|
 | **+ Encounter** | Drops a card at the center of the view and opens it for editing |
+| **Play** | Walks the board as a player would — see *Playtest* below |
 | **Connect** | Pick two cards to draw a manual (teal, dashed) link; tap a link to remove it |
 | **Legend** | Doubles as the filter — toggle any faction / type / status to dim the rest |
 | **Coverage chip** | Always-visible gap readout: open threads · needs with no source · empty faction poles. Tap for the full breakdown |
@@ -61,6 +62,53 @@ send whole encounter objects, omit `x`/`y`, and keep the prose prose.
 Because the merge only applies the keys a file actually contains, a partial
 encounter — say, a new `hook` and nothing else — updates that field and leaves
 everything else on the board untouched.
+
+---
+
+## Playtest
+
+**Play** walks the board the way a session would: pick an encounter, read the
+hook, take a choice, and carry the flags it sets forward. It is strictly
+read-only — a run never edits or saves anything.
+
+Sequencing is a **thread-walk**. After each choice, encounters your new flags
+reach are listed first under *your flags reach these*, with the reason shown
+(`holds found_water`); everything else is available below. So a chain can be
+followed end to end, or abandoned for whatever else is in the pool.
+
+Start by picking the faction you're playing as. That only matters for
+`scope: "gated"` encounters, which spawn for their own faction; choose *no
+faction* and nothing is gated out.
+
+### How a choice's flags are worked out
+
+Flags live on the encounter (`out` / `in`) while your prose says which choice
+touches them, so the run reads the `fx` text and shows every inference on the
+choice itself:
+
+- A choice **grants** any `out` flag its `fx` text names — `"+1 Tech · sets
+  studied_oldworld_machine"` grants that flag, and the button shows
+  `sets studied_oldworld_machine`.
+- If **no** choice in an encounter names any of its `out` flags, the encounter
+  grants them all however it ends.
+- A choice **requires** any `in` flag its `fx` names — `"needs befriended_reader
+  OR trusted_watersense"` locks the choice until you hold one of them (the
+  word *or* makes it any-of; otherwise all named flags are required).
+
+That inference is the point as much as the walk is: a choice showing `sets
+nothing`, or a locked choice you can never satisfy, is a finding about the
+writing.
+
+### What the summary tells you
+
+Ending a run (or exhausting the pool) gives an on-screen recap: the path with
+the choice taken at each step, flags held, **flags this run never picked up**,
+encounters **gated out by faction**, encounters **never reached**, choices you
+couldn't take and what they needed, and **flags no choice sets** — an `out` flag
+in an encounter whose other choices do name flags, meaning no player can ever
+obtain it.
+
+Keyboard: `1`–`9` take a choice, `Enter` continues, `Esc` leaves the run.
 
 ---
 

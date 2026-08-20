@@ -253,6 +253,94 @@ body{
 .drop b{color:var(--gold);font-weight:400}
 .err{color:var(--rust);font-family:var(--mono);font-size:.72rem;line-height:1.6;margin-top:.7rem}
 
+/* ── playtest ────────────────────────────────────────────────────────── */
+.play-wrap{
+  position:absolute;inset:0;z-index:34;background:rgba(14,13,11,.93);
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;padding:1rem;
+}
+.play-stage{
+  width:min(680px,100%);max-height:100%;display:flex;flex-direction:column;
+  background:var(--bg2);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,.55);
+}
+.play-head{
+  display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;
+  padding:.6rem .9rem;border-bottom:1px solid var(--line);background:#1e1c18;
+}
+.play-track{font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.play-track b{color:var(--gold);font-weight:400}
+.play-body{padding:1.1rem 1.1rem .9rem;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.play-eyebrow{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:.35rem}
+.play-title{font-family:var(--serif);font-size:1.55rem;font-weight:600;margin:0 0 .25rem;line-height:1.2}
+.play-sub{font-family:var(--mono);font-size:.63rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.9rem}
+.play-sub .spine{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:.4rem;vertical-align:-1px}
+.play-hook{font-family:var(--serif);font-size:1.06rem;line-height:1.7;margin:0 0 .9rem}
+.play-teaches{
+  border-left:2px solid rgba(212,178,106,.35);padding:.15rem 0 .15rem .75rem;margin:0 0 1.1rem;
+  color:var(--muted);font-size:.83rem;line-height:1.6;font-style:italic;
+}
+.play-teaches b{font-style:normal;font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--faint);display:block;margin-bottom:.2rem;font-weight:400}
+.choice-btn{
+  display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);
+  border-radius:8px;padding:.7rem .8rem;margin-bottom:.5rem;cursor:pointer;color:var(--bone);
+  font-family:var(--sans);transition:border-color .12s,background .12s;
+}
+.choice-btn:hover{border-color:rgba(212,178,106,.55);background:#2c2922}
+.choice-btn.locked{opacity:.45;cursor:not-allowed}
+.choice-btn.locked:hover{border-color:var(--line);background:var(--panel)}
+.choice-key{font-family:var(--mono);font-size:.62rem;color:var(--faint);margin-right:.45rem}
+.choice-lbl{font-family:var(--serif);font-size:1.02rem}
+.choice-fx{font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-top:.3rem;line-height:1.55}
+.chips{display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.4rem}
+.chip{font-family:var(--mono);font-size:.6rem;padding:.15rem .4rem;border-radius:4px;border:1px solid}
+.chip.gain{color:var(--gold);border-color:rgba(212,178,106,.4);background:rgba(212,178,106,.08)}
+.chip.need{color:var(--rust);border-color:rgba(217,138,118,.4);background:rgba(217,138,118,.09)}
+.chip.have{color:var(--sage);border-color:rgba(122,155,110,.45);background:rgba(122,155,110,.1)}
+.chip.plain{color:var(--muted);border-color:var(--line);background:var(--bg)}
+.pick-h{
+  font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--faint);margin:1.1rem 0 .4rem;display:flex;align-items:center;gap:.5rem;
+}
+.pick-h:first-child{margin-top:0}
+.pick-h.unlocked{color:var(--gold)}
+.pick-item{
+  display:flex;align-items:center;gap:.6rem;width:100%;text-align:left;background:var(--panel);
+  border:1px solid var(--line);border-left-width:4px;border-radius:7px;padding:.55rem .7rem;
+  margin-bottom:.35rem;cursor:pointer;color:var(--bone);font-family:var(--sans);
+  transition:border-color .12s,background .12s;
+}
+.pick-item:hover{background:#2c2922}
+.pick-body{flex:1;min-width:0}
+.pick-title{font-family:var(--serif);font-size:.98rem;display:block}
+.pick-meta{font-family:var(--mono);font-size:.6rem;color:var(--muted);display:block;margin-top:.15rem}
+.pick-why{font-family:var(--mono);font-size:.6rem;color:var(--gold);flex:none;max-width:45%;text-align:right}
+.play-foot{
+  padding:.65rem .9rem calc(.65rem + env(safe-area-inset-bottom,0px));
+  border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap;align-items:center;
+}
+.play-gained{
+  border:1px solid rgba(212,178,106,.3);background:rgba(212,178,106,.06);border-radius:8px;
+  padding:.7rem .8rem;margin-bottom:1rem;
+}
+.play-gained .lbl{font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.play-quiet{font-family:var(--mono);font-size:.68rem;color:var(--faint);line-height:1.6}
+.play-body select{
+  background:var(--bg);border:1px solid var(--line);color:var(--bone);border-radius:4px;
+  padding:.45rem .5rem;font-family:var(--sans);font-size:.88rem;width:100%;
+}
+.play-body select:focus{outline:none;border-color:var(--gold)}
+.sum-h{font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:1.1rem 0 .35rem}
+.sum-h:first-child{margin-top:0}
+.sum-step{display:flex;gap:.6rem;padding:.3rem 0;border-bottom:1px solid rgba(57,53,45,.5);font-size:.84rem}
+.sum-step .num{font-family:var(--mono);font-size:.66rem;color:var(--faint);flex:none;width:1.4rem}
+.sum-step .what{flex:1;min-width:0}
+.sum-step .took{color:var(--muted);font-size:.78rem;display:block;margin-top:.1rem}
+.sum-step .took i{color:var(--gold);font-style:normal;font-family:var(--mono);font-size:.66rem}
+.sum-note{font-size:.82rem;color:var(--muted);line-height:1.6;margin:.2rem 0 .5rem}
+.sum-note b{color:var(--bone);font-weight:400}
+
 .toast{
   position:absolute;left:50%;bottom:calc(1.2rem + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
   z-index:40;background:rgba(30,28,24,.97);border:1px solid var(--line);border-radius:20px;
@@ -280,6 +368,12 @@ body{
   .panel.legend,.panel.coverage{left:.5rem;right:.5rem;max-width:none;width:auto}
   .panel.menu{left:.5rem;right:.5rem;width:auto}
   .modal{padding:.9rem}
+  .play-wrap{padding:0}
+  .play-stage{width:100%;height:100%;max-height:100%;border:none;border-radius:0}
+  .play-body{padding:1rem .85rem .8rem}
+  .play-title{font-size:1.35rem}
+  .pick-why{max-width:38%}
+  .kbd-hint{display:none}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{transition-duration:.001ms !important;animation-duration:.001ms !important}
@@ -296,6 +390,7 @@ body{
     </div>
     <div class="tools">
       <button id="btn-add" class="btn primary">+ Encounter</button>
+      <button id="btn-play" class="btn">Play</button>
       <button id="btn-connect" class="btn">Connect</button>
       <span class="grp on-wide">
         <span class="sep"></span>
@@ -340,6 +435,7 @@ body{
   </svg>
 
   <aside id="drawer" class="drawer" hidden aria-label="Encounter editor"></aside>
+  <div id="play" class="play-wrap" hidden aria-label="Playtest"></div>
   <div id="modal" class="modal-wrap" hidden></div>
 </div>
 
@@ -1911,6 +2007,500 @@ function openImport() {
   openModal([body, footer]);
 }
 
+/* ════════════════════════════════════════════════════════════════════════
+   PLAYTEST — walk the board the way a session would, one encounter at a
+   time, carrying a wallet of flags. Read-only: a run never edits the board.
+
+   The data model puts flags on the encounter (out / in) while the prose says
+   which choice sets or needs them, so the run reads the fx text to work out
+   choice-level grants and gates, and shows every inference on screen — a
+   choice that sets nothing, or a flag no choice can reach, is a finding.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+var playEl = $("#play");
+var run = null;
+
+function mentions(text, flag) {
+  // Flags are snake_case; match on a whole token so `found_water` doesn't
+  // match inside `found_water_deep`.
+  var i = String(text).indexOf(flag);
+  while (i !== -1) {
+    var before = i === 0 ? "" : text.charAt(i - 1);
+    var after = text.charAt(i + flag.length);
+    if (!/[A-Za-z0-9_]/.test(before) && !/[A-Za-z0-9_]/.test(after)) return true;
+    i = text.indexOf(flag, i + 1);
+  }
+  return false;
+}
+
+// What one choice grants and requires, inferred from its fx prose.
+function readChoice(enc, choice, encGrantsAll) {
+  var fx = String(choice.fx || "");
+  var grants = enc.out.filter(function (f) { return mentions(fx, f); });
+  if (encGrantsAll) grants = enc.out.slice();
+  var needs = enc["in"].filter(function (f) { return mentions(fx, f); });
+  return { grants: grants, needs: needs, anyOf: needs.length > 1 && /\bor\b/i.test(fx) };
+}
+
+// If no choice names any out-flag, the encounter grants them however it ends.
+function grantsAll(enc) {
+  if (!enc.out.length) return false;
+  return !enc.choices.some(function (c) {
+    return enc.out.some(function (f) { return mentions(String(c.fx || ""), f); });
+  });
+}
+
+function choiceLocked(read, wallet) {
+  if (!read.needs.length) return null;
+  var missing = read.needs.filter(function (f) { return !wallet[f]; });
+  if (!missing.length) return null;
+  if (read.anyOf && missing.length < read.needs.length) return null;   // OR satisfied
+  return missing;
+}
+
+// scope:"gated" means faction-restricted at spawn.
+function gatedOut(enc) {
+  return enc.scope === "gated" && enc.faction !== "none" &&
+         run.faction !== "any" && enc.faction !== run.faction;
+}
+
+function playable() {
+  return board.encounters.filter(function (e) {
+    return !run.visited[e.id] && !gatedOut(e);
+  });
+}
+
+function unlockReason(enc) {
+  if (!enc["in"].length) return null;
+  var held = enc["in"].filter(function (f) { return run.wallet[f]; });
+  return held.length ? held : null;
+}
+
+function openPlay() {
+  closePanel();
+  closeModal();
+  select(null);
+  if (!board.encounters.length) { toast("Nothing to play — the board is empty.", true); return; }
+  run = { phase: "setup", faction: "any", turn: 0, wallet: {}, visited: {}, path: [], lockedSeen: [] };
+  playEl.hidden = false;
+  renderPlay();
+}
+
+function exitPlay(force) {
+  if (!force && run && run.path.length && run.phase !== "summary") {
+    if (!window.confirm("Leave this run? The summary is only shown at the end.")) return;
+  }
+  run = null;
+  playEl.hidden = true;
+  clear(playEl);
+}
+
+function playStage(headKids, bodyKids, footKids) {
+  clear(playEl);
+  var stage = el("div", { class: "play-stage", role: "dialog", "aria-modal": "true" }, [
+    el("div", { class: "play-head" }, headKids),
+    el("div", { class: "play-body" }, bodyKids),
+    el("div", { class: "play-foot" }, footKids)
+  ]);
+  playEl.appendChild(stage);
+  var body = stage.querySelector(".play-body");
+  if (body) body.scrollTop = 0;
+  return stage;
+}
+
+function playHead() {
+  var flags = Object.keys(run.wallet).length;
+  return [
+    el("div", { class: "play-track" }, [
+      el("span", { text: "Playtest · " }),
+      el("b", { text: "turn " + run.turn }),
+      el("span", { text: " · " + (run.faction === "any" ? "no faction" : factionLabel(run.faction)) }),
+      el("span", { text: " · " }),
+      el("b", { text: flags + " flag" + (flags === 1 ? "" : "s") })
+    ]),
+    el("button", { class: "btn ghost", text: "Exit", on: { click: function () { exitPlay(false); } } })
+  ];
+}
+
+function walletChips() {
+  var flags = Object.keys(run.wallet).sort();
+  if (!flags.length) return el("div", { class: "play-quiet", text: "no flags yet" });
+  return el("div", { class: "chips" }, flags.map(function (f) {
+    return el("span", { class: "chip have", text: f });
+  }));
+}
+
+function renderPlay() {
+  if (!run) return;
+  if (run.phase === "setup") return renderPlaySetup();
+  if (run.phase === "encounter") return renderPlayEncounter();
+  if (run.phase === "result") return renderPlayResult();
+  if (run.phase === "next") return renderPlayNext();
+  if (run.phase === "summary") return renderPlaySummary();
+}
+
+function renderPlaySetup() {
+  var counts = {};
+  board.encounters.forEach(function (e) { counts[e.faction] = (counts[e.faction] || 0) + 1; });
+  var options = [["any", "No faction — nothing is gated out"]].concat(
+    Object.keys(FACTIONS).filter(function (k) { return k !== "none"; })
+      .map(function (k) { return [k, FACTIONS[k].label]; })
+  );
+  var sel = selectEl(run.faction, options, function (v) { run.faction = v; });
+
+  playStage(
+    [el("div", { class: "play-track" }, [el("b", { text: "Playtest" })]),
+     el("button", { class: "btn ghost", text: "Exit", on: { click: function () { exitPlay(true); } } })],
+    [
+      el("div", { class: "play-eyebrow", text: "Set up the run" }),
+      el("h2", { class: "play-title", text: "Walk the board as a player" }),
+      el("p", { class: "play-hook",
+        text: "Pick an encounter, take a choice, and carry the flags it sets forward. " +
+              "Encounters your new flags reach are surfaced first, so a thread can be followed " +
+              "end to end. Nothing you do here changes the board." }),
+      el("label", { class: "dr-field", style: { display: "block", maxWidth: "320px" } }, [
+        el("div", { class: "play-eyebrow", text: "Playing as" }), sel
+      ]),
+      el("p", { class: "play-quiet",
+        text: "Faction only affects encounters marked gated — those spawn for their own faction. " +
+              board.encounters.filter(function (e) { return e.scope === "gated"; }).length +
+              " encounter(s) on this board are gated." })
+    ],
+    [
+      el("span", { class: "play-quiet", text: board.encounters.length + " encounters in the pool" }),
+      el("button", { class: "btn primary", text: "Begin", on: { click: function () {
+        run.phase = "next";
+        renderPlay();
+      } } })
+    ]
+  );
+}
+
+function renderPlayEncounter() {
+  var enc = getNode(run.current);
+  if (!enc) { run.phase = "next"; return renderPlay(); }
+  var all = grantsAll(enc);
+  var col = factionColor(enc.faction);
+
+  var body = [
+    el("div", { class: "play-eyebrow", text: "Encounter " + run.turn }),
+    el("h2", { class: "play-title", text: enc.title }),
+    el("div", { class: "play-sub" }, [
+      el("span", { class: "spine", style: { background: col } }),
+      el("span", { text: typeLabel(enc.type) + " · " + factionLabel(enc.faction) +
+                          (enc.scope === "gated" ? " · gated" : "") })
+    ]),
+    el("p", { class: "play-hook", text: enc.hook || "(no hook written yet)" })
+  ];
+  if (enc.teaches) {
+    body.push(el("p", { class: "play-teaches" }, [
+      el("b", { text: "teaches" }), el("span", { text: enc.teaches })
+    ]));
+  }
+
+  if (!enc.choices.length) {
+    body.push(el("div", { class: "play-quiet", text: "This encounter has no choices written yet." }));
+  }
+
+  enc.choices.forEach(function (c, i) {
+    var read = readChoice(enc, c, all);
+    var missing = choiceLocked(read, run.wallet);
+    var chips = [];
+    read.grants.forEach(function (f) { chips.push(el("span", { class: "chip gain", text: "sets " + f })); });
+    if (missing) {
+      chips.push(el("span", { class: "chip need",
+        text: "needs " + missing.join(read.anyOf ? " or " : " + ") }));
+    } else if (read.needs.length) {
+      chips.push(el("span", { class: "chip have", text: "unlocked by " + read.needs.join(" / ") }));
+    }
+    if (!read.grants.length && !missing) chips.push(el("span", { class: "chip plain", text: "sets nothing" }));
+
+    body.push(el("button", {
+      class: "choice-btn" + (missing ? " locked" : ""),
+      disabled: !!missing,
+      on: { click: function () { if (!missing) takeChoice(enc, i, read); } }
+    }, [
+      el("div", {}, [
+        el("span", { class: "choice-key", text: String(i + 1) }),
+        el("span", { class: "choice-lbl", text: c.label || "(unlabelled choice)" })
+      ]),
+      el("div", { class: "choice-fx", text: c.fx || "—" }),
+      chips.length ? el("div", { class: "chips" }, chips) : null
+    ]));
+
+    if (missing) {
+      run.lockedSeen.push({ enc: enc.title, choice: c.label || "(unlabelled)", missing: missing.slice() });
+    }
+  });
+
+  playStage(playHead(), body, [
+    el("span", { class: "play-quiet kbd-hint", text: "press 1–9 to choose" }),
+    el("button", { class: "btn ghost", text: "Skip this one", on: { click: function () {
+      run.visited[enc.id] = true;
+      run.path.push({ id: enc.id, title: enc.title, choice: null, gained: [] });
+      run.phase = "next";
+      renderPlay();
+    } } })
+  ]);
+}
+
+function takeChoice(enc, i, read) {
+  var gained = read.grants.filter(function (f) { return !run.wallet[f]; });
+  gained.forEach(function (f) { run.wallet[f] = true; });
+  run.visited[enc.id] = true;
+  run.path.push({
+    id: enc.id, title: enc.title,
+    choice: enc.choices[i].label || "(unlabelled)",
+    fx: enc.choices[i].fx || "",
+    gained: gained
+  });
+  run.lastGain = { enc: enc, gained: gained, opened: opensNow(gained) };
+  run.phase = "result";
+  renderPlay();
+}
+
+// Which unvisited encounters those new flags just reached.
+function opensNow(gained) {
+  if (!gained.length) return [];
+  return playable().filter(function (e) {
+    return e["in"].some(function (f) { return gained.indexOf(f) !== -1; });
+  });
+}
+
+function renderPlayResult() {
+  var g = run.lastGain;
+  var body = [];
+  if (g.gained.length) {
+    body.push(el("div", { class: "play-gained" }, [
+      el("div", { class: "lbl", text: "flags gained" }),
+      el("div", { class: "chips" }, g.gained.map(function (f) {
+        return el("span", { class: "chip gain", text: f });
+      }))
+    ]));
+  } else {
+    body.push(el("div", { class: "play-gained" }, [
+      el("div", { class: "lbl", text: "no flags gained" }),
+      el("div", { class: "play-quiet", style: { marginTop: ".3rem" },
+        text: "That choice sets nothing the board can follow — worth checking if it should." })
+    ]));
+  }
+
+  if (g.opened.length) {
+    body.push(el("div", { class: "pick-h unlocked", text: "that opened" }));
+    g.opened.forEach(function (e) {
+      body.push(el("div", { class: "pick-item", style: { borderLeftColor: factionColor(e.faction), cursor: "default" } }, [
+        el("div", { class: "pick-body" }, [
+          el("span", { class: "pick-title", text: e.title }),
+          el("span", { class: "pick-meta", text: typeLabel(e.type) + " · " + factionLabel(e.faction) })
+        ])
+      ]));
+    });
+  }
+
+  body.push(el("div", { class: "pick-h", text: "flags in hand" }));
+  body.push(walletChips());
+
+  playStage(playHead(), body, [
+    el("span", { class: "play-quiet kbd-hint", text: "press Enter to continue" }),
+    el("button", { class: "btn primary", text: "Continue", on: { click: function () {
+      run.phase = "next";
+      renderPlay();
+    } } })
+  ]);
+}
+
+function renderPlayNext() {
+  var pool = playable();
+  if (!pool.length) { run.phase = "summary"; return renderPlay(); }
+
+  var unlocked = [], rest = [];
+  pool.forEach(function (e) {
+    var why = unlockReason(e);
+    (why ? unlocked : rest).push({ e: e, why: why });
+  });
+  var byTitle = function (a, b) { return a.e.title.localeCompare(b.e.title); };
+  unlocked.sort(byTitle);
+  rest.sort(function (a, b) {
+    if (a.e.type !== b.e.type) return a.e.type.localeCompare(b.e.type);
+    return byTitle(a, b);
+  });
+
+  function item(row) {
+    return el("button", {
+      class: "pick-item",
+      style: { borderLeftColor: factionColor(row.e.faction) },
+      on: { click: function () {
+        run.current = row.e.id;
+        run.turn += 1;
+        run.phase = "encounter";
+        renderPlay();
+      } }
+    }, [
+      el("div", { class: "pick-body" }, [
+        el("span", { class: "pick-title", text: row.e.title }),
+        el("span", { class: "pick-meta",
+          text: typeLabel(row.e.type) + " · " + factionLabel(row.e.faction) +
+                (row.e.out.length ? " · sets " + row.e.out.length : "") })
+      ]),
+      row.why ? el("span", { class: "pick-why", text: "holds " + row.why.join(", ") }) : null
+    ]);
+  }
+
+  var body = [];
+  if (!run.turn) {
+    body.push(el("div", { class: "play-eyebrow", text: "Where does the run begin?" }));
+  }
+  if (unlocked.length) {
+    body.push(el("div", { class: "pick-h unlocked",
+      text: "your flags reach these (" + unlocked.length + ")" }));
+    unlocked.forEach(function (r) { body.push(item(r)); });
+  }
+  body.push(el("div", { class: "pick-h",
+    text: (unlocked.length ? "everything else " : "available ") + "(" + rest.length + ")" }));
+  if (rest.length) rest.forEach(function (r) { body.push(item(r)); });
+  else body.push(el("div", { class: "play-quiet", text: "nothing else left in the pool" }));
+
+  if (Object.keys(run.wallet).length) {
+    body.push(el("div", { class: "pick-h", text: "flags in hand" }));
+    body.push(walletChips());
+  }
+
+  playStage(playHead(), body, [
+    el("span", { class: "play-quiet", text: run.path.length + " played · " + pool.length + " left" }),
+    el("button", { class: "btn", text: "End run", on: { click: function () {
+      run.phase = "summary";
+      renderPlay();
+    } } })
+  ]);
+}
+
+function renderPlaySummary() {
+  var body = [];
+  var held = Object.keys(run.wallet).sort();
+
+  body.push(el("div", { class: "play-eyebrow", text: "Run summary" }));
+  body.push(el("h2", { class: "play-title",
+    text: run.path.length + " encounter" + (run.path.length === 1 ? "" : "s") + " played" }));
+
+  if (run.path.length) {
+    body.push(el("div", { class: "sum-h", text: "the path" }));
+    run.path.forEach(function (step, i) {
+      body.push(el("div", { class: "sum-step" }, [
+        el("span", { class: "num", text: String(i + 1) }),
+        el("span", { class: "what" }, [
+          el("span", { text: step.title }),
+          el("span", { class: "took" }, step.choice
+            ? [el("span", { text: "→ " + step.choice + (step.gained.length ? "  " : "") }),
+               step.gained.length ? el("i", { text: "+" + step.gained.join(", +") }) : null]
+            : [el("span", { text: "→ skipped" })])
+        ])
+      ]));
+    });
+  }
+
+  body.push(el("div", { class: "sum-h", text: "flags held (" + held.length + ")" }));
+  body.push(held.length
+    ? el("div", { class: "chips" }, held.map(function (f) { return el("span", { class: "chip have", text: f }); }))
+    : el("div", { class: "play-quiet", text: "none" }));
+
+  // Everything the board can set, that this run never picked up.
+  var allOut = uniq(board.encounters.reduce(function (a, e) { return a.concat(e.out); }, [])).sort();
+  var missed = allOut.filter(function (f) { return !run.wallet[f]; });
+  body.push(el("div", { class: "sum-h", text: "flags this run never picked up (" + missed.length + ")" }));
+  body.push(missed.length
+    ? el("div", { class: "chips" }, missed.map(function (f) { return el("span", { class: "chip plain", text: f }); }))
+    : el("div", { class: "play-quiet", text: "none — the run touched every flag on the board" }));
+
+  var gated = board.encounters.filter(function (e) {
+    return !run.visited[e.id] && e.scope === "gated" && e.faction !== "none" &&
+           run.faction !== "any" && e.faction !== run.faction;
+  });
+  if (gated.length) {
+    body.push(el("div", { class: "sum-h", text: "gated out by faction (" + gated.length + ")" }));
+    gated.forEach(function (e) {
+      body.push(el("div", { class: "sum-note" }, [
+        el("b", { text: e.title }), el("span", { text: " — spawns for " + factionLabel(e.faction) })
+      ]));
+    });
+  }
+
+  var unvisited = board.encounters.filter(function (e) {
+    return !run.visited[e.id] && gated.indexOf(e) === -1;
+  });
+  body.push(el("div", { class: "sum-h", text: "never reached (" + unvisited.length + ")" }));
+  body.push(unvisited.length
+    ? el("div", { class: "chips" }, unvisited.map(function (e) {
+        return el("span", { class: "chip plain", text: e.title });
+      }))
+    : el("div", { class: "play-quiet", text: "the run covered the whole board" }));
+
+  // Authoring findings the walk turned up.
+  var locked = {};
+  run.lockedSeen.forEach(function (l) { locked[l.enc + " · " + l.choice] = l; });
+  var lockedList = Object.keys(locked);
+  if (lockedList.length) {
+    body.push(el("div", { class: "sum-h", text: "choices you couldn't take (" + lockedList.length + ")" }));
+    lockedList.forEach(function (k) {
+      body.push(el("div", { class: "sum-note" }, [
+        el("b", { text: locked[k].enc + " · " + locked[k].choice }),
+        el("span", { text: " — needs " + locked[k].missing.join(", ") })
+      ]));
+    });
+  }
+
+  var unreachable = [];
+  board.encounters.forEach(function (e) {
+    if (grantsAll(e) || !e.out.length) return;
+    e.out.forEach(function (f) {
+      var reachable = e.choices.some(function (c) { return mentions(String(c.fx || ""), f); });
+      if (!reachable) unreachable.push({ enc: e.title, flag: f });
+    });
+  });
+  if (unreachable.length) {
+    body.push(el("div", { class: "sum-h", text: "flags no choice sets (" + unreachable.length + ")" }));
+    body.push(el("div", { class: "play-quiet",
+      text: "Other choices in these encounters name a flag, so the run reads them as choice-specific — " +
+            "but nothing sets these, which means no player can ever get them." }));
+    unreachable.forEach(function (u) {
+      body.push(el("div", { class: "sum-note" }, [
+        el("b", { text: u.flag }), el("span", { text: " — in " + u.enc })
+      ]));
+    });
+  }
+
+  playStage(
+    [el("div", { class: "play-track" }, [el("b", { text: "Playtest · complete" })]),
+     el("button", { class: "btn ghost", text: "Close", on: { click: function () { exitPlay(true); } } })],
+    body,
+    [
+      el("button", { class: "btn ghost", text: "Run again", on: { click: function () {
+        var f = run.faction;
+        run = { phase: "next", faction: f, turn: 0, wallet: {}, visited: {}, path: [], lockedSeen: [] };
+        renderPlay();
+      } } }),
+      el("button", { class: "btn primary", text: "Back to the board", on: { click: function () { exitPlay(true); } } })
+    ]
+  );
+}
+
+function playKey(ev) {
+  if (!run || playEl.hidden) return;
+  if (ev.key === "Escape") { ev.preventDefault(); exitPlay(false); return; }
+  if (run.phase === "encounter" && /^[1-9]$/.test(ev.key)) {
+    var i = parseInt(ev.key, 10) - 1;
+    var enc = getNode(run.current);
+    if (!enc || !enc.choices[i]) return;
+    var read = readChoice(enc, enc.choices[i], grantsAll(enc));
+    if (choiceLocked(read, run.wallet)) return;
+    ev.preventDefault();
+    takeChoice(enc, i, read);
+  } else if (run.phase === "result" && ev.key === "Enter") {
+    ev.preventDefault();
+    run.phase = "next";
+    renderPlay();
+  }
+}
+
 /* ── search & color-by ────────────────────────────────────────────────── */
 
 var searchTimer = null;
@@ -1959,7 +2549,9 @@ window.addEventListener("pointermove", onGlobalMove);
 window.addEventListener("pointerup", onGlobalUp);
 window.addEventListener("pointercancel", onGlobalUp);
 window.addEventListener("resize", function () { measureBar(); });
+$("#btn-play").addEventListener("click", openPlay);
 window.addEventListener("keydown", function (ev) {
+  if (run && !playEl.hidden) { playKey(ev); return; }   // the run owns the keyboard
   if (ev.key === "Escape") {
     if (!modalEl.hidden) { closeModal(); return; }
     if (panel) { closePanel(); return; }

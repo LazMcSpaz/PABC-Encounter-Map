@@ -315,6 +315,7 @@ body{
 .chip.need{color:var(--rust);border-color:rgba(217,138,118,.4);background:rgba(217,138,118,.09)}
 .chip.have{color:var(--sage);border-color:rgba(122,155,110,.45);background:rgba(122,155,110,.1)}
 .chip.plain{color:var(--muted);border-color:var(--line);background:var(--bg)}
+.chip.fork{color:#8fd4d4;border-color:rgba(74,157,157,.5);background:rgba(74,157,157,.1)}
 .pick-h{
   font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;
   color:var(--faint);margin:1.1rem 0 .4rem;display:flex;align-items:center;gap:.5rem;
@@ -607,14 +608,37 @@ function newId(prefix) {
 }
 function str(v) { return typeof v === "string" ? v : (v == null ? "" : String(v)); }
 function num(v) { var n = typeof v === "number" ? v : parseFloat(v); return isFinite(n) ? n : null; }
+// Boards written before flag names were tokenized properly can hold a single
+// "a OR b" flag that nothing can ever read. Repair on load, but keep a record —
+// silently rewriting authored data without saying so would be worse.
+var flagRepairs = [];
 function flagList(v) {
-  if (Array.isArray(v)) return v.map(str).map(function (s) { return s.trim(); }).filter(Boolean);
-  if (typeof v === "string") return parseFlags(v);
-  return [];
+  var raw = Array.isArray(v) ? v : (typeof v === "string" ? [v] : []);
+  var out = [];
+  raw.forEach(function (x) {
+    var parts = parseFlags(x);
+    if (typeof x === "string" && parts.length > 1 && x.indexOf(",") === -1) {
+      flagRepairs.push({ from: x.trim(), into: parts.slice() });
+    }
+    out = out.concat(parts);
+  });
+  return uniq(out);
 }
+
+// A flag is one snake_case token, so anything that isn't [A-Za-z0-9_] separates
+// two of them — a comma, a slash, a pipe, or plain whitespace. That makes
+// "a OR b" two flags rather than one flag whose name contains " OR ", which
+// nothing could ever read. The joining words are dropped, not kept as flags.
+var JOIN_WORDS = { or: 1, and: 1, then: 1, plus: 1 };
 function parseFlags(s) {
-  return str(s).split(",").map(function (x) { return x.trim(); }).filter(Boolean);
+  return uniq(str(s).split(/[^A-Za-z0-9_]+/)
+    .map(function (x) { return x.trim(); })
+    .filter(function (x) { return x && !JOIN_WORDS[x.toLowerCase()]; }));
 }
+
+// Was this written as an either/or rather than a list? Used to tell a run that
+// a choice grants one of these, not all of them.
+function splitsOnOr(text) { return /(^|[^A-Za-z0-9_])or([^A-Za-z0-9_]|$)/i.test(str(text)); }
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 function uniq(a) { var s = {}, o = []; a.forEach(function (v) { if (!s[v]) { s[v] = 1; o.push(v); } }); return o; }
 
@@ -2076,13 +2100,13 @@ function renderDrawer() {
     el("label", { class: "dr-field" }, [
       "Sets flags ", el("span", { class: "dr-hintlbl", text: "comma-sep" }),
       el("input", { class: "mono", value: e.out.join(", "), placeholder: "snake_case",
-        on: { change: function (ev) { patch(id, { out: parseFlags(ev.target.value) }); },
+        on: { change: function (ev) { commitFlagField(ev.target, id, "out"); },
               input: function (ev) { patchFlagsLive(id, "out", ev.target.value); } } })
     ]),
     el("label", { class: "dr-field" }, [
       "Needs flags ", el("span", { class: "dr-hintlbl", text: "comma-sep" }),
       el("input", { class: "mono", value: e["in"].join(", "), placeholder: "snake_case",
-        on: { change: function (ev) { patch(id, { "in": parseFlags(ev.target.value) }); },
+        on: { change: function (ev) { commitFlagField(ev.target, id, "in"); },
               input: function (ev) { patchFlagsLive(id, "in", ev.target.value); } } })
     ])
   ]));
@@ -2167,6 +2191,16 @@ function patchChoice(id, i, props) {
   if (!n || !n.choices[i]) return;
   Object.assign(n.choices[i], props);
   scheduleSave();
+}
+
+// Writing the tokenized list back into the field is the feedback: typing
+// "a OR b" visibly becomes "a, b" on blur, so a fork can't hide as one flag.
+function commitFlagField(input, id, key) {
+  var flags = parseFlags(input.value);
+  var props = {};
+  props[key] = flags;
+  patch(id, props);
+  input.value = flags.join(", ");
 }
 
 // Flags re-render the whole web, which would steal focus mid-typing; update the
@@ -2308,6 +2342,18 @@ function renderCoveragePanel() {
     coverageEl.appendChild(unmetWrap);
   } else {
     coverageEl.appendChild(el("div", { class: "cov-empty", text: "none — every need has a source" }));
+  }
+
+  if (flagRepairs.length) {
+    coverageEl.appendChild(el("div", { class: "cov-h", text: "Flag names repaired on load" }));
+    coverageEl.appendChild(el("div", { class: "cov-empty",
+      text: "A flag is one snake_case token. These held separators, so nothing could read them:" }));
+    flagRepairs.forEach(function (r) {
+      coverageEl.appendChild(el("div", { class: "cov-row" }, [
+        el("span", { class: "k mono", text: r.from }),
+        el("span", { class: "v", text: "→ " + r.into.join(" + ") })
+      ]));
+    });
   }
 
   coverageEl.appendChild(el("div", { class: "cov-h", text: "Faction poles" }));
@@ -3124,7 +3170,41 @@ function readChoice(enc, choice, encGrantsAll) {
   var grants = enc.out.filter(function (f) { return mentions(fx, f); });
   if (encGrantsAll) grants = enc.out.slice();
   var needs = enc["in"].filter(function (f) { return mentions(fx, f); });
-  return { grants: grants, needs: needs, anyOf: needs.length > 1 && /\bor\b/i.test(fx) };
+
+  // "sets a OR b" is one outcome or the other, not both. Hand the fork to the
+  // run to resolve rather than quietly granting everything named.
+  var fork = null;
+  if (grants.length > 1 && !encGrantsAll && orJoins(fx, grants)) {
+    fork = grants.slice();
+    grants = [];
+  }
+  return {
+    grants: grants, fork: fork, needs: needs,
+    anyOf: needs.length > 1 && splitsOnOr(fx)
+  };
+}
+
+// Say plainly what the load repaired, and keep it out of the way after that.
+function reportFlagRepairs() {
+  if (!flagRepairs.length) return;
+  var n = flagRepairs.length;
+  commitSave();      // the board in memory is now the repaired one; make that durable
+  toast(n + " flag name" + (n === 1 ? "" : "s") + " split into separate flags — see Coverage.", true);
+}
+
+// True when the fx text joins these flags with "or" rather than listing them.
+// Checked on the span between each pair so "+1 Tech, sets a or b" forks on a|b
+// while "sets a and b (or nothing)" does not.
+function orJoins(fx, flags) {
+  var at = flags.map(function (f) { return { f: f, i: String(fx).indexOf(f) }; })
+    .filter(function (p) { return p.i !== -1; })
+    .sort(function (a, b) { return a.i - b.i; });
+  if (at.length < 2) return false;
+  for (var i = 0; i < at.length - 1; i++) {
+    var between = fx.slice(at[i].i + at[i].f.length, at[i + 1].i);
+    if (!splitsOnOr(between)) return false;
+  }
+  return true;
 }
 
 // If no choice names any out-flag, the encounter grants them however it ends.
@@ -3339,13 +3419,18 @@ function renderPlayEncounter() {
     var missing = choiceLocked(read, run.wallet);
     var chips = [];
     read.grants.forEach(function (f) { chips.push(el("span", { class: "chip gain", text: "sets " + f })); });
+    if (read.fork) {
+      chips.push(el("span", { class: "chip fork", text: "sets " + read.fork.join(" or ") + " — you pick" }));
+    }
     if (missing) {
       chips.push(el("span", { class: "chip need",
         text: "needs " + missing.join(read.anyOf ? " or " : " + ") }));
     } else if (read.needs.length) {
       chips.push(el("span", { class: "chip have", text: "unlocked by " + read.needs.join(" / ") }));
     }
-    if (!read.grants.length && !missing) chips.push(el("span", { class: "chip plain", text: "sets nothing" }));
+    if (!read.grants.length && !read.fork && !missing) {
+      chips.push(el("span", { class: "chip plain", text: "sets nothing" }));
+    }
 
     body.push(el("button", {
       class: "choice-btn" + (missing ? " locked" : ""),
@@ -3386,6 +3471,8 @@ function takeChoice(enc, i, read) {
     read.grants.forEach(function (f) {
       if (!run.wallet[f]) { run.wallet[f] = true; log.gained.push(f); }
     });
+    // "sets a OR b" — the run picks one rather than taking both.
+    if (read.fork) log.pending.push({ kind: "flagfork", flags: read.fork.slice() });
   }
 
   run.visited[enc.id] = true;
@@ -3421,6 +3508,31 @@ function finishChoice(log, enc) {
 function renderPlayPending() {
   var pend = run.pending;
   var item = pend.queue[0];
+
+  // An either/or written into the fx prose: one of these flags, not all.
+  if (item.kind === "flagfork") {
+    var forkBody = [
+      el("div", { class: "play-eyebrow", text: "This outcome forks" }),
+      el("h2", { class: "play-title", text: "One or the other" }),
+      el("p", { class: "play-hook",
+        text: "The effect is written as an either/or, so the run takes one of these — not both. " +
+              "Pick the branch you want to walk." })
+    ];
+    item.flags.forEach(function (f) {
+      forkBody.push(el("button", { class: "choice-btn", on: { click: function () {
+        if (!run.wallet[f]) { run.wallet[f] = true; pend.log.gained.push(f); }
+        stepPending();
+      } } }, [
+        el("div", {}, [el("span", { class: "choice-lbl mono", text: f })]),
+        el("div", { class: "choice-fx", text: "carries " + f + " forward; the others are not set" })
+      ]));
+    });
+    playStage(playHead(), forkBody, [
+      el("span", { class: "play-quiet", text: "written as “" + item.flags.join(" or ") + "”" })
+    ]);
+    return;
+  }
+
   var p = effParams(item.effect);
   var body = [el("div", { class: "play-eyebrow", text: "The engine needs a result" })];
 
@@ -3850,6 +3962,7 @@ Store.load().then(function (saved) {
   loaded = true;
   renderCanvas();
   renderDrawer();
+  reportFlagRepairs();
   setTimeout(function () { fit(window.innerWidth <= 620 ? 0.6 : 0); }, 60);
   if (!saved) commitSave();
 });

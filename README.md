@@ -33,6 +33,7 @@ is how a board travels**, between machines and into a chat.
 | **Connect** | Pick two cards to draw a manual (teal, dashed) link; tap a link to remove it |
 | **Legend** | Doubles as the filter — toggle any faction / type / status to dim the rest |
 | **Coverage chip** | Always-visible gap readout: open threads · needs with no source · empty faction poles. Tap for the full breakdown |
+| **Systems** | What the mechanized content asks the engine for — see *Engine format* below |
 | **color: faction / status** | Recolors the cards; the corner dot always shows the other dimension |
 | **Search** | Matches title, hook, teaches, notes, id, flags and choices; dims everything else |
 | **Fit / Tidy** | Frame the whole board · re-lay-out into clean type clusters |
@@ -82,9 +83,13 @@ faction* and nothing is gated out.
 
 ### How a choice's flags are worked out
 
-Flags live on the encounter (`out` / `in`) while your prose says which choice
-touches them, so the run reads the `fx` text and shows every inference on the
-choice itself:
+This applies to hand-written content only. A choice imported from the encounter
+builder states its effects and its condition outright, so the run uses those and
+infers nothing — see *Engine format* below.
+
+For hand-written encounters, flags live on the encounter (`out` / `in`) while
+your prose says which choice touches them, so the run reads the `fx` text and
+shows every inference on the choice itself:
 
 - A choice **grants** any `out` flag its `fx` text names — `"+1 Tech · sets
   studied_oldworld_machine"` grants that flag, and the button shows
@@ -109,6 +114,72 @@ in an encounter whose other choices do name flags, meaning no player can ever
 obtain it.
 
 Keyboard: `1`–`9` take a choice, `Enter` continues, `Esc` leaves the run.
+
+---
+
+## Engine format — the encounter builder's own JSON
+
+The tool reads the builder's table-grouped export directly: drop a file with
+`world_encounters`, `field_encounters`, `quests`, `quest_beats`,
+`quest_beat_prereqs`, `choices` and `effects` into **Import** and it is
+recognised on sight. The consolidated Remnant content (29 encounters, 35 quests,
+131 beats, 383 choices, 1,133 effects) loads as 160 cards on one canvas.
+
+**Nothing is dropped, and nothing is rewritten.** The source tables are kept
+whole, and every choice keeps a pointer to its own rows, so ⋯ → *Export back to
+the encounter builder* hands the file back byte-identical unless you edited
+something the format has a place for. What is written back: encounter, field and
+quest titles, body text, and choice labels and outcome text. What is not: new
+encounters, changed flags, links, and beat titles — `quest_beats` rows have no
+title field, so the ones on the canvas are the tool's own. The export dialog
+counts the rows that differ before you download.
+
+How the two models line up:
+
+| Builder | Thread Web |
+|---|---|
+| `world_encounters` / `field_encounters` | encounters, typed `world` / `field` |
+| `quests` + `quest_beats` | quests with beats — beats are cards on the canvas, clustered inside their quest's container |
+| `quest_beat_prereqs` | `prereqs` on a beat, drawn as quiet grey sequence edges |
+| `choices` + `effects` | `choices[]`, with `fx` written out in plain language (`+1 Tech · sets bunker_online`) and the rows kept verbatim underneath |
+| `SET_PLAYER_FLAG` anywhere in a choice's effects | that encounter's `out` — which is what draws the gold flag ties |
+| flags read by `condition` / `triggerCondition` / `deliverCondition` | that encounter's `in` |
+| a choice gated on `active == <faction>` | `faction` + `scope: "gated"` |
+| `_readme.faction_coverage.gated_chains` | the faction of the quests it names |
+
+Faction is only claimed where the file states it. Everything else stays
+frontier/none rather than being guessed at from standing changes.
+
+### Systems — what the content is asking for
+
+**Systems** in the toolbar is the reconciliation report. It lists every effect
+type and condition operator the content uses, split by whether a run can
+actually carry it out; the authors' own `_note` on individual effects; the
+file's `required_systems` and `known_breaks_pre_existing` rendered as text
+instead of buried in JSON; and flags read that nothing writes.
+
+On the consolidated file that comes to 23 effect types, of which 14 run and 9 —
+`ADJUST_BASE_STRENGTH`, `MODIFY_STAT`, `SURCHARGE`, `SET_MOVEMENT`,
+`GRANT_SAFE_PASSAGE`, `TAKE_UNIT`, `PERSISTENT_VISION`,
+`ESTABLISH_DUAL_HOLDING`, `MOVE_CARD` — do not. Those are preserved, exported
+unchanged, and reported during a run as *"the engine would…"* with the author's
+note attached. The one flag read that nothing writes is
+`sold_bunker_to_versari`, exactly as the file's own readme says.
+
+### What a run does with mechanized content
+
+Where an encounter carries real effects, the run stops guessing and executes
+them. It keeps a ledger of Resource and Tech, the `trust` and `alignment`
+tracks, per-faction standing, honor and menace; it runs `ROLL` against its
+stated chance; it queues `QUEUE_DEFERRED` on a round clock and lands it rounds
+later; it advances and completes quests, gating each beat on its prereqs and
+`deliverCondition`; and it evaluates the full condition language — `has_flag`,
+`all` / `any` / `not`, `op` comparisons against `score`, and **`count_flags`**,
+the prefix tally the readme calls load-bearing but unbuilt.
+
+Two things it hands back to you rather than deciding alone: `CONTEST`, which has
+no unit model here, and `FORCE_CHOICE`, which is a real choice — both pause the
+run and ask which branch to walk.
 
 ---
 
@@ -151,8 +222,20 @@ Enums are additive: an unrecognised value is preserved verbatim and shown as
 Unknown top-level fields on an encounter ride along untouched through a
 round-trip.
 
-`quests` (build doc §7) is passed through unchanged — files carrying quests
-import and re-export losslessly — but has no editing UI yet.
+### Quests (build doc §7)
+
+```json
+{ "id": "q_settle_the_dry_line", "title": "Settle the Dry Line",
+  "mode": "single-player", "notes": "Pays off found_water.",
+  "beats": [ { "id": "qb_…", "title": "…", "deliver": "auto",
+               "text": "…", "choices": [ { "label": "…", "fx": "…" } ],
+               "out": [], "in": [], "prereqs": [ "qb_previous" ], "notes": "" } ] }
+```
+
+Beats are full citizens: cards on the canvas inside their quest's container,
+participants in the flag graph, editable in the same drawer (with a `deliver`
+selector and a prereq field), and playable in a run. They merge by beat id, so a
+chat can hand back one revised beat without disturbing the chain.
 
 ---
 
@@ -166,5 +249,16 @@ import and re-export losslessly — but has no editing UI yet.
   select), and per-card `textUpdaters` refresh one card's text. Drawer typing
   deliberately avoids the structural path so the web doesn't rebuild on every
   keystroke.
-- **Still to build** (build doc §7): quest containers and beats on the canvas
-  [V1.1], minimap and multi-board [Later].
+- **Engine content is kept whole, in two places.** `board.engine.source` holds
+  the imported tables verbatim for the round-trip; each choice also carries its
+  own rows on `choice.engine` so the run, the gating and the Systems report can
+  read them without walking the source. A 160-card library costs about 920 KB in
+  `localStorage`, well inside the usual quota.
+- **Rendering splits three ways.** `renderCanvas()` rebuilds structure,
+  `renderGeometry()` only moves and recolors what exists, and per-card
+  `textUpdaters` refresh one card. Positions are separated in place across
+  encounters and beats together, so a node's container never changes with its
+  coordinates.
+- **Still to build:** minimap and multi-board [Later]. The nine unimplemented
+  effect types and the recurring-yield system the content keeps asking for are
+  the engine's to build — the tool now names them precisely.

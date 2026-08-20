@@ -29,10 +29,10 @@ is how a board travels**, between machines and into a chat.
 | Control | What it does |
 |---|---|
 | **+ Encounter** | Drops a card at the center of the view and opens it for editing |
-| **Play** | Walks the board as a player would — see *Playtest* below |
+| **Walk** | Follows a thread through the board — see *Walking a thread* below |
 | **Connect** | Pick two cards to draw a manual (teal, dashed) link; tap a link to remove it |
 | **Legend** | Doubles as the filter — toggle any faction / type / status to dim the rest |
-| **Coverage chip** | Always-visible gap readout: open threads · needs with no source · empty faction poles. Tap for the full breakdown |
+| **Coverage chip** | Always-visible gap readout: open threads · needs with no source · cards no walk can reach. Tap for the full breakdown |
 | **Systems** | What the mechanized content asks the engine for — see *Engine format* below |
 | **color: faction / status** | Recolors the cards; the corner dot always shows the other dimension |
 | **Search** | Matches title, hook, teaches, notes, id, flags and choices; dims everything else |
@@ -66,11 +66,20 @@ everything else on the board untouched.
 
 ---
 
-## Playtest
+## Walking a thread
 
-**Play** walks the board the way a session would: pick an encounter, read the
-hook, take a choice, and carry the flags it sets forward. It is strictly
-read-only — a run never edits or saves anything.
+**Walk** follows one thread through the board: pick an encounter, read the hook,
+take a choice, and carry the flags it sets forward. It is strictly read-only — a
+walk never edits or saves anything.
+
+**A walk is not a session, and does not try to be.** The engine deals a different
+board every time — decks, `copies`, draw weights, and where a card is allowed to
+land — and none of that is modelled here. Every card sits in one flat pool. So a
+card you do not meet on a walk is *not* a card a player would miss, and a walk
+that runs out of cards has not "finished the content". The question the walk
+answers is whether a chain reads and connects end to end. The question *"can a
+player ever get here at all?"* belongs to **Coverage → Unreachable**, which
+answers it for every walk at once instead of one.
 
 Sequencing is a **thread-walk**. After each choice, encounters your new flags
 reach are listed first under *your flags reach these*, with the reason shown
@@ -84,11 +93,11 @@ faction* and nothing is gated out.
 ### How a choice's flags are worked out
 
 This applies to hand-written content only. A choice imported from the encounter
-builder states its effects and its condition outright, so the run uses those and
+builder states its effects and its condition outright, so the walk uses those and
 infers nothing — see *Engine format* below.
 
 For hand-written encounters, flags live on the encounter (`out` / `in`) while
-your prose says which choice touches them, so the run reads the `fx` text and
+your prose says which choice touches them, so the walk reads the `fx` text and
 shows every inference on the choice itself:
 
 - A choice **grants** any `out` flag its `fx` text names — `"+1 Tech · sets
@@ -106,14 +115,45 @@ writing.
 
 ### What the summary tells you
 
-Ending a run (or exhausting the pool) gives an on-screen recap: the path with
-the choice taken at each step, flags held, **flags this run never picked up**,
-encounters **gated out by faction**, encounters **never reached**, choices you
-couldn't take and what they needed, and **flags no choice sets** — an `out` flag
-in an encounter whose other choices do name flags, meaning no player can ever
-obtain it.
+Ending a walk gives an on-screen recap: the path with the choice taken at each
+step, flags held, **flags this walk never picked up** (marking any that no walk
+could), encounters **gated out by faction**, choices you couldn't take and what
+they needed, and **flags no choice sets** — an `out` flag in an encounter whose
+other choices do name flags, meaning no player can ever obtain it.
 
-Keyboard: `1`–`9` take a choice, `Enter` continues, `Esc` leaves the run.
+The cards you did not see are split in two, because they are not the same
+finding:
+
+- **blocked · no walk opens these** — with the reason for each. A real defect.
+- **not on this walk** — open, simply not taken. One walk is one path; a
+  different walk, or a different board, reaches them. Not a defect.
+
+Keyboard: `1`–`9` take a choice, `Enter` continues, `Esc` leaves the walk.
+
+
+---
+
+## Coverage — the map-independent read
+
+Because the engine lays the board out differently every session, the useful
+authoring question is never "did I see it?" but "**can anyone ever see it?**"
+Coverage answers that across all walks at once, by growing the set of reachable
+cards and obtainable flags together until neither moves.
+
+Everything unknown is treated as *satisfiable*, so the analysis under-reports
+rather than crying wolf: a card listed here is one that no placement and no run
+of luck can open.
+
+| Report | What it means |
+|---|---|
+| **Unreachable** | No walk opens this card, with the reason: a prereq that isn't on the board, a prereq nothing opens, or a condition needing a flag with no source |
+| **Prereq loops** | Beats that wait on each other in a ring, so none of them ever opens |
+| **Choices no walk can take** | The card is reachable; this choice inside it never unlocks |
+| **Quests with no prereq chain** | Order lives in `ADVANCE_QUEST` effects, which nothing enforces, so every beat is on offer at once |
+
+Alternative branches are *not* findings. Three beats forking off one parent are
+each reachable by some walk, so Coverage stays quiet about them even though any
+single walk sees only one.
 
 ---
 
@@ -153,22 +193,43 @@ frontier/none rather than being guessed at from standing changes.
 ### Systems — what the content is asking for
 
 **Systems** in the toolbar is the reconciliation report. It lists every effect
-type and condition operator the content uses, split by whether a run can
+type and condition operator the content uses, split by whether a walk can
 actually carry it out; the authors' own `_note` on individual effects; the
 file's `required_systems` and `known_breaks_pre_existing` rendered as text
 instead of buried in JSON; and flags read that nothing writes.
 
-On the consolidated file that comes to 23 effect types, of which 14 run and 9 —
-`ADJUST_BASE_STRENGTH`, `MODIFY_STAT`, `SURCHARGE`, `SET_MOVEMENT`,
-`GRANT_SAFE_PASSAGE`, `TAKE_UNIT`, `PERSISTENT_VISION`,
-`ESTABLISH_DUAL_HOLDING`, `MOVE_CARD` — do not. Those are preserved, exported
-unchanged, and reported during a run as *"the engine would…"* with the author's
-note attached. The one flag read that nothing writes is
-`sold_bunker_to_versari`, exactly as the file's own readme says.
+Effects fall in three tiers, not two:
 
-### What a run does with mechanized content
+- **Applied.** The walk carries them out: flags, resources, tracks, standing,
+  honor, menace, quest completion, deferred queues, rolls, and the two it hands
+  back to you (`CONTEST`, `FORCE_CHOICE`).
+- **Named, but nothing behind them.** `ADVANCE_QUEST`, `DELIVER_ENCOUNTER` and
+  `PEEK` read and phrase correctly, so content using them *looks* handled — but
+  there is no deck to peek into or deliver from, and beat order comes from
+  prereqs rather than from `ADVANCE_QUEST`. They are reported as engine asks
+  rather than counted as modelled, which is what previously let a board look
+  complete while its sequencing sat idle.
+- **Absent.** `ADJUST_BASE_STRENGTH`, `MODIFY_STAT`, `SURCHARGE`,
+  `SET_MOVEMENT`, `GRANT_SAFE_PASSAGE`, `TAKE_UNIT`, `PERSISTENT_VISION`,
+  `ESTABLISH_DUAL_HOLDING`, `MOVE_CARD`.
 
-Where an encounter carries real effects, the run stops guessing and executes
+On the consolidated file's 23 effect types that is 11 applied, 3 named-only and
+9 absent. Everything outside the first tier is preserved, exported unchanged,
+and reported during a walk as *"the engine would…"* with the author's note
+attached. The one flag read that nothing writes is `sold_bunker_to_versari`,
+exactly as the file's own readme says.
+
+**Board data the walk ignores** is listed separately: `copies`,
+`triggerStrength` (draw weight), `placementFilter`, `deliver: "discovered"` and
+`recipient`. All of it is kept whole and exported unchanged — it simply has no
+bearing on what a walk offers, because it describes a map and a deck this tool
+does not simulate. Operators appearing only inside `triggerStrength` are counted
+under their own heading rather than beside the conditions the walk really
+evaluates.
+
+### What a walk does with mechanized content
+
+Where an encounter carries real effects, the walk stops guessing and executes
 them. It keeps a ledger of Resource and Tech, the `trust` and `alignment`
 tracks, per-faction standing, honor and menace; it runs `ROLL` against its
 stated chance; it queues `QUEUE_DEFERRED` on a round clock and lands it rounds
@@ -179,7 +240,12 @@ the prefix tally the readme calls load-bearing but unbuilt.
 
 Two things it hands back to you rather than deciding alone: `CONTEST`, which has
 no unit model here, and `FORCE_CHOICE`, which is a real choice — both pause the
-run and ask which branch to walk.
+walk and ask which branch to take.
+
+`has_flag` is accepted in both shapes the content uses — `{"has_flag": {"flag":
+"x"}}` and the shorthand `{"has_flag": "x"}`. An `op` comparison against an
+operand the walk has no model for (a unit count, a map fact) **opens**, the same
+as an unrecognised operator does; closing it would hide the content behind it.
 
 ---
 
@@ -234,7 +300,7 @@ round-trip.
 
 Beats are full citizens: cards on the canvas inside their quest's container,
 participants in the flag graph, editable in the same drawer (with a `deliver`
-selector and a prereq field), and playable in a run. They merge by beat id, so a
+selector and a prereq field), and walkable. They merge by beat id, so a
 chat can hand back one revised beat without disturbing the chain.
 
 ---
@@ -251,7 +317,7 @@ chat can hand back one revised beat without disturbing the chain.
   keystroke.
 - **Engine content is kept whole, in two places.** `board.engine.source` holds
   the imported tables verbatim for the round-trip; each choice also carries its
-  own rows on `choice.engine` so the run, the gating and the Systems report can
+  own rows on `choice.engine` so the walk, the gating and the Systems report can
   read them without walking the source. A 160-card library costs about 920 KB in
   `localStorage`, well inside the usual quota.
 - **Rendering splits three ways.** `renderCanvas()` rebuilds structure,
@@ -259,6 +325,15 @@ chat can hand back one revised beat without disturbing the chain.
   `textUpdaters` refresh one card. Positions are separated in place across
   encounters and beats together, so a node's container never changes with its
   coordinates.
+- **A walk is deliberately not a simulator.** It walks one fixed graph, and
+  Coverage answers the map-independent question across all walks. Turning the
+  walk into a real seeded session — decks with `copies`, weighted draws off
+  `triggerStrength`, `placementFilter` against a rolled map, `DELIVER_ENCOUNTER`
+  pushing into the deck, `deliver: "discovered"` meaning discovered — is a
+  separate, larger build, and needs a visible seed before it is worth anything
+  (`ROLL` uses unseeded `Math.random()` today, so no walk replays). Until then
+  the tool says plainly which board data it is ignoring rather than implying it
+  ran.
 - **Still to build:** minimap and multi-board [Later]. The nine unimplemented
   effect types and the recurring-yield system the content keeps asking for are
   the engine's to build — the tool now names them precisely.

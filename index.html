@@ -132,6 +132,16 @@ body{
 }
 .cov-flag.unmet{background:rgba(217,138,118,.1);border-color:rgba(217,138,118,.35);color:var(--rust)}
 .cov-empty{font-family:var(--mono);font-size:.66rem;color:var(--faint)}
+.cov-reach{
+  display:block;width:100%;text-align:left;background:none;border:0;cursor:pointer;
+  border-left:2px solid var(--rust);padding:.22rem .5rem;margin:.18rem 0;font:inherit;color:inherit;
+}
+.cov-reach:hover{background:rgba(217,138,118,.07)}
+.cov-reach .k{display:block;font-size:.78rem;color:var(--bone)}
+.cov-reach .reach-why{display:block;font-family:var(--mono);font-size:.62rem;color:var(--rust);margin-top:.1rem}
+.cov-reach.prereq{border-left-color:var(--gold)}
+.cov-reach.prereq .reach-why{color:var(--gold)}
+.cov-reach.cycle{border-left-color:var(--rust)}
 .sys-row{border-top:1px solid rgba(57,53,45,.7);padding:.45rem 0}
 .sys-head{display:flex;align-items:baseline;gap:.5rem}
 .sys-type{font-family:var(--mono);font-size:.7rem;color:var(--gold)}
@@ -316,6 +326,7 @@ body{
 .chip.have{color:var(--sage);border-color:rgba(122,155,110,.45);background:rgba(122,155,110,.1)}
 .chip.plain{color:var(--muted);border-color:var(--line);background:var(--bg)}
 .chip.fork{color:#8fd4d4;border-color:rgba(74,157,157,.5);background:rgba(74,157,157,.1)}
+.chip.gone{color:var(--rust);border-color:rgba(217,138,118,.45);background:rgba(217,138,118,.09);text-decoration:line-through}
 .pick-h{
   font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;
   color:var(--faint);margin:1.1rem 0 .4rem;display:flex;align-items:center;gap:.5rem;
@@ -409,7 +420,7 @@ body{
     </div>
     <div class="tools">
       <button id="btn-add" class="btn primary">+ Encounter</button>
-      <button id="btn-play" class="btn">Play</button>
+      <button id="btn-play" class="btn">Walk</button>
       <button id="btn-connect" class="btn">Connect</button>
       <span class="grp on-wide">
         <span class="sep"></span>
@@ -459,7 +470,7 @@ body{
   </svg>
 
   <aside id="drawer" class="drawer" hidden aria-label="Encounter editor"></aside>
-  <div id="play" class="play-wrap" hidden aria-label="Playtest"></div>
+  <div id="play" class="play-wrap" hidden aria-label="Thread walk"></div>
   <div id="modal" class="modal-wrap" hidden></div>
 </div>
 
@@ -859,10 +870,15 @@ function isEngineFile(b) {
 // listed in Systems, and logged as an engine ask when a run hits it.
 var SIMULATED_EFFECTS = {
   SET_PLAYER_FLAG: 1, ADJUST_RESOURCE: 1, ADJUST_TRACK: 1, ADJUST_STANDING: 1,
-  ADJUST_HONOR: 1, ADJUST_MENACE: 1, ADVANCE_QUEST: 1, COMPLETE_QUEST: 1,
-  QUEUE_DEFERRED: 1, ROLL: 1, CONTEST: 1, FORCE_CHOICE: 1, PEEK: 1,
-  DELIVER_ENCOUNTER: 1
+  ADJUST_HONOR: 1, ADJUST_MENACE: 1, COMPLETE_QUEST: 1,
+  QUEUE_DEFERRED: 1, ROLL: 1, CONTEST: 1, FORCE_CHOICE: 1
 };
+
+// Named, phrased and logged, but with nothing behind them: there is no deck to
+// peek into or deliver from, and quest position is held by prereqs rather than
+// by ADVANCE_QUEST. They were being counted as modelled, which is what let a
+// board look complete while half its sequencing sat idle.
+var NAMED_ONLY_EFFECTS = { ADVANCE_QUEST: 1, DELIVER_ENCOUNTER: 1, PEEK: 1 };
 var SIMULATED_CONDITIONS = {
   has_flag: 1, count_flags: 1, all: 1, any: 1, not: 1, op: 1, score: 1, "if": 1
 };
@@ -897,13 +913,21 @@ function flagsSetBy(effects) {
   return uniq(out);
 }
 
+// has_flag comes in two shapes in the wild: {"has_flag":{"flag":"x"}} and the
+// shorthand {"has_flag":"x"}. Both name the same flag; reading only the first
+// made the second evaluate false forever.
+function flagName(v) {
+  if (typeof v === "string") return v;
+  return (v && v.flag) ? String(v.flag) : "";
+}
+
 function flagsReadBy(cond) {
   var out = [];
   (function walk(c) {
     if (Array.isArray(c)) return c.forEach(walk);
     if (!c || typeof c !== "object") return;
     Object.keys(c).forEach(function (k) {
-      if (k === "has_flag" && c[k] && c[k].flag) out.push(String(c[k].flag));
+      if (k === "has_flag") { var f = flagName(c[k]); if (f) out.push(f); }
       walk(c[k]);
     });
   })(cond);
@@ -968,7 +992,7 @@ function fxFromEffects(effects) {
 function conditionPhrase(c) {
   if (c === null || c === undefined) return "";
   if (typeof c !== "object") return String(c);
-  if (c.has_flag) return "has " + c.has_flag.flag;
+  if (c.has_flag) return "has " + flagName(c.has_flag);
   if (c.count_flags) return "count of " + c.count_flags.prefix + "* flags";
   if (c.not) return "not (" + conditionPhrase(c.not) + ")";
   if (c.all) return c.all.map(conditionPhrase).join(" and ");
@@ -1341,6 +1365,198 @@ function coverage() {
   };
 }
 
+/* -- reachability: what any walk can reach ----------------------------- */
+
+// A walk is one path through a board the engine lays out differently every
+// session, so "I never saw it" says nothing on its own. This asks the
+// map-independent question instead: is there ANY walk that arrives here?
+// Every unknown is treated as satisfiable, so the analysis under-reports
+// rather than crying wolf -- a node listed here is one that no placement and
+// no run of luck can open.
+
+var reachCache = null;
+function reach() { return reachCache || (reachCache = reachability()); }
+
+function nodeLabel(n) {
+  if (!n) return "";
+  if (n._kind !== "beat") return n.title;
+  var q = getQuest(n._questId);
+  return (q ? q.title : "quest") + " · beat " + ((n._ordinal || 0) + 1);
+}
+
+// Could this condition ever hold, given every flag the board can produce?
+// Only the flag case is decided; numeric and unmodelled terms are assumed
+// reachable, because nothing here can prove otherwise.
+function satisfiable(cond, flags) {
+  if (!cond || typeof cond !== "object") return true;
+  if (cond.has_flag) { var f = flagName(cond.has_flag); return !f || !!flags[f]; }
+  if (cond.all) return cond.all.every(function (x) { return satisfiable(x, flags); });
+  if (cond.any) return cond.any.some(function (x) { return satisfiable(x, flags); });
+  return true;   // not / op / count_flags / score / unrecognised
+}
+
+function missingFrom(cond, flags) {
+  return flagsReadBy(cond).filter(function (f) { return !flags[f]; });
+}
+
+// What a choice needs before any walk can take it, and what it hands out.
+// A fork counts as granting both sides: one walk takes each.
+function choiceNeeds(n, c) {
+  var read = readChoice(n, c, grantsAll(n));
+  return { engine: !!read.engine, condition: read.condition || null,
+           needs: read.needs || [], anyOf: !!read.anyOf,
+           grants: (read.grants || []).concat(read.fork || []) };
+}
+
+function choiceOpenable(req, flags) {
+  if (req.engine) return satisfiable(req.condition, flags);
+  if (!req.needs.length) return true;
+  return req.anyOf
+    ? req.needs.some(function (f) { return flags[f]; })
+    : req.needs.every(function (f) { return flags[f]; });
+}
+
+// Beats whose prereqs form a loop: each waits on another that is waiting on
+// it, so the whole ring is dead no matter how the board is laid out.
+function prereqCycles() {
+  var state = {}, stack = [], out = [], seen = {};
+  function visit(id) {
+    var n = getNode(id);
+    if (!n) return;
+    if (state[id] === 1) {
+      var at = stack.indexOf(id);
+      if (at === -1) return;
+      var ring = stack.slice(at);
+      var key = ring.slice().sort().join("|");
+      if (!seen[key]) { seen[key] = 1; out.push(ring); }
+      return;
+    }
+    if (state[id] === 2) return;
+    state[id] = 1; stack.push(id);
+    (n.prereqs || []).forEach(visit);
+    stack.pop(); state[id] = 2;
+  }
+  allNodes().forEach(function (n) { visit(n.id); });
+  return out;
+}
+
+function reachability() {
+  var nodes = allNodes();
+  var onBoard = {};
+  nodes.forEach(function (n) { onBoard[n.id] = n; });
+
+  // A prereq pointing at a beat that is not on the board can never be
+  // satisfied -- and it draws no edge, so the chain behind it simply never
+  // appears, with nothing on screen to say why.
+  var dangling = {};
+  nodes.forEach(function (n) {
+    var miss = (n.prereqs || []).filter(function (p) { return !onBoard[p]; });
+    if (miss.length) dangling[n.id] = miss;
+  });
+
+  // Grow the reachable set and the obtainable-flag set together until neither
+  // moves. Flags come only from choices a walk could actually take in nodes it
+  // could actually enter, so content walled off behind a broken gate cannot
+  // prop up the rest of the analysis.
+  var reached = {}, flags = {};
+  for (var pass = 0; pass < nodes.length + 2; pass++) {
+    var moved = false;
+    nodes.forEach(function (n) {
+      if (reached[n.id] || dangling[n.id]) return;
+      if (!(n.prereqs || []).every(function (p) { return reached[p]; })) return;
+      var eng = n.engine || {};
+      if (!satisfiable(eng.triggerCondition, flags)) return;
+      if (n.deliver === "conditional" && !satisfiable(eng.deliverCondition, flags)) return;
+      reached[n.id] = true; moved = true;
+    });
+    nodes.forEach(function (n) {
+      if (!reached[n.id]) return;
+      var all = grantsAll(n);
+      var give = (all || !(n.choices || []).length) ? (n.out || []).slice() : [];
+      (n.choices || []).forEach(function (c) {
+        var req = choiceNeeds(n, c);
+        if (choiceOpenable(req, flags)) give = give.concat(req.grants);
+      });
+      give.forEach(function (f) { if (f && !flags[f]) { flags[f] = true; moved = true; } });
+    });
+    if (!moved) break;
+  }
+
+  function why(n) {
+    if (dangling[n.id]) {
+      return { kind: "dangling",
+               text: "prereq is not on the board: " + dangling[n.id].join(", ") };
+    }
+    var waiting = (n.prereqs || []).filter(function (p) { return !reached[p]; });
+    if (waiting.length) {
+      return { kind: "prereq", text: "waits on " +
+        waiting.map(function (p) { return nodeLabel(getNode(p)) || p; }).join(", ") +
+        ", which nothing opens" };
+    }
+    var eng = n.engine || {};
+    var cond = !satisfiable(eng.triggerCondition, flags) ? eng.triggerCondition
+             : (n.deliver === "conditional" && !satisfiable(eng.deliverCondition, flags))
+               ? eng.deliverCondition : null;
+    if (cond) {
+      var miss = missingFrom(cond, flags);
+      // When the unmet flags are the whole story, say only that: repeating the
+      // condition back adds nothing but noise.
+      if (miss.length && flagsReadBy(cond).length === miss.length) {
+        return { kind: "condition", text: "nothing sets " + miss.join(", ") };
+      }
+      return { kind: "condition", text: "needs " + conditionPhrase(cond) +
+        (miss.length ? " — nothing sets " + miss.join(", ") : "") };
+    }
+    return { kind: "cycle", text: "its prereqs form a loop" };
+  }
+
+  var unreachable = [];
+  nodes.forEach(function (n) {
+    if (!reached[n.id]) unreachable.push({ node: n, why: why(n) });
+  });
+
+  // Choices inside reachable content that no walk can ever unlock.
+  var deadChoices = [];
+  nodes.forEach(function (n) {
+    if (!reached[n.id]) return;
+    (n.choices || []).forEach(function (c) {
+      var req = choiceNeeds(n, c);
+      if (choiceOpenable(req, flags)) return;
+      var miss = req.engine ? missingFrom(req.condition, flags)
+                            : req.needs.filter(function (f) { return !flags[f]; });
+      deadChoices.push({ node: n, label: c.label || "(unlabelled)", missing: miss,
+                         phrase: req.engine ? conditionPhrase(req.condition) : "" });
+    });
+  });
+
+  // A quest whose order lives in ADVANCE_QUEST effects rather than in
+  // quest_beat_prereqs. Nothing holds the line, so every beat is on offer at
+  // once -- the sequence exists only in the engine's head.
+  var looseQuests = [];
+  (board.quests || []).forEach(function (q) {
+    var beats = q.beats || [];
+    if (beats.length < 2) return;
+    if (beats.some(function (b) { return (b.prereqs || []).length; })) return;
+    var advances = false;
+    beats.forEach(function (b) {
+      (b.choices || []).forEach(function (c) {
+        if (!c.engine) return;
+        walkEffects(c.engine.effects, function (e) {
+          if (e.type === "ADVANCE_QUEST") advances = true;
+        });
+      });
+    });
+    if (advances) looseQuests.push({ quest: q, beats: beats.length });
+  });
+
+  return {
+    reached: reached, flags: flags, unreachable: unreachable,
+    deadChoices: deadChoices, cycles: prereqCycles(), looseQuests: looseQuests,
+    total: nodes.length, reachedCount: Object.keys(reached).length
+  };
+}
+
+
 /* ── filtering ────────────────────────────────────────────────────────── */
 
 function matchesSearch(e) {
@@ -1426,6 +1642,7 @@ function regionBox(type) {
 function renderCanvas() {
   syncIndex();
   derived = derive();
+  reachCache = null;
   geomUpdaters = [];
   textUpdaters = {};
   clear(world);
@@ -2301,13 +2518,83 @@ function renderCoverageChip() {
     text: cov.unmet.length + " unmet"
   }));
   chip.appendChild(el("span", { text: " · " }));
+  var blocked = cov.total - reach().reachedCount;
   chip.appendChild(el("span", {
-    class: cov.emptyPoles.length ? "chip-warn" : "chip-ok",
-    text: cov.emptyPoles.length + " empty"
+    class: blocked ? "chip-warn" : "chip-ok",
+    text: blocked + " blocked"
   }));
   $("#btn-coverage").setAttribute("title",
-    cov.total + " encounters · " + cov.open.length + " open threads · " +
-    cov.unmet.length + " needs with no source · " + cov.emptyPoles.length + " empty faction poles");
+    cov.total + " cards · " + cov.open.length + " open threads · " +
+    cov.unmet.length + " needs with no source · " +
+    blocked + " unreachable by any walk · " + cov.emptyPoles.length + " empty faction poles");
+}
+
+// The map-independent half of Coverage. A walk only ever shows one path, and
+// the engine deals a different board each session, so "I never saw it" is not
+// evidence. This is: nothing on any board, under any luck, opens these.
+function renderReachability() {
+  var r = reach();
+
+  var lead = r.total - r.reachedCount;
+  coverageEl.appendChild(el("div", { class: "cov-h",
+    text: "Unreachable · no walk can open these (" + lead + ")" }));
+
+  if (!lead) {
+    coverageEl.appendChild(el("div", { class: "cov-empty",
+      text: "none — every card on the board is openable by some walk" }));
+  } else {
+    r.unreachable.forEach(function (u) {
+      coverageEl.appendChild(el("button", {
+        class: "cov-reach " + u.why.kind,
+        title: "Show " + nodeLabel(u.node),
+        on: { click: function () { closePanel(); select(u.node.id); } }
+      }, [
+        el("span", { class: "k", text: nodeLabel(u.node) }),
+        el("span", { class: "reach-why", text: u.why.text })
+      ]));
+    });
+  }
+
+  if (r.cycles.length) {
+    coverageEl.appendChild(el("div", { class: "cov-h",
+      text: "Prereq loops (" + r.cycles.length + ")" }));
+    coverageEl.appendChild(el("div", { class: "cov-empty",
+      text: "Each of these waits on another that is waiting on it." }));
+    r.cycles.forEach(function (ring) {
+      coverageEl.appendChild(el("div", { class: "cov-row" }, [
+        el("span", { class: "k mono",
+          text: ring.map(function (id) { return nodeLabel(getNode(id)) || id; }).join(" → ") +
+                " → " + (nodeLabel(getNode(ring[0])) || ring[0]) })
+      ]));
+    });
+  }
+
+  if (r.deadChoices.length) {
+    coverageEl.appendChild(el("div", { class: "cov-h",
+      text: "Choices no walk can take (" + r.deadChoices.length + ")" }));
+    r.deadChoices.forEach(function (dc) {
+      coverageEl.appendChild(el("div", { class: "cov-row" }, [
+        el("span", { class: "k", text: nodeLabel(dc.node) + " · " + dc.label }),
+        el("span", { class: "v", text: dc.missing.length
+          ? "no source for " + dc.missing.join(", ")
+          : (dc.phrase || "condition never holds") })
+      ]));
+    });
+  }
+
+  if (r.looseQuests.length) {
+    coverageEl.appendChild(el("div", { class: "cov-h",
+      text: "Quests with no prereq chain (" + r.looseQuests.length + ")" }));
+    coverageEl.appendChild(el("div", { class: "cov-empty",
+      text: "Order lives in ADVANCE_QUEST effects, which the walk does not enforce — " +
+            "so every beat is on offer from the start." }));
+    r.looseQuests.forEach(function (lq) {
+      coverageEl.appendChild(el("div", { class: "cov-row" }, [
+        el("span", { class: "k", text: lq.quest.title || lq.quest.id }),
+        el("span", { class: "v", text: lq.beats + " beats" })
+      ]));
+    });
+  }
 }
 
 function renderCoveragePanel() {
@@ -2343,6 +2630,8 @@ function renderCoveragePanel() {
   } else {
     coverageEl.appendChild(el("div", { class: "cov-empty", text: "none — every need has a source" }));
   }
+
+  renderReachability();
 
   if (flagRepairs.length) {
     coverageEl.appendChild(el("div", { class: "cov-h", text: "Flag names repaired on load" }));
@@ -2391,6 +2680,13 @@ function renderCoveragePanel() {
 // reading of it.
 function systemsReport() {
   var effTypes = {}, condOps = {}, notes = [], engineChoices = 0;
+  // Operators that appear only in triggerStrength. The walk never evaluates
+  // those -- a draw weight is the engine's business -- so counting them beside
+  // the conditions it does evaluate overstated what runs.
+  var strengthOps = {};
+  // Board data the walk reads, stores and shows in the drawer, but cannot act
+  // on, because it describes a map and a deck this tool does not simulate.
+  var placement = { copies: 0, weight: 0, filter: 0, discovered: 0, recipient: 0 };
   allNodes().forEach(function (n) {
     (n.choices || []).forEach(function (c) {
       if (!c.engine) return;
@@ -2409,9 +2705,17 @@ function systemsReport() {
       });
     });
     var eng = n.engine || {};
-    [eng.triggerCondition, eng.deliverCondition, eng.triggerStrength].forEach(function (c) {
+    [eng.triggerCondition, eng.deliverCondition].forEach(function (c) {
       conditionOps(c).forEach(function (op) { condOps[op] = (condOps[op] || 0) + 1; });
     });
+    conditionOps(eng.triggerStrength).forEach(function (op) {
+      strengthOps[op] = (strengthOps[op] || 0) + 1;
+    });
+    if (eng.copies !== undefined && Number(eng.copies) > 1) placement.copies++;
+    if (eng.triggerStrength !== undefined) placement.weight++;
+    if (eng.placementFilter) placement.filter++;
+    if (eng.recipient) placement.recipient++;
+    if (n._kind === "beat" && n.deliver === "discovered") placement.discovered++;
   });
 
   var readme = (board.engine && board.engine.source && board.engine.source._readme) || null;
@@ -2426,7 +2730,8 @@ function systemsReport() {
   }
 
   return {
-    effTypes: effTypes, condOps: condOps, notes: notes, readme: readme,
+    effTypes: effTypes, condOps: condOps, strengthOps: strengthOps,
+    placement: placement, notes: notes, readme: readme,
     engineChoices: engineChoices,
     unmet: d.unmet, open: d.openFlags, seeds: seeds
   };
@@ -2453,11 +2758,13 @@ function renderSystems() {
   systemsEl.appendChild(el("div", { class: "cov-lead",
     text: r.engineChoices + " mechanized choices across " + effKeys.length + " effect types." }));
 
-  var missing = effKeys.filter(function (t) { return !SIMULATED_EFFECTS[t]; });
-  systemsEl.appendChild(el("div", { class: "cov-h", text: "Effects the run cannot carry out (" + missing.length + ")" }));
+  var missing = effKeys.filter(function (t) {
+    return !SIMULATED_EFFECTS[t] && !NAMED_ONLY_EFFECTS[t];
+  });
+  systemsEl.appendChild(el("div", { class: "cov-h", text: "Effects the walk cannot carry out (" + missing.length + ")" }));
   if (missing.length) {
     systemsEl.appendChild(el("div", { class: "leg-note",
-      text: "Preserved exactly as authored and exported unchanged. A run records each one as " +
+      text: "Preserved exactly as authored and exported unchanged. A walk records each one as " +
             "“the engine would…” rather than pretending it happened." }));
     missing.forEach(function (t) {
       var row = r.effTypes[t];
@@ -2471,10 +2778,55 @@ function renderSystems() {
       ]));
     });
   } else {
-    systemsEl.appendChild(el("div", { class: "cov-empty", text: "none — the run models every effect used" }));
+    systemsEl.appendChild(el("div", { class: "cov-empty",
+      text: "none beyond the named-only effects below" }));
   }
 
-  systemsEl.appendChild(el("div", { class: "cov-h", text: "Effects the run applies" }));
+  var named = effKeys.filter(function (t) { return NAMED_ONLY_EFFECTS[t]; });
+  if (named.length) {
+    systemsEl.appendChild(el("div", { class: "cov-h",
+      text: "Named, but nothing behind them (" + named.length + ")" }));
+    systemsEl.appendChild(el("div", { class: "leg-note",
+      text: "These read and phrase correctly, so content using them looks handled — but the walk " +
+            "has no deck and no map to act on, so nothing arrives. This is why a chain can go quiet " +
+            "with no error: the card that should have been dealt was only ever described." }));
+    named.forEach(function (t) {
+      var row = r.effTypes[t];
+      systemsEl.appendChild(el("div", { class: "sys-row" }, [
+        el("div", { class: "sys-head" }, [
+          el("span", { class: "sys-type warn", text: t }),
+          el("span", { class: "sys-count", text: String(row.count) })
+        ]),
+        el("div", { class: "sys-where", text: row.where.join(" · ") }),
+        row.notes.length ? el("div", { class: "sys-note", text: row.notes[0] }) : null
+      ]));
+    });
+  }
+
+  var pl = r.placement;
+  var plRows = [
+    ["copies", pl.copies, "field encounters with more than one copy in the deck"],
+    ["draw weight", pl.weight, "cards whose triggerStrength decides how often they come up"],
+    ["placement filter", pl.filter, "beats that can only land on certain ground"],
+    ["deliver: discovered", pl.discovered, "beats found by exploring, offered here as though automatic"],
+    ["recipient", pl.recipient, "encounters aimed at a particular player"]
+  ].filter(function (x) { return x[1]; });
+  if (plRows.length) {
+    systemsEl.appendChild(el("div", { class: "cov-h", text: "Board data the walk ignores" }));
+    systemsEl.appendChild(el("div", { class: "leg-note",
+      text: "The engine deals a different board every session; this tool walks one fixed graph. " +
+            "All of it is kept whole and exported unchanged — it just has no bearing on what a " +
+            "walk offers you." }));
+    plRows.forEach(function (x) {
+      systemsEl.appendChild(el("div", { class: "cov-row" }, [
+        el("span", { class: "k", text: x[0] }),
+        el("span", { class: "v", text: String(x[1]) })
+      ]));
+      systemsEl.appendChild(el("div", { class: "sys-where", text: x[2] }));
+    });
+  }
+
+  systemsEl.appendChild(el("div", { class: "cov-h", text: "Effects the walk applies" }));
   var applied = effKeys.filter(function (t) { return SIMULATED_EFFECTS[t]; });
   systemsEl.appendChild(el("div", { class: "cov-flags" }, applied.map(function (t) {
     return el("span", { class: "cov-flag", text: t + " " + r.effTypes[t].count });
@@ -2486,6 +2838,17 @@ function renderSystems() {
     systemsEl.appendChild(el("div", { class: "cov-flags" }, ops.map(function (o) {
       return el("span", { class: "cov-flag" + (SIMULATED_CONDITIONS[o] ? "" : " unmet"),
                           text: o + " " + r.condOps[o] });
+    })));
+  }
+
+  var sOps = Object.keys(r.strengthOps).sort();
+  if (sOps.length) {
+    systemsEl.appendChild(el("div", { class: "cov-h", text: "Operators used only for draw weight" }));
+    systemsEl.appendChild(el("div", { class: "leg-note",
+      text: "These sit in triggerStrength, which decides how likely a card is to come up. " +
+            "The walk never evaluates them." }));
+    systemsEl.appendChild(el("div", { class: "cov-flags" }, sOps.map(function (o) {
+      return el("span", { class: "cov-flag unmet", text: o + " " + r.strengthOps[o] });
     })));
   }
 
@@ -2981,12 +3344,21 @@ function evalCondition(c, unknown) {
   if (c === null || c === undefined) return true;
   if (typeof c === "boolean") return c;
   if (typeof c !== "object") return !!c;
-  if (c.has_flag) return !!run.wallet[c.has_flag.flag];
+  if (c.has_flag) return !!run.wallet[flagName(c.has_flag)];
   if (c.not) return !evalCondition(c.not, unknown);
   if (c.all) return c.all.every(function (x) { return evalCondition(x, unknown); });
   if (c.any) return c.any.some(function (x) { return evalCondition(x, unknown); });
   if (c.op) {
-    var l = evalValue(c.left, unknown), r = evalValue(c.right, unknown);
+    // An operand the walk has no model for (a unit count, a map fact) used to
+    // fall through to a comparison against a raw object and quietly answer
+    // false — closing the gate and hiding the content behind it. Unknown
+    // operands open, the same as an unknown operator does below.
+    var seen = [];
+    var l = evalValue(c.left, seen), r = evalValue(c.right, seen);
+    if (seen.length) {
+      if (unknown) seen.forEach(function (u) { unknown.push(u); });
+      return true;
+    }
     switch (c.op) {
       case "eq":  return l === r;
       case "ne":  return l !== r;
@@ -3020,7 +3392,7 @@ function evalValue(v, unknown) {
       if (run.tracks[k] !== undefined) return run.tracks[k];
       return 0;
     }
-    if (v.has_flag) return !!run.wallet[v.has_flag.flag];
+    if (v.has_flag) return !!run.wallet[flagName(v.has_flag)];
   }
   if (unknown) unknown.push(JSON.stringify(v).slice(0, 40));
   return v;
@@ -3057,8 +3429,11 @@ function applyEffect(e, log) {
     case "ADJUST_HONOR":    run.honor  += Number(p.amount) || 0;       log.lines.push(effectPhrase(e)); break;
     case "ADJUST_MENACE":   run.menace += Number(p.amount) || 0;       log.lines.push(effectPhrase(e)); break;
     case "ADVANCE_QUEST":
+      // Position is recorded, but beat order on the canvas comes from prereqs,
+      // so this does not itself move the quest along. Coverage names the quests
+      // that rely on it and have no prereq chain to fall back on.
       run.quests[p.questId] = { beatId: p.beatId, complete: false };
-      log.lines.push(effectPhrase(e));
+      owed(e, log, effectPhrase(e));
       break;
     case "COMPLETE_QUEST":
       run.quests[p.questId] = { beatId: null, complete: true };
@@ -3092,16 +3467,28 @@ function applyEffect(e, log) {
       log.pending.push({ kind: "force", effect: e });
       break;
     case "PEEK":
-      log.lines.push(effectPhrase(e));
+      owed(e, log, effectPhrase(e));
       break;
     case "DELIVER_ENCOUNTER":
-      log.lines.push("delivers " + (p.encounterId || p.id || "an encounter"));
+      // The spawn mechanism: this is how the engine puts a new card in front of
+      // a player mid-session. The walk has no deck to put it in, so it says so
+      // rather than pretending the card arrived.
+      owed(e, log, "delivers " + (p.encounterId || p.id || "an encounter"));
       break;
     default:
       // Preserved exactly as authored, surfaced as something the engine owes.
       run.asks.push({ type: e.type, id: e.id || "", params: p, note: e._note || "", source: log.source });
       log.asks.push({ type: e.type, phrase: effectPhrase(e), note: e._note || "" });
   }
+}
+
+// Say the thing plainly and book it as something the engine still owes, so it
+// shows up in the walk and in Systems instead of reading as though it ran.
+function owed(e, log, phrase) {
+  log.lines.push(phrase);
+  run.asks.push({ type: e.type, id: e.id || "", params: effParams(e),
+                  note: e._note || "", source: log.source });
+  log.asks.push({ type: e.type, phrase: phrase, note: e._note || "" });
 }
 
 function newLog(source) {
@@ -3263,7 +3650,7 @@ function openPlay() {
   closePanel();
   closeModal();
   select(null);
-  if (!allNodes().length) { toast("Nothing to play — the board is empty.", true); return; }
+  if (!allNodes().length) { toast("Nothing to walk — the board is empty.", true); return; }
   run = newRunState("any");
   playEl.hidden = false;
   renderPlay();
@@ -3271,7 +3658,7 @@ function openPlay() {
 
 function exitPlay(force) {
   if (!force && run && run.path.length && run.phase !== "summary") {
-    if (!window.confirm("Leave this run? The summary is only shown at the end.")) return;
+    if (!window.confirm("Leave this walk? The summary is only shown at the end.")) return;
   }
   run = null;
   playEl.hidden = true;
@@ -3311,7 +3698,7 @@ function playHead() {
   var flags = Object.keys(run.wallet).length;
   var head = el("div", {}, [
     el("div", { class: "play-track" }, [
-      el("span", { text: "Playtest · " }),
+      el("span", { text: "Walk · " }),
       el("b", { text: "turn " + run.turn }),
       el("span", { text: " · round " + run.round }),
       el("span", { text: " · " + (run.faction === "any" ? "no faction" : factionLabel(run.faction)) }),
@@ -3356,15 +3743,21 @@ function renderPlaySetup() {
   var sel = selectEl(run.faction, options, function (v) { run.faction = v; });
 
   playStage(
-    [el("div", { class: "play-track" }, [el("b", { text: "Playtest" })]),
+    [el("div", { class: "play-track" }, [el("b", { text: "Thread walk" })]),
      el("button", { class: "btn ghost", text: "Exit", on: { click: function () { exitPlay(true); } } })],
     [
-      el("div", { class: "play-eyebrow", text: "Set up the run" }),
-      el("h2", { class: "play-title", text: "Walk the board as a player" }),
+      el("div", { class: "play-eyebrow", text: "Set up the walk" }),
+      el("h2", { class: "play-title", text: "Follow a thread through the board" }),
       el("p", { class: "play-hook",
         text: "Pick an encounter, take a choice, and carry the flags it sets forward. " +
               "Encounters your new flags reach are surfaced first, so a thread can be followed " +
               "end to end. Nothing you do here changes the board." }),
+      el("p", { class: "play-quiet",
+        text: "This is not a session. The engine deals a different board each time — decks, " +
+              "copies, draw weights and where a card can land — and none of that is modelled " +
+              "here; every card sits in one flat pool. So a card you do not meet on this walk " +
+              "is not a card a player would miss. For that question, use Coverage → Unreachable, " +
+              "which asks it of every walk at once." }),
       el("label", { class: "dr-field", style: { display: "block", maxWidth: "320px" } }, [
         el("div", { class: "play-eyebrow", text: "Playing as" }), sel
       ]),
@@ -3374,7 +3767,7 @@ function renderPlaySetup() {
               " encounter(s) on this board are gated." })
     ],
     [
-      el("span", { class: "play-quiet", text: allNodes().length + " cards in the pool" }),
+      el("span", { class: "play-quiet", text: allNodes().length + " cards on the board" }),
       el("button", { class: "btn primary", text: "Begin", on: { click: function () {
         run.phase = "next";
         renderPlay();
@@ -3515,7 +3908,7 @@ function renderPlayPending() {
       el("div", { class: "play-eyebrow", text: "This outcome forks" }),
       el("h2", { class: "play-title", text: "One or the other" }),
       el("p", { class: "play-hook",
-        text: "The effect is written as an either/or, so the run takes one of these — not both. " +
+        text: "The effect is written as an either/or, so the walk takes one of these — not both. " +
               "Pick the branch you want to walk." })
     ];
     item.flags.forEach(function (f) {
@@ -3713,7 +4106,7 @@ function renderPlayNext() {
 
   var body = [];
   if (!run.turn) {
-    body.push(el("div", { class: "play-eyebrow", text: "Where does the run begin?" }));
+    body.push(el("div", { class: "play-eyebrow", text: "Where does the walk begin?" }));
   }
   if (unlocked.length) {
     body.push(el("div", { class: "pick-h unlocked",
@@ -3723,7 +4116,7 @@ function renderPlayNext() {
   body.push(el("div", { class: "pick-h",
     text: (unlocked.length ? "everything else " : "available ") + "(" + rest.length + ")" }));
   if (rest.length) rest.forEach(function (r) { body.push(item(r)); });
-  else body.push(el("div", { class: "play-quiet", text: "nothing else left in the pool" }));
+  else body.push(el("div", { class: "play-quiet", text: "nothing else open from here" }));
 
   if (Object.keys(run.wallet).length) {
     body.push(el("div", { class: "pick-h", text: "flags in hand" }));
@@ -3731,8 +4124,9 @@ function renderPlayNext() {
   }
 
   playStage(playHead(), body, [
-    el("span", { class: "play-quiet", text: run.path.length + " played · " + pool.length + " left" }),
-    el("button", { class: "btn", text: "End run", on: { click: function () {
+    el("span", { class: "play-quiet",
+      text: run.path.length + " walked · " + pool.length + " open from here" }),
+    el("button", { class: "btn", text: "End walk", on: { click: function () {
       run.phase = "summary";
       renderPlay();
     } } })
@@ -3743,9 +4137,9 @@ function renderPlaySummary() {
   var body = [];
   var held = Object.keys(run.wallet).sort();
 
-  body.push(el("div", { class: "play-eyebrow", text: "Run summary" }));
+  body.push(el("div", { class: "play-eyebrow", text: "Walk summary" }));
   body.push(el("h2", { class: "play-title",
-    text: run.path.length + " encounter" + (run.path.length === 1 ? "" : "s") + " played" }));
+    text: run.path.length + " encounter" + (run.path.length === 1 ? "" : "s") + " walked" }));
 
   if (run.path.length) {
     body.push(el("div", { class: "sum-h", text: "the path" }));
@@ -3770,11 +4164,22 @@ function renderPlaySummary() {
 
   // Everything the board can set, that this run never picked up.
   var allOut = uniq(allNodes().reduce(function (a, e) { return a.concat(e.out); }, [])).sort();
+  var obtainable = reach().flags;
   var missed = allOut.filter(function (f) { return !run.wallet[f]; });
-  body.push(el("div", { class: "sum-h", text: "flags this run never picked up (" + missed.length + ")" }));
+  var neverAny = missed.filter(function (f) { return !obtainable[f]; });
+  body.push(el("div", { class: "sum-h", text: "flags this walk never picked up (" + missed.length + ")" }));
   body.push(missed.length
-    ? el("div", { class: "chips" }, missed.map(function (f) { return el("span", { class: "chip plain", text: f }); }))
-    : el("div", { class: "play-quiet", text: "none — the run touched every flag on the board" }));
+    ? el("div", { class: "chips" }, missed.map(function (f) {
+        return el("span", { class: "chip " + (obtainable[f] ? "plain" : "gone"),
+                            title: obtainable[f] ? "another walk could pick this up"
+                                                 : "no walk can pick this up", text: f });
+      }))
+    : el("div", { class: "play-quiet", text: "none \u2014 this walk touched every flag on the board" }));
+  if (neverAny.length) {
+    body.push(el("div", { class: "play-quiet",
+      text: neverAny.length + " of those are out of reach on every walk, not just this one \u2014 " +
+            "nothing on the board sets them." }));
+  }
 
   var gated = allNodes().filter(function (e) {
     return !run.visited[e.id] && e.scope === "gated" && e.faction !== "none" &&
@@ -3789,15 +4194,42 @@ function renderPlaySummary() {
     });
   }
 
+  // Two very different things used to share this list. A card you simply did
+  // not pick is not a finding -- one walk is one path, and the engine deals a
+  // fresh board each session anyway. A card no walk can open is.
+  var r = reach();
   var unvisited = allNodes().filter(function (e) {
     return !run.visited[e.id] && gated.indexOf(e) === -1;
   });
-  body.push(el("div", { class: "sum-h", text: "never reached (" + unvisited.length + ")" }));
-  body.push(unvisited.length
-    ? el("div", { class: "chips" }, unvisited.map(function (e) {
-        return el("span", { class: "chip plain", text: e.title });
+  var blocked = unvisited.filter(function (e) { return !r.reached[e.id]; });
+  var skipped = unvisited.filter(function (e) { return r.reached[e.id]; });
+
+  body.push(el("div", { class: "sum-h", text: "blocked \u00b7 no walk opens these (" + blocked.length + ")" }));
+  if (blocked.length) {
+    var whyBy = {};
+    r.unreachable.forEach(function (u) { whyBy[u.node.id] = u.why; });
+    blocked.forEach(function (e) {
+      body.push(el("div", { class: "sum-note" }, [
+        el("b", { text: nodeLabel(e) }),
+        el("span", { text: " \u2014 " + ((whyBy[e.id] || {}).text || "nothing opens it") })
+      ]));
+    });
+  } else {
+    body.push(el("div", { class: "play-quiet",
+      text: "none \u2014 everything you did not see, some other walk could reach" }));
+  }
+
+  body.push(el("div", { class: "sum-h", text: "not on this walk (" + skipped.length + ")" }));
+  body.push(skipped.length
+    ? el("div", { class: "chips" }, skipped.map(function (e) {
+        return el("span", { class: "chip plain", text: pickTitle(e) });
       }))
-    : el("div", { class: "play-quiet", text: "the run covered the whole board" }));
+    : el("div", { class: "play-quiet", text: "this walk covered everything open to it" }));
+  if (skipped.length) {
+    body.push(el("div", { class: "play-quiet",
+      text: "These were open and simply not taken \u2014 a different walk, or a different board, " +
+            "reaches them. Coverage keeps the standing answer." }));
+  }
 
   // Authoring findings the walk turned up.
   var locked = {};
@@ -3824,7 +4256,7 @@ function renderPlaySummary() {
   if (unreachable.length) {
     body.push(el("div", { class: "sum-h", text: "flags no choice sets (" + unreachable.length + ")" }));
     body.push(el("div", { class: "play-quiet",
-      text: "Other choices in these encounters name a flag, so the run reads them as choice-specific — " +
+      text: "Other choices in these encounters name a flag, so the walk reads them as choice-specific — " +
             "but nothing sets these, which means no player can ever get them." }));
     unreachable.forEach(function (u) {
       body.push(el("div", { class: "sum-note" }, [
@@ -3834,11 +4266,11 @@ function renderPlaySummary() {
   }
 
   playStage(
-    [el("div", { class: "play-track" }, [el("b", { text: "Playtest · complete" })]),
+    [el("div", { class: "play-track" }, [el("b", { text: "Thread walk · done" })]),
      el("button", { class: "btn ghost", text: "Close", on: { click: function () { exitPlay(true); } } })],
     body,
     [
-      el("button", { class: "btn ghost", text: "Run again", on: { click: function () {
+      el("button", { class: "btn ghost", text: "Walk again", on: { click: function () {
         var f = run.faction;
         run = newRunState(f);
         run.phase = "next";

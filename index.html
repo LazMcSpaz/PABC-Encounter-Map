@@ -2788,8 +2788,9 @@ function renderSystems() {
       text: "Named, but nothing behind them (" + named.length + ")" }));
     systemsEl.appendChild(el("div", { class: "leg-note",
       text: "These read and phrase correctly, so content using them looks handled — but the walk " +
-            "has no deck and no map to act on, so nothing arrives. This is why a chain can go quiet " +
-            "with no error: the card that should have been dealt was only ever described." }));
+            "has no deck and no map to act on. Where a prereq chain says the same thing as an " +
+            "ADVANCE_QUEST, order still holds; where it does not, the sequence exists only in the " +
+            "engine's head. Coverage names any quest in that position." }));
     named.forEach(function (t) {
       var row = r.effTypes[t];
       systemsEl.appendChild(el("div", { class: "sys-row" }, [

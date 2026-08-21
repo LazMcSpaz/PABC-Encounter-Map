@@ -163,7 +163,18 @@ The tool reads the builder's table-grouped export directly: drop a file with
 `world_encounters`, `field_encounters`, `quests`, `quest_beats`,
 `quest_beat_prereqs`, `choices` and `effects` into **Import** and it is
 recognised on sight. The consolidated Remnant content (29 encounters, 35 quests,
-131 beats, 383 choices, 1,133 effects) loads as 160 cards on one canvas.
+131 beats, 383 choices, 1,133 effect rows) loads as 160 cards on one canvas, and
+ships here as
+[`remnant_content_consolidated_rev2.json`](remnant_content_consolidated_rev2.json)
+so the reports below can be reproduced from a clean checkout.
+
+Coverage reads it as **0 unreachable**: every card is openable by some walk, no
+prereq points off the board, no chain loops, and no choice is permanently
+locked. The one flag read that nothing writes is `sold_bunker_to_versari`,
+exactly as the file's own readme says. So when a walk goes quiet, that is the
+walk's flat pool talking, not a hole in the content — 42 beats carry no prereq
+and open at once alongside the 29 encounters, and of the prereq links that
+follow, 59 release exactly one successor each.
 
 **Nothing is dropped, and nothing is rewritten.** The source tables are kept
 whole, and every choice keeps a pointer to its own rows, so ⋯ → *Export back to

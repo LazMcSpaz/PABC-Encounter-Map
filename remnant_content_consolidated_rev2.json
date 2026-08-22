@@ -4646,7 +4646,7 @@
   },
   {
    "id": "ch_tem_scrap5",
-   "parentKind": "beat",
+   "parentKind": "quest_beat",
    "parentId": "qb_tem_3",
    "ordinal": 0,
    "label": "Send five scrap ahead",
@@ -4654,7 +4654,7 @@
   },
   {
    "id": "ch_tem_scrap10",
-   "parentKind": "beat",
+   "parentKind": "quest_beat",
    "parentId": "qb_tem_3",
    "ordinal": 1,
    "label": "Send ten scrap ahead",
@@ -4662,7 +4662,7 @@
   },
   {
    "id": "ch_tem_sendnone",
-   "parentKind": "beat",
+   "parentKind": "quest_beat",
    "parentId": "qb_tem_3",
    "ordinal": 2,
    "label": "Send nothing ahead",
@@ -4670,7 +4670,7 @@
   },
   {
    "id": "ch_tem_road_take",
-   "parentKind": "beat",
+   "parentKind": "quest_beat",
    "parentId": "qb_tem_road",
    "ordinal": 0,
    "label": "Take her terms",
@@ -4678,7 +4678,7 @@
   },
   {
    "id": "ch_tem_road_refuse",
-   "parentKind": "beat",
+   "parentKind": "quest_beat",
    "parentId": "qb_tem_road",
    "ordinal": 1,
    "label": "Send her away",
@@ -4686,7 +4686,7 @@
   },
   {
    "id": "ch_tem_road_tell",
-   "parentKind": "beat",
+   "parentKind": "quest_beat",
    "parentId": "qb_tem_road",
    "ordinal": 2,
    "label": "Send her away, and tell Tempest she came",
@@ -4694,7 +4694,7 @@
   },
   {
    "id": "ch_tem_wall_start",
-   "parentKind": "beat",
+   "parentKind": "quest_beat",
    "parentId": "qb_tem_wall",
    "ordinal": 0,
    "label": "Tell him to start",
@@ -4710,7 +4710,7 @@
   },
   {
    "id": "ch_tem_wall_turn",
-   "parentKind": "beat",
+   "parentKind": "quest_beat",
    "parentId": "qb_tem_wall",
    "ordinal": 1,
    "label": "Tell him to start, and wait",
@@ -4724,7 +4724,7 @@
   },
   {
    "id": "ch_tem_wall_leave",
-   "parentKind": "beat",
+   "parentKind": "quest_beat",
    "parentId": "qb_tem_wall",
    "ordinal": 2,
    "label": "Turn your columns around",
@@ -4732,7 +4732,7 @@
   },
   {
    "id": "ch_tem_blood_ack",
-   "parentKind": "beat",
+   "parentKind": "quest_beat",
    "parentId": "qb_tem_4_blood",
    "ordinal": 0,
    "label": "Bury yours first",
@@ -4740,7 +4740,7 @@
   },
   {
    "id": "ch_tem_turned_ack",
-   "parentKind": "beat",
+   "parentKind": "quest_beat",
    "parentId": "qb_tem_4_turned",
    "ordinal": 0,
    "label": "Take the payment",
@@ -4748,7 +4748,7 @@
   },
   {
    "id": "ch_tem_paid_ack",
-   "parentKind": "beat",
+   "parentKind": "quest_beat",
    "parentId": "qb_tem_4_paid",
    "ordinal": 0,
    "label": "Settle accounts",
@@ -4756,7 +4756,7 @@
   },
   {
    "id": "ch_tem_none_ack",
-   "parentKind": "beat",
+   "parentKind": "quest_beat",
    "parentId": "qb_tem_4_none",
    "ordinal": 0,
    "label": "Let it go",
@@ -4764,7 +4764,7 @@
   },
   {
    "id": "ch_tem_failed_ack",
-   "parentKind": "beat",
+   "parentKind": "quest_beat",
    "parentId": "qb_tem_4_failed",
    "ordinal": 0,
    "label": "Count them",
@@ -4772,7 +4772,7 @@
   },
   {
    "id": "ch_tem_turned_lost_ack",
-   "parentKind": "beat",
+   "parentKind": "quest_beat",
    "parentId": "qb_tem_4_turned_lost",
    "ordinal": 0,
    "label": "Take the payment",

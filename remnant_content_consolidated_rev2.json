@@ -518,12 +518,14 @@
   {
    "id": "q_caravan",
    "mode": "single-player",
-   "title": "The Caravan"
+   "title": "The Caravan",
+   "subjectFaction": "versari"
   },
   {
    "id": "q_massacre",
    "mode": "single-player",
-   "title": "What the Steel Traders Left"
+   "title": "What the Steel Traders Left",
+   "subjectFaction": "goldgrass"
   },
   {
    "id": "q_tempest",
@@ -533,7 +535,8 @@
   {
    "id": "q_croppers",
    "mode": "single-player",
-   "title": "The Goddess of the Fields"
+   "title": "The Goddess of the Fields",
+   "subjectFaction": "plainers"
   },
   {
    "id": "q_assembly",
@@ -603,12 +606,14 @@
   {
    "id": "q_works",
    "mode": "single-player",
-   "title": "The Works"
+   "title": "The Works",
+   "subjectFaction": "lakers"
   },
   {
    "id": "q_runner",
    "mode": "single-player",
-   "title": "The Runner"
+   "title": "The Runner",
+   "subjectFaction": "lakers"
   },
   {
    "id": "q_notes",
@@ -628,7 +633,8 @@
   {
    "id": "q_baron",
    "mode": "single-player",
-   "title": "Baron Juan Sends Word"
+   "title": "Baron Juan Sends Word",
+   "subjectFaction": "plainers"
   },
   {
    "id": "q_claim",
@@ -11538,6 +11544,20 @@
      {
       "type": "SET_PLAYER_FLAG",
       "params": {
+       "flag": "tempest_reached_in_time",
+       "value": true,
+       "duration": "permanent",
+       "target": "active"
+      }
+     }
+    ],
+    "label": "The siege at the Laker capital",
+    "visible": true,
+    "satisfiedIfFlag": "tempest_reached_the_wall",
+    "onMissed": [
+     {
+      "type": "SET_PLAYER_FLAG",
+      "params": {
        "flag": "tempest_siege_over",
        "value": true,
        "duration": "permanent",
@@ -11607,6 +11627,20 @@
      {
       "type": "SET_PLAYER_FLAG",
       "params": {
+       "flag": "tempest_reached_in_time",
+       "value": true,
+       "duration": "permanent",
+       "target": "active"
+      }
+     }
+    ],
+    "label": "The siege at the Laker capital",
+    "visible": true,
+    "satisfiedIfFlag": "tempest_reached_the_wall",
+    "onMissed": [
+     {
+      "type": "SET_PLAYER_FLAG",
+      "params": {
        "flag": "tempest_siege_over",
        "value": true,
        "duration": "permanent",
@@ -11649,6 +11683,20 @@
    "paramsJson": {
     "delayRounds": 4,
     "effects": [
+     {
+      "type": "SET_PLAYER_FLAG",
+      "params": {
+       "flag": "tempest_reached_in_time",
+       "value": true,
+       "duration": "permanent",
+       "target": "active"
+      }
+     }
+    ],
+    "label": "The siege at the Laker capital",
+    "visible": true,
+    "satisfiedIfFlag": "tempest_reached_the_wall",
+    "onMissed": [
      {
       "type": "SET_PLAYER_FLAG",
       "params": {
@@ -12145,6 +12193,45 @@
    "type": "COMPLETE_QUEST",
    "paramsJson": {
     "questId": "q_tempest"
+   }
+  },
+  {
+   "id": "ef_tem_wall_start_reached",
+   "parentKind": "choice",
+   "parentId": "ch_tem_wall_start",
+   "ordinal": 3,
+   "type": "SET_PLAYER_FLAG",
+   "paramsJson": {
+    "flag": "tempest_reached_the_wall",
+    "value": true,
+    "duration": "permanent",
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_tem_wall_turn_reached",
+   "parentKind": "choice",
+   "parentId": "ch_tem_wall_turn",
+   "ordinal": 3,
+   "type": "SET_PLAYER_FLAG",
+   "paramsJson": {
+    "flag": "tempest_reached_the_wall",
+    "value": true,
+    "duration": "permanent",
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_tem_wall_leave_reached",
+   "parentKind": "choice",
+   "parentId": "ch_tem_wall_leave",
+   "ordinal": 4,
+   "type": "SET_PLAYER_FLAG",
+   "paramsJson": {
+    "flag": "tempest_reached_the_wall",
+    "value": true,
+    "duration": "permanent",
+    "target": "active"
    }
   },
   {

@@ -11889,7 +11889,7 @@
       "type": "ADJUST_BASE_STRENGTH",
       "params": {
        "amount": -99,
-       "target": "triggering-unit"
+       "target": "units-on-hex"
       }
      },
      {
@@ -11954,7 +11954,7 @@
       "type": "ADJUST_BASE_STRENGTH",
       "params": {
        "amount": -99,
-       "target": "triggering-unit"
+       "target": "units-on-hex"
       }
      },
      {

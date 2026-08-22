@@ -1188,7 +1188,7 @@
         "player": "active"
        }
       },
-      "right": 3
+      "right": 2
      }
     ]
    },
@@ -1322,20 +1322,6 @@
    },
    "text": "It is a plough iron, very old, worked with figures along the beam and worn smooth in the places a thousand hands have held it. It is also, you learn from a Goldgrass factor who takes far too much interest in it, a thing the Goldgrass have wanted back for two generations and consider theirs by an older claim than the Croppers'.",
    "art": "An ancient worked plough iron on a blanket, figures visible along the beam."
-  },
-  {
-   "id": "qb_cro_blowback",
-   "questId": "q_croppers",
-   "ordinal": 5,
-   "deliver": "conditional",
-   "deliverCondition": {
-    "has_flag": {
-     "player": "active",
-     "flag": "cro_baron_blowback_due"
-    }
-   },
-   "text": "Whatever Baron Juan did with your people, he did it against another Plainer leader, and he did it under colors that were not his own. The main body of the Free Plainers is not confused about whose troops those were. Nothing you say about the arrangement improves the situation.",
-   "art": "A Plainer war council; a captured banner on the table that is not the Baron's."
   },
   {
    "id": "qb_asm_1",
@@ -2389,9 +2375,23 @@
    }
   },
   {
-   "id": "qb_bar_1",
+   "id": "qb_cro_blowback",
    "questId": "q_baron",
    "ordinal": 0,
+   "deliver": "conditional",
+   "deliverCondition": {
+    "has_flag": {
+     "player": "active",
+     "flag": "cro_baron_blowback_due"
+    }
+   },
+   "text": "Whatever Baron Juan did with your people, he did it against another Plainer leader, and he did it under colors that were not his own. The main body of the Free Plainers is not confused about whose troops those were. Nothing you say about the arrangement improves the situation.",
+   "art": "A Plainer war council; a captured banner on the table that is not the Baron's."
+  },
+  {
+   "id": "qb_bar_1",
+   "questId": "q_baron",
+   "ordinal": 1,
    "deliver": "conditional",
    "text": "Baron Juan sends a rider, unarmed and unhurried, with a message he has not bothered to have written down. He has heard that you wore the blame for a job he did under your colors. He is grateful. He is grateful in the specific way a man is grateful when the gratitude cost him nothing and the arrangement cost you a great deal, and he does not appear to see a difference between those two things. He has another one. Better paid. Same terms.",
    "art": "A lone unarmed rider on a road, waiting; a walled estate on the horizon behind him.",
@@ -2417,7 +2417,7 @@
   {
    "id": "qb_bar_2",
    "questId": "q_baron",
-   "ordinal": 1,
+   "ordinal": 2,
    "deliver": "conditional",
    "text": "Colonel Reba Ives does not use the title and everybody else does. She lost eleven people and a season's stock to troops flying your colors and she has been told a story about you that she is willing to hear a different version of, once, in person, because she came up in a country where a man who rides in himself is worth listening to before he is worth shooting. She is direct about what she actually wants. It is not your soldiers. It is Juan, and it is your account of the arrangement, and of those two she can only get one from you.",
    "art": "A Plainer camp with a plate-patched command wagon; a woman at a plank table, listening.",
@@ -2431,7 +2431,7 @@
   {
    "id": "qb_bar_3",
    "questId": "q_baron",
-   "ordinal": 2,
+   "ordinal": 3,
    "deliver": "conditional",
    "text": "It resolves the way these things resolve out here — not in a battle anyone names, but in who is still holding a gate at the end of the season. Whatever happens to Baron Juan, he knows which way you went. He has always been very good at knowing that.",
    "art": "A walled estate gate at dawn, seen from a distance; horses on the road below it.",
@@ -11832,13 +11832,14 @@
    }
   },
   {
-   "id": "ef_cro_blow_complete",
+   "id": "ef_cro_blow_adv",
    "parentKind": "choice",
    "parentId": "ch_cro_blowback_ack",
    "ordinal": 2,
-   "type": "COMPLETE_QUEST",
+   "type": "ADVANCE_QUEST",
    "paramsJson": {
-    "questId": "q_croppers"
+    "questId": "q_baron",
+    "beatId": "qb_cro_blowback"
    }
   },
   {

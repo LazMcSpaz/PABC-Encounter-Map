@@ -1328,10 +1328,20 @@
    "ordinal": 5,
    "deliver": "conditional",
    "deliverCondition": {
-    "has_flag": {
-     "player": "active",
-     "flag": "tempest_fought_for"
-    }
+    "all": [
+     {
+      "has_flag": {
+       "player": "active",
+       "flag": "tempest_fought_for"
+      }
+     },
+     {
+      "has_flag": {
+       "player": "active",
+       "flag": "tempest_victory"
+      }
+     }
+    ]
    },
    "text": "The wall goes in the third week, and the counting starts before the dust has settled. Tempest pays what it owes in front of its own people, which among Lakers is the whole of the ceremony. Your dead are counted separately, by your own, in a tent that smells of other men's smoke.\n\nNobody in the tent says out loud how much of the coalition is left. Everyone in it knows, and the number is smaller than it was a season ago.",
    "art": "A command tent after a storming; two sets of ledgers on the same table."
@@ -1342,10 +1352,20 @@
    "ordinal": 6,
    "deliver": "conditional",
    "deliverCondition": {
-    "has_flag": {
-     "player": "active",
-     "flag": "tempest_fought_against"
-    }
+    "all": [
+     {
+      "has_flag": {
+       "player": "active",
+       "flag": "tempest_fought_against"
+      }
+     },
+     {
+      "has_flag": {
+       "player": "active",
+       "flag": "tempest_broken"
+      }
+     }
+    ]
    },
    "text": "Tempest breaks on the ground it came to take, and it breaks partly because of where your people were standing. The coalition pays what Corrow said it would, on time and in daylight and in front of witnesses. They want it on the record that they paid you.\n\nSomewhere south of here a clan that is now considerably smaller than it was knows the name of everyone who stood on that line.",
    "art": "Coalition clerks paying out in daylight, in the open, in front of witnesses."
@@ -1467,9 +1487,57 @@
    "art": "A distant column of smoke seen from a long way off, from safety."
   },
   {
-   "id": "qb_tem_betray",
+   "id": "qb_tem_4_failed",
    "questId": "q_tempest",
    "ordinal": 9,
+   "deliver": "conditional",
+   "deliverCondition": {
+    "all": [
+     {
+      "has_flag": {
+       "player": "active",
+       "flag": "tempest_fought_for"
+      }
+     },
+     {
+      "has_flag": {
+       "player": "active",
+       "flag": "tempest_siege_failed"
+      }
+     }
+    ]
+   },
+   "text": "The wall holds. Tempest spends three more weeks in front of it and then spends the winter explaining why, and the part of that explanation which involves you is short and not flattering. You get your people back, or the ones who are coming back.",
+   "art": "A siege line in winter, the wall behind it undamaged."
+  },
+  {
+   "id": "qb_tem_4_turned_lost",
+   "questId": "q_tempest",
+   "ordinal": 10,
+   "deliver": "conditional",
+   "deliverCondition": {
+    "all": [
+     {
+      "has_flag": {
+       "player": "active",
+       "flag": "tempest_fought_against"
+      }
+     },
+     {
+      "has_flag": {
+       "player": "active",
+       "flag": "tempest_turn_failed"
+      }
+     }
+    ]
+   },
+   "text": "Tempest takes the capital anyway, and takes it knowing exactly where you were standing when they did. Corrow pays what she promised, which is the last thing the coalition does as a coalition. Nobody has to tell you what your name is worth on the lakes now.",
+   "art": "A payment counted out in a hurry, by people packing to leave."
+  },
+  {
+   "id": "qb_tem_betray",
+   "questId": "q_tempest",
+   "ordinal": 11,
    "deliver": "conditional",
    "deliverCondition": {
     "has_flag": {
@@ -3341,6 +3409,14 @@
   {
    "beatId": "qb_rd_2",
    "prereqBeatId": "qb_rd_1"
+  },
+  {
+   "beatId": "qb_tem_4_failed",
+   "prereqBeatId": "qb_tem_wall"
+  },
+  {
+   "beatId": "qb_tem_4_turned_lost",
+   "prereqBeatId": "qb_tem_wall"
   }
  ],
  "choices": [
@@ -4685,6 +4761,22 @@
    "ordinal": 0,
    "label": "Let it go",
    "outcomeText": "You let it go. There was never a version of this in which they came and told you themselves."
+  },
+  {
+   "id": "ch_tem_failed_ack",
+   "parentKind": "beat",
+   "parentId": "qb_tem_4_failed",
+   "ordinal": 0,
+   "label": "Count them",
+   "outcomeText": "You count them yourself, because it is the one part of this nobody else should do for you."
+  },
+  {
+   "id": "ch_tem_turned_lost_ack",
+   "parentKind": "beat",
+   "parentId": "qb_tem_4_turned_lost",
+   "ordinal": 0,
+   "label": "Take the payment",
+   "outcomeText": "You take it. There is nothing else left on the table and both of you know exactly what it is you are being paid for."
   },
   {
    "id": "ch_cro_approach",
@@ -8660,7 +8752,7 @@
    "type": "ADJUST_BASE_STRENGTH",
    "paramsJson": {
     "amount": -1,
-    "target": "active"
+    "target": "triggering-unit"
    }
   },
   {
@@ -9548,7 +9640,7 @@
       "type": "ADJUST_BASE_STRENGTH",
       "params": {
        "amount": -2,
-       "target": "active"
+       "target": "triggering-unit"
       }
      }
     ]
@@ -10910,7 +11002,7 @@
       "type": "ADJUST_BASE_STRENGTH",
       "params": {
        "amount": -99,
-       "target": "active"
+       "target": "triggering-unit"
       }
      }
     ]
@@ -10972,7 +11064,7 @@
       "type": "ADJUST_BASE_STRENGTH",
       "params": {
        "amount": -99,
-       "target": "active"
+       "target": "triggering-unit"
       }
      }
     ]
@@ -11173,7 +11265,7 @@
       "type": "ADJUST_BASE_STRENGTH",
       "params": {
        "amount": -99,
-       "target": "active"
+       "target": "triggering-unit"
       }
      }
     ]
@@ -11744,7 +11836,24 @@
       }
      }
     ],
-    "onLose": []
+    "onLose": [
+     {
+      "type": "ADJUST_BASE_STRENGTH",
+      "params": {
+       "amount": -99,
+       "target": "triggering-unit"
+      }
+     },
+     {
+      "type": "SET_PLAYER_FLAG",
+      "params": {
+       "flag": "tempest_siege_failed",
+       "value": true,
+       "duration": "permanent",
+       "target": "active"
+      }
+     }
+    ]
    },
    "_note": "opponentStrength provisional: capital garrison plus defenders. Must be re-measured now that allies and vassals defend as well as attack."
   },
@@ -11792,7 +11901,24 @@
       }
      }
     ],
-    "onLose": []
+    "onLose": [
+     {
+      "type": "ADJUST_BASE_STRENGTH",
+      "params": {
+       "amount": -99,
+       "target": "triggering-unit"
+      }
+     },
+     {
+      "type": "SET_PLAYER_FLAG",
+      "params": {
+       "flag": "tempest_turn_failed",
+       "value": true,
+       "duration": "permanent",
+       "target": "active"
+      }
+     }
+    ]
    },
    "_note": "You fight alongside the garrison against Tempest. Any Tempest units your scrap paid for are on the other side. opponentStrength provisional."
   },
@@ -11978,6 +12104,50 @@
    }
   },
   {
+   "id": "ef_tem_fl_std",
+   "parentKind": "choice",
+   "parentId": "ch_tem_failed_ack",
+   "ordinal": 0,
+   "type": "ADJUST_STANDING",
+   "paramsJson": {
+    "faction": "lakers",
+    "player": "active",
+    "amount": 1
+   }
+  },
+  {
+   "id": "ef_tem_fl_end",
+   "parentKind": "choice",
+   "parentId": "ch_tem_failed_ack",
+   "ordinal": 1,
+   "type": "COMPLETE_QUEST",
+   "paramsJson": {
+    "questId": "q_tempest"
+   }
+  },
+  {
+   "id": "ef_tem_tl_std",
+   "parentKind": "choice",
+   "parentId": "ch_tem_turned_lost_ack",
+   "ordinal": 0,
+   "type": "ADJUST_STANDING",
+   "paramsJson": {
+    "faction": "lakers",
+    "player": "active",
+    "amount": -6
+   }
+  },
+  {
+   "id": "ef_tem_tl_end",
+   "parentKind": "choice",
+   "parentId": "ch_tem_turned_lost_ack",
+   "ordinal": 1,
+   "type": "COMPLETE_QUEST",
+   "paramsJson": {
+    "questId": "q_tempest"
+   }
+  },
+  {
    "id": "ef_cro_app_flag",
    "parentKind": "choice",
    "parentId": "ch_cro_approach",
@@ -12091,7 +12261,7 @@
       "type": "ADJUST_BASE_STRENGTH",
       "params": {
        "amount": -2,
-       "target": "active"
+       "target": "triggering-unit"
       }
      }
     ]
@@ -12210,7 +12380,7 @@
       "type": "ADJUST_BASE_STRENGTH",
       "params": {
        "amount": -2,
-       "target": "active"
+       "target": "triggering-unit"
       }
      }
     ],
@@ -12219,7 +12389,22 @@
       "type": "ADJUST_BASE_STRENGTH",
       "params": {
        "amount": -99,
+       "target": "triggering-unit"
+      }
+     },
+     {
+      "type": "SET_PLAYER_FLAG",
+      "params": {
+       "flag": "cro_relic_lost",
+       "value": true,
+       "duration": "permanent",
        "target": "active"
+      }
+     },
+     {
+      "type": "COMPLETE_QUEST",
+      "params": {
+       "questId": "q_croppers"
       }
      }
     ]
@@ -15402,7 +15587,7 @@
         "type": "ADJUST_BASE_STRENGTH",
         "params": {
          "amount": 2,
-         "target": "active"
+         "target": "triggering-unit"
         }
        }
       ]
@@ -16059,7 +16244,7 @@
    "type": "ADJUST_BASE_STRENGTH",
    "paramsJson": {
     "amount": 1,
-    "target": "active"
+    "target": "triggering-unit"
    }
   },
   {
@@ -18862,7 +19047,7 @@
       "type": "ADJUST_BASE_STRENGTH",
       "params": {
        "amount": -2,
-       "target": "active"
+       "target": "triggering-unit"
       }
      }
     ]

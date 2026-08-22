@@ -1220,27 +1220,256 @@
      "flag": "tempest_call_due"
     }
    },
-   "text": "The call comes from the siege lines outside the Laker capital. Tempest has committed everything it has and it is not going to be enough on its own. They are asking, plainly, for how much of your strength you will put in front of that wall.",
+   "text": "A Tempest rider comes in at night on a horse that has been ridden badly, and does not apologise for either. The clan is moving on the Laker capital, and the lines will close around it inside the month. He does not ask you for a decision. He tells you where it is and when it starts, and that a wagon which gets there before the lines close is worth two that arrive after. Whether you come yourself is a separate question, and he does not ask it. Then he sleeps four hours in your stable and rides back.",
    "art": "Siege works outside a lake-port city; earthworks, ships standing off the harbour."
   },
   {
-   "id": "qb_tem_4",
+   "id": "qb_tem_road",
    "questId": "q_tempest",
    "ordinal": 3,
+   "deliver": "discovered",
+   "placementFilter": [
+    {
+     "type": "any",
+     "hasRoad": true,
+     "notControlledBy": "active"
+    },
+    {
+     "type": "any",
+     "hasRoad": true
+    }
+   ],
+   "deliverCondition": {
+    "all": [
+     {
+      "has_flag": {
+       "player": "active",
+       "flag": "tempest_allied"
+      }
+     },
+     {
+      "has_flag": {
+       "player": "active",
+       "flag": "tempest_call_due"
+      }
+     },
+     {
+      "not": {
+       "has_flag": {
+        "player": "active",
+        "flag": "turned_on_tempest"
+       }
+      }
+     },
+     {
+      "not": {
+       "has_flag": {
+        "player": "active",
+        "flag": "tempest_siege_over"
+       }
+      }
+     }
+    ]
+   },
+   "text": "They meet your column on the road in the middle of the day. No rider, no night, no apology for the hour. Ilsa Corrow speaks for four of the five clans and brings enough escort to make it clear she is not hiding.\n\nShe wants you to turn on Tempest at the battle. She says so in the first minute, before anything else, so that the rest of it can be honest.\n\nHer reason is this. Clan Tempest rules by an old right that only works while every other clan stays small. Ninety years of it has kept the lakes fighting each other, and Tempest has never once tried to stop that, because the fighting is what keeps them first. The coalition closed the capital to break the pattern. If Tempest takes the seat back, nothing changes for another ninety years.\n\nThe offer is scrap, paid on the day, and an alliance with the coalition afterwards. She names both and then stops talking.\n\nWhat she cannot offer is the one thing Tempest already has. They asked first, and you said yes.",
+   "art": "A well-escorted delegation halting a marching column on an open road at midday."
+  },
+  {
+   "id": "qb_tem_wall",
+   "questId": "q_tempest",
+   "ordinal": 4,
+   "deliver": "discovered",
+   "placementFilter": [
+    {
+     "type": "location",
+     "factionAffiliation": "lakers",
+     "hasChip": "capital"
+    },
+    {
+     "type": "location",
+     "factionAffiliation": "lakers",
+     "strategicValue": "veryHigh"
+    },
+    {
+     "type": "location",
+     "factionAffiliation": "lakers"
+    }
+   ],
+   "deliverCondition": {
+    "all": [
+     {
+      "has_flag": {
+       "player": "active",
+       "flag": "tempest_allied"
+      }
+     },
+     {
+      "has_flag": {
+       "player": "active",
+       "flag": "tempest_call_due"
+      }
+     },
+     {
+      "not": {
+       "has_flag": {
+        "player": "active",
+        "flag": "tempest_siege_over"
+       }
+      }
+     }
+    ]
+   },
+   "text": "The Laker capital is bigger than anything the rider said about it. It stands on rising ground behind two walls with the lake at its back, and the coalition has had ninety years and five clans' revenues to make it what it is. Whoever holds it rules the lakes — which is why Tempest has come for it, and why it is defended the way it is.\n\nYour columns are up on the left of the line by midday. A Tempest captain — grey, unhurried, missing most of one ear — walks the length of your front, looks at what you have brought, and asks whether you are certain. He is not offering you a way out. He has seen people get this close and realise they had imagined something smaller. He asks once. Then he waits, and the waiting is the courtesy.",
+   "art": "Siege lines before a double-walled city on rising ground, a lake behind it."
+  },
+  {
+   "id": "qb_tem_4_blood",
+   "questId": "q_tempest",
+   "ordinal": 5,
    "deliver": "conditional",
    "deliverCondition": {
     "has_flag": {
      "player": "active",
-     "flag": "tempest_resolved"
+     "flag": "tempest_fought_for"
     }
    },
+   "text": "The wall goes in the third week, and the counting starts before the dust has settled. Tempest pays what it owes in front of its own people, which among Lakers is the whole of the ceremony. Your dead are counted separately, by your own, in a tent that smells of other men's smoke.\n\nNobody in the tent says out loud how much of the coalition is left. Everyone in it knows, and the number is smaller than it was a season ago.",
+   "art": "A command tent after a storming; two sets of ledgers on the same table."
+  },
+  {
+   "id": "qb_tem_4_turned",
+   "questId": "q_tempest",
+   "ordinal": 6,
+   "deliver": "conditional",
+   "deliverCondition": {
+    "has_flag": {
+     "player": "active",
+     "flag": "tempest_fought_against"
+    }
+   },
+   "text": "Tempest breaks on the ground it came to take, and it breaks partly because of where your people were standing. The coalition pays what Corrow said it would, on time and in daylight and in front of witnesses. They want it on the record that they paid you.\n\nSomewhere south of here a clan that is now considerably smaller than it was knows the name of everyone who stood on that line.",
+   "art": "Coalition clerks paying out in daylight, in the open, in front of witnesses."
+  },
+  {
+   "id": "qb_tem_4_paid",
+   "questId": "q_tempest",
+   "ordinal": 7,
+   "deliver": "conditional",
+   "deliverCondition": {
+    "all": [
+     {
+      "has_flag": {
+       "player": "active",
+       "flag": "tempest_siege_over"
+      }
+     },
+     {
+      "not": {
+       "has_flag": {
+        "player": "active",
+        "flag": "tempest_fought_for"
+       }
+      }
+     },
+     {
+      "not": {
+       "has_flag": {
+        "player": "active",
+        "flag": "tempest_fought_against"
+       }
+      }
+     },
+     {
+      "not": {
+       "has_flag": {
+        "player": "active",
+        "flag": "tempest_walked_away"
+       }
+      }
+     },
+     {
+      "any": [
+       {
+        "has_flag": {
+         "player": "active",
+         "flag": "tempest_scrap_1"
+        }
+       },
+       {
+        "has_flag": {
+         "player": "active",
+         "flag": "tempest_scrap_2"
+        }
+       }
+      ]
+     }
+    ]
+   },
    "text": "The siege ends the way sieges end, and the accounting begins immediately.",
-   "art": "A breached gate; two banners on the same wall."
+   "art": "A long list being read aloud from a board; a clerk not looking up."
+  },
+  {
+   "id": "qb_tem_4_none",
+   "questId": "q_tempest",
+   "ordinal": 8,
+   "deliver": "conditional",
+   "deliverCondition": {
+    "all": [
+     {
+      "has_flag": {
+       "player": "active",
+       "flag": "tempest_siege_over"
+      }
+     },
+     {
+      "not": {
+       "has_flag": {
+        "player": "active",
+        "flag": "tempest_fought_for"
+       }
+      }
+     },
+     {
+      "not": {
+       "has_flag": {
+        "player": "active",
+        "flag": "tempest_fought_against"
+       }
+      }
+     },
+     {
+      "not": {
+       "has_flag": {
+        "player": "active",
+        "flag": "tempest_walked_away"
+       }
+      }
+     },
+     {
+      "not": {
+       "has_flag": {
+        "player": "active",
+        "flag": "tempest_scrap_1"
+       }
+      }
+     },
+     {
+      "not": {
+       "has_flag": {
+        "player": "active",
+        "flag": "tempest_scrap_2"
+       }
+      }
+     }
+    ]
+   },
+   "text": "Word of how the siege ended reaches you the way news reaches a man who was not there: late, secondhand, and from somebody who assumes he has no particular interest in it.",
+   "art": "A distant column of smoke seen from a long way off, from safety."
   },
   {
    "id": "qb_tem_betray",
    "questId": "q_tempest",
-   "ordinal": 4,
+   "ordinal": 9,
    "deliver": "conditional",
    "deliverCondition": {
     "has_flag": {
@@ -2850,7 +3079,27 @@
    "prereqBeatId": "qb_tem_2"
   },
   {
-   "beatId": "qb_tem_4",
+   "beatId": "qb_tem_road",
+   "prereqBeatId": "qb_tem_3"
+  },
+  {
+   "beatId": "qb_tem_wall",
+   "prereqBeatId": "qb_tem_3"
+  },
+  {
+   "beatId": "qb_tem_4_blood",
+   "prereqBeatId": "qb_tem_wall"
+  },
+  {
+   "beatId": "qb_tem_4_turned",
+   "prereqBeatId": "qb_tem_wall"
+  },
+  {
+   "beatId": "qb_tem_4_paid",
+   "prereqBeatId": "qb_tem_3"
+  },
+  {
+   "beatId": "qb_tem_4_none",
    "prereqBeatId": "qb_tem_3"
   },
   {
@@ -4292,22 +4541,14 @@
    "parentKind": "quest_beat",
    "parentId": "qb_tem_2",
    "ordinal": 0,
-   "label": "Offer him your soldiers",
+   "label": "Take his terms",
    "outcomeText": "You commit to the field. He does not thank you extravagantly; among Lakers, that would suggest he had doubted you."
-  },
-  {
-   "id": "ch_tem_material",
-   "parentKind": "quest_beat",
-   "parentId": "qb_tem_2",
-   "ordinal": 1,
-   "label": "Offer material support",
-   "outcomeText": "Twelve loads, paid out over the campaign. He accepts it as what it is, and files away what it isn't."
   },
   {
    "id": "ch_tem_reject",
    "parentKind": "quest_beat",
    "parentId": "qb_tem_2",
-   "ordinal": 2,
+   "ordinal": 1,
    "label": "Refuse him",
    "outcomeText": "You turn down a war and a clan in the same sentence. He leaves without discourtesy and Tempest will remember this for a generation."
   },
@@ -4315,33 +4556,9 @@
    "id": "ch_tem_betray",
    "parentKind": "quest_beat",
    "parentId": "qb_tem_2",
-   "ordinal": 3,
+   "ordinal": 2,
    "label": "Warn the Lakers",
    "outcomeText": "You send everything he told you to the coalition, in detail, while he is still riding home."
-  },
-  {
-   "id": "ch_tem_commit",
-   "parentKind": "quest_beat",
-   "parentId": "qb_tem_3",
-   "ordinal": 0,
-   "label": "Commit units to the siege",
-   "outcomeText": "Your columns go in on the northern works alongside Tempest's."
-  },
-  {
-   "id": "ch_tem_withhold",
-   "parentKind": "quest_beat",
-   "parentId": "qb_tem_3",
-   "ordinal": 1,
-   "label": "Send nothing",
-   "outcomeText": "You let the call go unanswered. They notice immediately and say nothing until it is over."
-  },
-  {
-   "id": "ch_tem_result",
-   "parentKind": "quest_beat",
-   "parentId": "qb_tem_4",
-   "ordinal": 0,
-   "label": "Settle accounts",
-   "outcomeText": "Tempest is precise about what it owes and equally precise about what it doesn't."
   },
   {
    "id": "ch_tem_betray_ack",
@@ -4350,6 +4567,124 @@
    "ordinal": 0,
    "label": "Take the payment",
    "outcomeText": "You take it. It is not very much and it was never going to be."
+  },
+  {
+   "id": "ch_tem_scrap5",
+   "parentKind": "beat",
+   "parentId": "qb_tem_3",
+   "ordinal": 0,
+   "label": "Send five scrap ahead",
+   "outcomeText": "Five scrap goes east with his escort. Tempest will spend it on men before you get there. He accepts it as what it is and files away what it isn't."
+  },
+  {
+   "id": "ch_tem_scrap10",
+   "parentKind": "beat",
+   "parentId": "qb_tem_3",
+   "ordinal": 1,
+   "label": "Send ten scrap ahead",
+   "outcomeText": "Ten scrap goes east with his escort. That is twice what he asked for and he does not remark on it. Tempest will have two companies standing because of it before the digging is done."
+  },
+  {
+   "id": "ch_tem_sendnone",
+   "parentKind": "beat",
+   "parentId": "qb_tem_3",
+   "ordinal": 2,
+   "label": "Send nothing ahead",
+   "outcomeText": "You send the rider back with your compliments and nothing else. What you do about the wall itself is still in front of you."
+  },
+  {
+   "id": "ch_tem_road_take",
+   "parentKind": "beat",
+   "parentId": "qb_tem_road",
+   "ordinal": 0,
+   "label": "Take her terms",
+   "outcomeText": "You settle it in an hour, on a road. She does not shake your hand at the end. There is no document, no seal and no witness, which is exactly what both of you want."
+  },
+  {
+   "id": "ch_tem_road_refuse",
+   "parentKind": "beat",
+   "parentId": "qb_tem_road",
+   "ordinal": 1,
+   "label": "Send her away",
+   "outcomeText": "She goes without arguing, which is worse than arguing. Nobody will ever know she came, and that includes the people you are about to fight for."
+  },
+  {
+   "id": "ch_tem_road_tell",
+   "parentKind": "beat",
+   "parentId": "qb_tem_road",
+   "ordinal": 2,
+   "label": "Send her away, and tell Tempest she came",
+   "outcomeText": "The captain hears it out, asks two questions about the size of her escort and none about her offer, and thanks you so briefly that it takes a moment to recognise as thanks. It will be remembered a great deal longer than it was said."
+  },
+  {
+   "id": "ch_tem_wall_start",
+   "parentKind": "beat",
+   "parentId": "qb_tem_wall",
+   "ordinal": 0,
+   "label": "Tell him to start",
+   "condition": {
+    "not": {
+     "has_flag": {
+      "player": "active",
+      "flag": "turned_on_tempest"
+     }
+    }
+   },
+   "outcomeText": "He nods the way a man nods at a receipt and goes back down the line without hurrying, and somewhere behind him a horn goes."
+  },
+  {
+   "id": "ch_tem_wall_turn",
+   "parentKind": "beat",
+   "parentId": "qb_tem_wall",
+   "ordinal": 1,
+   "label": "Tell him to start, and wait",
+   "condition": {
+    "has_flag": {
+     "player": "active",
+     "flag": "turned_on_tempest"
+    }
+   },
+   "outcomeText": "He nods the way a man nods at a receipt and goes back down the line without hurrying. You watch him all the way, which you did not intend to do."
+  },
+  {
+   "id": "ch_tem_wall_leave",
+   "parentKind": "beat",
+   "parentId": "qb_tem_wall",
+   "ordinal": 2,
+   "label": "Turn your columns around",
+   "outcomeText": "You take your people back off the line in good order and in full view, which is the only way it can be done. The captain does not argue and does not watch you go. By the time you make camp that night it is already a thing that is known."
+  },
+  {
+   "id": "ch_tem_blood_ack",
+   "parentKind": "beat",
+   "parentId": "qb_tem_4_blood",
+   "ordinal": 0,
+   "label": "Bury yours first",
+   "outcomeText": "They pay in full and they pay ahead of their own clans, and nobody objects out loud. It is not gratitude. It is a debt being closed where everyone can see it closed."
+  },
+  {
+   "id": "ch_tem_turned_ack",
+   "parentKind": "beat",
+   "parentId": "qb_tem_4_turned",
+   "ordinal": 0,
+   "label": "Take the payment",
+   "outcomeText": "You take it. It spends exactly as well as any other money, which is the thing nobody warns you about."
+  },
+  {
+   "id": "ch_tem_paid_ack",
+   "parentKind": "beat",
+   "parentId": "qb_tem_4_paid",
+   "ordinal": 0,
+   "label": "Settle accounts",
+   "outcomeText": "Tempest is precise about what it owes and equally precise about what it doesn't. Your scrap is on the list. It is on it beneath every clan that sent men, and the clerk reading it does not look up."
+  },
+  {
+   "id": "ch_tem_none_ack",
+   "parentKind": "beat",
+   "parentId": "qb_tem_4_none",
+   "ordinal": 0,
+   "label": "Let it go",
+   "outcomeText": "You let it go. There was never a version of this in which they came and told you themselves."
   },
   {
    "id": "ch_cro_approach",
@@ -10933,7 +11268,7 @@
    "ordinal": 0,
    "type": "SET_PLAYER_FLAG",
    "paramsJson": {
-    "flag": "tempest_direct_support",
+    "flag": "tempest_allied",
     "value": true,
     "duration": "permanent",
     "target": "active"
@@ -10965,83 +11300,6 @@
    "parentKind": "choice",
    "parentId": "ch_tem_direct",
    "ordinal": 2,
-   "type": "ADVANCE_QUEST",
-   "paramsJson": {
-    "questId": "q_tempest",
-    "beatId": "qb_tem_2"
-   }
-  },
-  {
-   "id": "ef_tem_mat_flag",
-   "parentKind": "choice",
-   "parentId": "ch_tem_material",
-   "ordinal": 0,
-   "type": "SET_PLAYER_FLAG",
-   "paramsJson": {
-    "flag": "tempest_material_only",
-    "value": true,
-    "duration": "permanent",
-    "target": "active"
-   }
-  },
-  {
-   "id": "ef_tem_mat_cost1",
-   "parentKind": "choice",
-   "parentId": "ch_tem_material",
-   "ordinal": 1,
-   "type": "ADJUST_RESOURCE",
-   "paramsJson": {
-    "resource": "Resource",
-    "amount": -6,
-    "target": "active"
-   }
-  },
-  {
-   "id": "ef_tem_mat_cost2",
-   "parentKind": "choice",
-   "parentId": "ch_tem_material",
-   "ordinal": 2,
-   "type": "QUEUE_DEFERRED",
-   "paramsJson": {
-    "delayRounds": 3,
-    "effects": [
-     {
-      "type": "ADJUST_RESOURCE",
-      "params": {
-       "resource": "Resource",
-       "amount": -6,
-       "target": "active"
-      }
-     }
-    ]
-   }
-  },
-  {
-   "id": "ef_tem_mat_timer",
-   "parentKind": "choice",
-   "parentId": "ch_tem_material",
-   "ordinal": 3,
-   "type": "QUEUE_DEFERRED",
-   "paramsJson": {
-    "delayRounds": 4,
-    "effects": [
-     {
-      "type": "SET_PLAYER_FLAG",
-      "params": {
-       "flag": "tempest_call_due",
-       "value": true,
-       "duration": "permanent",
-       "target": "active"
-      }
-     }
-    ]
-   }
-  },
-  {
-   "id": "ef_tem_mat_adv",
-   "parentKind": "choice",
-   "parentId": "ch_tem_material",
-   "ordinal": 4,
    "type": "ADVANCE_QUEST",
    "paramsJson": {
     "questId": "q_tempest",
@@ -11140,143 +11398,55 @@
    }
   },
   {
-   "id": "ef_tem_commit_choice",
+   "id": "ef_tem_s5_cost",
    "parentKind": "choice",
-   "parentId": "ch_tem_commit",
+   "parentId": "ch_tem_scrap5",
    "ordinal": 0,
-   "type": "FORCE_CHOICE",
+   "type": "ADJUST_RESOURCE",
    "paramsJson": {
-    "chooser": "active",
-    "target": "active",
-    "options": [
-     {
-      "label": "One unit",
-      "effects": [
-       {
-        "type": "SET_PLAYER_FLAG",
-        "params": {
-         "flag": "tempest_committed_1",
-         "value": true,
-         "duration": "permanent",
-         "target": "active"
-        }
-       },
-       {
-        "type": "ADJUST_STANDING",
-        "params": {
-         "faction": "lakers",
-         "player": "active",
-         "amount": 2
-        }
-       }
-      ]
-     },
-     {
-      "label": "Two units",
-      "effects": [
-       {
-        "type": "SET_PLAYER_FLAG",
-        "params": {
-         "flag": "tempest_committed_2",
-         "value": true,
-         "duration": "permanent",
-         "target": "active"
-        }
-       },
-       {
-        "type": "ADJUST_STANDING",
-        "params": {
-         "faction": "lakers",
-         "player": "active",
-         "amount": 4
-        }
-       }
-      ]
-     },
-     {
-      "label": "Three or more",
-      "effects": [
-       {
-        "type": "SET_PLAYER_FLAG",
-        "params": {
-         "flag": "tempest_committed_3",
-         "value": true,
-         "duration": "permanent",
-         "target": "active"
-        }
-       },
-       {
-        "type": "ADJUST_STANDING",
-        "params": {
-         "faction": "lakers",
-         "player": "active",
-         "amount": 6
-        }
-       }
-      ]
-     }
-    ]
-   },
-   "_note": "Standing gain caps at three units. Real implementation should move the committed units to the siege hex and pay 5 scrap per survivor at qb_tem_4."
+    "resource": "Resource",
+    "amount": -5,
+    "target": "active"
+   }
   },
   {
-   "id": "ef_tem_commit_timer",
+   "id": "ef_tem_s5_flag",
    "parentKind": "choice",
-   "parentId": "ch_tem_commit",
+   "parentId": "ch_tem_scrap5",
    "ordinal": 1,
-   "type": "QUEUE_DEFERRED",
-   "paramsJson": {
-    "delayRounds": 3,
-    "effects": [
-     {
-      "type": "SET_PLAYER_FLAG",
-      "params": {
-       "flag": "tempest_resolved",
-       "value": true,
-       "duration": "permanent",
-       "target": "active"
-      }
-     }
-    ]
-   }
-  },
-  {
-   "id": "ef_tem_commit_adv",
-   "parentKind": "choice",
-   "parentId": "ch_tem_commit",
-   "ordinal": 2,
-   "type": "ADVANCE_QUEST",
-   "paramsJson": {
-    "questId": "q_tempest",
-    "beatId": "qb_tem_3"
-   }
-  },
-  {
-   "id": "ef_tem_with_flag",
-   "parentKind": "choice",
-   "parentId": "ch_tem_withhold",
-   "ordinal": 0,
    "type": "SET_PLAYER_FLAG",
    "paramsJson": {
-    "flag": "tempest_withheld",
+    "flag": "tempest_scrap_1",
     "value": true,
     "duration": "permanent",
     "target": "active"
    }
   },
   {
-   "id": "ef_tem_with_timer",
+   "id": "ef_tem_s5_std",
    "parentKind": "choice",
-   "parentId": "ch_tem_withhold",
-   "ordinal": 1,
+   "parentId": "ch_tem_scrap5",
+   "ordinal": 2,
+   "type": "ADJUST_STANDING",
+   "paramsJson": {
+    "faction": "lakers",
+    "player": "active",
+    "amount": 1
+   }
+  },
+  {
+   "id": "ef_tem_s5_deadline",
+   "parentKind": "choice",
+   "parentId": "ch_tem_scrap5",
+   "ordinal": 3,
    "type": "QUEUE_DEFERRED",
    "paramsJson": {
-    "delayRounds": 3,
+    "delayRounds": 4,
     "effects": [
      {
       "type": "SET_PLAYER_FLAG",
       "params": {
-       "flag": "tempest_resolved",
+       "flag": "tempest_siege_over",
        "value": true,
        "duration": "permanent",
        "target": "active"
@@ -11286,9 +11456,123 @@
    }
   },
   {
-   "id": "ef_tem_with_adv",
+   "id": "ef_tem_s5_adv",
    "parentKind": "choice",
-   "parentId": "ch_tem_withhold",
+   "parentId": "ch_tem_scrap5",
+   "ordinal": 4,
+   "type": "ADVANCE_QUEST",
+   "paramsJson": {
+    "questId": "q_tempest",
+    "beatId": "qb_tem_3"
+   }
+  },
+  {
+   "id": "ef_tem_s10_cost",
+   "parentKind": "choice",
+   "parentId": "ch_tem_scrap10",
+   "ordinal": 0,
+   "type": "ADJUST_RESOURCE",
+   "paramsJson": {
+    "resource": "Resource",
+    "amount": -10,
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_tem_s10_flag",
+   "parentKind": "choice",
+   "parentId": "ch_tem_scrap10",
+   "ordinal": 1,
+   "type": "SET_PLAYER_FLAG",
+   "paramsJson": {
+    "flag": "tempest_scrap_2",
+    "value": true,
+    "duration": "permanent",
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_tem_s10_std",
+   "parentKind": "choice",
+   "parentId": "ch_tem_scrap10",
+   "ordinal": 2,
+   "type": "ADJUST_STANDING",
+   "paramsJson": {
+    "faction": "lakers",
+    "player": "active",
+    "amount": 2
+   }
+  },
+  {
+   "id": "ef_tem_s10_deadline",
+   "parentKind": "choice",
+   "parentId": "ch_tem_scrap10",
+   "ordinal": 3,
+   "type": "QUEUE_DEFERRED",
+   "paramsJson": {
+    "delayRounds": 4,
+    "effects": [
+     {
+      "type": "SET_PLAYER_FLAG",
+      "params": {
+       "flag": "tempest_siege_over",
+       "value": true,
+       "duration": "permanent",
+       "target": "active"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "ef_tem_s10_adv",
+   "parentKind": "choice",
+   "parentId": "ch_tem_scrap10",
+   "ordinal": 4,
+   "type": "ADVANCE_QUEST",
+   "paramsJson": {
+    "questId": "q_tempest",
+    "beatId": "qb_tem_3"
+   }
+  },
+  {
+   "id": "ef_tem_sn_flag",
+   "parentKind": "choice",
+   "parentId": "ch_tem_sendnone",
+   "ordinal": 0,
+   "type": "SET_PLAYER_FLAG",
+   "paramsJson": {
+    "flag": "tempest_sent_nothing",
+    "value": true,
+    "duration": "permanent",
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_tem_sn_deadline",
+   "parentKind": "choice",
+   "parentId": "ch_tem_sendnone",
+   "ordinal": 1,
+   "type": "QUEUE_DEFERRED",
+   "paramsJson": {
+    "delayRounds": 4,
+    "effects": [
+     {
+      "type": "SET_PLAYER_FLAG",
+      "params": {
+       "flag": "tempest_siege_over",
+       "value": true,
+       "duration": "permanent",
+       "target": "active"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "ef_tem_sn_adv",
+   "parentKind": "choice",
+   "parentId": "ch_tem_sendnone",
    "ordinal": 2,
    "type": "ADVANCE_QUEST",
    "paramsJson": {
@@ -11297,14 +11581,159 @@
    }
   },
   {
-   "id": "ef_tem_result_roll",
+   "id": "ef_tem_rt_flag",
    "parentKind": "choice",
-   "parentId": "ch_tem_result",
+   "parentId": "ch_tem_road_take",
    "ordinal": 0,
-   "type": "ROLL",
+   "type": "SET_PLAYER_FLAG",
    "paramsJson": {
-    "chance": 60,
-    "onSuccess": [
+    "flag": "turned_on_tempest",
+    "value": true,
+    "duration": "permanent",
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_tem_rt_ally",
+   "parentKind": "choice",
+   "parentId": "ch_tem_road_take",
+   "ordinal": 1,
+   "type": "SET_PLAYER_FLAG",
+   "paramsJson": {
+    "flag": "laker_coalition_ally",
+    "value": true,
+    "duration": "permanent",
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_tem_rt_hon",
+   "parentKind": "choice",
+   "parentId": "ch_tem_road_take",
+   "ordinal": 2,
+   "type": "ADJUST_HONOR",
+   "paramsJson": {
+    "amount": -3,
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_tem_rt_adv",
+   "parentKind": "choice",
+   "parentId": "ch_tem_road_take",
+   "ordinal": 3,
+   "type": "ADVANCE_QUEST",
+   "paramsJson": {
+    "questId": "q_tempest",
+    "beatId": "qb_tem_road"
+   }
+  },
+  {
+   "id": "ef_tem_rr_flag",
+   "parentKind": "choice",
+   "parentId": "ch_tem_road_refuse",
+   "ordinal": 0,
+   "type": "SET_PLAYER_FLAG",
+   "paramsJson": {
+    "flag": "refused_the_coalition",
+    "value": true,
+    "duration": "permanent",
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_tem_rr_hon",
+   "parentKind": "choice",
+   "parentId": "ch_tem_road_refuse",
+   "ordinal": 1,
+   "type": "ADJUST_HONOR",
+   "paramsJson": {
+    "amount": 1,
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_tem_rr_adv",
+   "parentKind": "choice",
+   "parentId": "ch_tem_road_refuse",
+   "ordinal": 2,
+   "type": "ADVANCE_QUEST",
+   "paramsJson": {
+    "questId": "q_tempest",
+    "beatId": "qb_tem_road"
+   }
+  },
+  {
+   "id": "ef_tem_rl_flag",
+   "parentKind": "choice",
+   "parentId": "ch_tem_road_tell",
+   "ordinal": 0,
+   "type": "SET_PLAYER_FLAG",
+   "paramsJson": {
+    "flag": "told_tempest_of_the_offer",
+    "value": true,
+    "duration": "permanent",
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_tem_rl_ref",
+   "parentKind": "choice",
+   "parentId": "ch_tem_road_tell",
+   "ordinal": 1,
+   "type": "SET_PLAYER_FLAG",
+   "paramsJson": {
+    "flag": "refused_the_coalition",
+    "value": true,
+    "duration": "permanent",
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_tem_rl_hon",
+   "parentKind": "choice",
+   "parentId": "ch_tem_road_tell",
+   "ordinal": 2,
+   "type": "ADJUST_HONOR",
+   "paramsJson": {
+    "amount": 1,
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_tem_rl_adv",
+   "parentKind": "choice",
+   "parentId": "ch_tem_road_tell",
+   "ordinal": 3,
+   "type": "ADVANCE_QUEST",
+   "paramsJson": {
+    "questId": "q_tempest",
+    "beatId": "qb_tem_road"
+   }
+  },
+  {
+   "id": "ef_tem_ws_flag",
+   "parentKind": "choice",
+   "parentId": "ch_tem_wall_start",
+   "ordinal": 0,
+   "type": "SET_PLAYER_FLAG",
+   "paramsJson": {
+    "flag": "tempest_fought_for",
+    "value": true,
+    "duration": "permanent",
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_tem_ws_contest",
+   "parentKind": "choice",
+   "parentId": "ch_tem_wall_start",
+   "ordinal": 1,
+   "type": "CONTEST",
+   "paramsJson": {
+    "opponentStrength": 12,
+    "target": "active",
+    "onWin": [
      {
       "type": "SET_PLAYER_FLAG",
       "params": {
@@ -11313,41 +11742,235 @@
        "duration": "permanent",
        "target": "active"
       }
-     },
+     }
+    ],
+    "onLose": []
+   },
+   "_note": "opponentStrength provisional: capital garrison plus defenders. Must be re-measured now that allies and vassals defend as well as attack."
+  },
+  {
+   "id": "ef_tem_ws_adv",
+   "parentKind": "choice",
+   "parentId": "ch_tem_wall_start",
+   "ordinal": 2,
+   "type": "ADVANCE_QUEST",
+   "paramsJson": {
+    "questId": "q_tempest",
+    "beatId": "qb_tem_wall"
+   }
+  },
+  {
+   "id": "ef_tem_wt_flag",
+   "parentKind": "choice",
+   "parentId": "ch_tem_wall_turn",
+   "ordinal": 0,
+   "type": "SET_PLAYER_FLAG",
+   "paramsJson": {
+    "flag": "tempest_fought_against",
+    "value": true,
+    "duration": "permanent",
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_tem_wt_contest",
+   "parentKind": "choice",
+   "parentId": "ch_tem_wall_turn",
+   "ordinal": 1,
+   "type": "CONTEST",
+   "paramsJson": {
+    "opponentStrength": 8,
+    "target": "active",
+    "onWin": [
      {
-      "type": "ADJUST_STANDING",
+      "type": "SET_PLAYER_FLAG",
       "params": {
-       "faction": "lakers",
-       "player": "active",
-       "amount": 6
-      }
-     },
-     {
-      "type": "ADJUST_RESOURCE",
-      "params": {
-       "resource": "Resource",
-       "amount": 10,
+       "flag": "tempest_broken",
+       "value": true,
+       "duration": "permanent",
        "target": "active"
       }
      }
     ],
-    "onFail": [
-     {
-      "type": "ADJUST_STANDING",
-      "params": {
-       "faction": "lakers",
-       "player": "active",
-       "amount": -4
-      }
-     }
-    ]
+    "onLose": []
    },
-   "_note": "Victory chance should scale with committed units. Material-only supporters get no spoils and no alliance regardless of outcome — gate on tempest_material_only."
+   "_note": "You fight alongside the garrison against Tempest. Any Tempest units your scrap paid for are on the other side. opponentStrength provisional."
   },
   {
-   "id": "ef_tem_result_end",
+   "id": "ef_tem_wt_adv",
    "parentKind": "choice",
-   "parentId": "ch_tem_result",
+   "parentId": "ch_tem_wall_turn",
+   "ordinal": 2,
+   "type": "ADVANCE_QUEST",
+   "paramsJson": {
+    "questId": "q_tempest",
+    "beatId": "qb_tem_wall"
+   }
+  },
+  {
+   "id": "ef_tem_wl_flag",
+   "parentKind": "choice",
+   "parentId": "ch_tem_wall_leave",
+   "ordinal": 0,
+   "type": "SET_PLAYER_FLAG",
+   "paramsJson": {
+    "flag": "tempest_walked_away",
+    "value": true,
+    "duration": "permanent",
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_tem_wl_std",
+   "parentKind": "choice",
+   "parentId": "ch_tem_wall_leave",
+   "ordinal": 1,
+   "type": "ADJUST_STANDING",
+   "paramsJson": {
+    "faction": "lakers",
+    "player": "active",
+    "amount": -8
+   }
+  },
+  {
+   "id": "ef_tem_wl_hon",
+   "parentKind": "choice",
+   "parentId": "ch_tem_wall_leave",
+   "ordinal": 2,
+   "type": "ADJUST_HONOR",
+   "paramsJson": {
+    "amount": -2,
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_tem_wl_end",
+   "parentKind": "choice",
+   "parentId": "ch_tem_wall_leave",
+   "ordinal": 3,
+   "type": "COMPLETE_QUEST",
+   "paramsJson": {
+    "questId": "q_tempest"
+   }
+  },
+  {
+   "id": "ef_tem_bl_std",
+   "parentKind": "choice",
+   "parentId": "ch_tem_blood_ack",
+   "ordinal": 0,
+   "type": "ADJUST_STANDING",
+   "paramsJson": {
+    "faction": "lakers",
+    "player": "active",
+    "amount": 6
+   }
+  },
+  {
+   "id": "ef_tem_bl_res",
+   "parentKind": "choice",
+   "parentId": "ch_tem_blood_ack",
+   "ordinal": 1,
+   "type": "ADJUST_RESOURCE",
+   "paramsJson": {
+    "resource": "Resource",
+    "amount": 10,
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_tem_bl_end",
+   "parentKind": "choice",
+   "parentId": "ch_tem_blood_ack",
+   "ordinal": 2,
+   "type": "COMPLETE_QUEST",
+   "paramsJson": {
+    "questId": "q_tempest"
+   }
+  },
+  {
+   "id": "ef_tem_tn_res",
+   "parentKind": "choice",
+   "parentId": "ch_tem_turned_ack",
+   "ordinal": 0,
+   "type": "ADJUST_RESOURCE",
+   "paramsJson": {
+    "resource": "Resource",
+    "amount": 12,
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_tem_tn_std",
+   "parentKind": "choice",
+   "parentId": "ch_tem_turned_ack",
+   "ordinal": 1,
+   "type": "ADJUST_STANDING",
+   "paramsJson": {
+    "faction": "lakers",
+    "player": "active",
+    "amount": 6
+   }
+  },
+  {
+   "id": "ef_tem_tn_end",
+   "parentKind": "choice",
+   "parentId": "ch_tem_turned_ack",
+   "ordinal": 2,
+   "type": "COMPLETE_QUEST",
+   "paramsJson": {
+    "questId": "q_tempest"
+   }
+  },
+  {
+   "id": "ef_tem_pd_std",
+   "parentKind": "choice",
+   "parentId": "ch_tem_paid_ack",
+   "ordinal": 0,
+   "type": "ADJUST_STANDING",
+   "paramsJson": {
+    "faction": "lakers",
+    "player": "active",
+    "amount": 2
+   }
+  },
+  {
+   "id": "ef_tem_pd_res",
+   "parentKind": "choice",
+   "parentId": "ch_tem_paid_ack",
+   "ordinal": 1,
+   "type": "ADJUST_RESOURCE",
+   "paramsJson": {
+    "resource": "Resource",
+    "amount": 3,
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_tem_pd_end",
+   "parentKind": "choice",
+   "parentId": "ch_tem_paid_ack",
+   "ordinal": 2,
+   "type": "COMPLETE_QUEST",
+   "paramsJson": {
+    "questId": "q_tempest"
+   }
+  },
+  {
+   "id": "ef_tem_nn_std",
+   "parentKind": "choice",
+   "parentId": "ch_tem_none_ack",
+   "ordinal": 0,
+   "type": "ADJUST_STANDING",
+   "paramsJson": {
+    "faction": "lakers",
+    "player": "active",
+    "amount": -3
+   }
+  },
+  {
+   "id": "ef_tem_nn_end",
+   "parentKind": "choice",
+   "parentId": "ch_tem_none_ack",
    "ordinal": 1,
    "type": "COMPLETE_QUEST",
    "paramsJson": {

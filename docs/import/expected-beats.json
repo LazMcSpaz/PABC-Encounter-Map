@@ -1,0 +1,1936 @@
+{
+  "source": "remnant_content_consolidated_rev2.json",
+  "total_beats": 131,
+  "predicted_skipped": [
+    "qb_bar_2",
+    "qb_bar_3",
+    "qb_clm_2",
+    "qb_clm_3",
+    "qb_clm_4_bought",
+    "qb_clm_4_installed",
+    "qb_clm_4_taken",
+    "qb_gls_2",
+    "qb_hau_2",
+    "qb_hau_3",
+    "qb_hire_2",
+    "qb_hire_3",
+    "qb_not_2",
+    "qb_not_3",
+    "qb_not_4_called",
+    "qb_not_4_settled",
+    "qb_not_4_sovereign",
+    "qb_rd_2",
+    "qb_sea_2",
+    "qb_sea_3",
+    "qb_sea_4_bound",
+    "qb_sea_4_restored",
+    "qb_sea_4_scattered",
+    "qb_wir_2"
+  ],
+  "expected_beats": [
+    {
+      "beatId": "qb_app_1",
+      "questId": "q_apprentice",
+      "ordinal": 0,
+      "deliver": "conditional",
+      "gateFlag": [
+        "app_heard",
+        "apprentice_resentful",
+        "seen_apprentice"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_app_2",
+      "questId": "q_apprentice",
+      "ordinal": 1,
+      "deliver": "auto",
+      "gateFlag": [
+        "app_stayed",
+        "app_went_free",
+        "apprentice_resentful",
+        "rule_hard_forbade_apprentice",
+        "versari_took_the_boy"
+      ],
+      "prereqs": [
+        "qb_app_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_app_3_gone",
+      "questId": "q_apprentice",
+      "ordinal": 2,
+      "deliver": "conditional",
+      "gateFlag": [],
+      "prereqs": [
+        "qb_app_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_app_3_kept",
+      "questId": "q_apprentice",
+      "ordinal": 3,
+      "deliver": "conditional",
+      "gateFlag": [],
+      "prereqs": [
+        "qb_app_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_app_3_returned",
+      "questId": "q_apprentice",
+      "ordinal": 4,
+      "deliver": "conditional",
+      "gateFlag": [
+        "versari_prospecting"
+      ],
+      "prereqs": [
+        "qb_app_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_asm_1",
+      "questId": "q_assembly",
+      "ordinal": 0,
+      "deliver": "conditional",
+      "gateFlag": [
+        "asm_started"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_asm_2",
+      "questId": "q_assembly",
+      "ordinal": 1,
+      "deliver": "conditional",
+      "gateFlag": [
+        "assembly_decorative",
+        "assembly_real",
+        "rule_hard_overrode_assembly"
+      ],
+      "prereqs": [
+        "qb_asm_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_asm_3",
+      "questId": "q_assembly",
+      "ordinal": 2,
+      "deliver": "conditional",
+      "gateFlag": [],
+      "prereqs": [
+        "qb_asm_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_bar_1",
+      "questId": "q_baron",
+      "ordinal": 0,
+      "deliver": "conditional",
+      "gateFlag": [
+        "baron_refused",
+        "baron_seeking_ives",
+        "baron_twice",
+        "seen_baron_word"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_bar_2",
+      "questId": "q_baron",
+      "ordinal": 1,
+      "deliver": "conditional",
+      "gateFlag": [
+        "baron_sold_him",
+        "baron_stayed_silent",
+        "baron_testified"
+      ],
+      "prereqs": [
+        "qb_bar_1"
+      ],
+      "routedFrom": [
+        "ch_bar1_ives"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_bar_3",
+      "questId": "q_baron",
+      "ordinal": 2,
+      "deliver": "conditional",
+      "gateFlag": [
+        "baron_alive_and_owes_you_nothing",
+        "baron_dead",
+        "baron_discredited"
+      ],
+      "prereqs": [
+        "qb_bar_1"
+      ],
+      "routedFrom": [
+        "ch_bar1_take",
+        "ch_bar1_refuse",
+        "ch_bar2_account",
+        "ch_bar2_sell",
+        "ch_bar2_nothing"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_car_1",
+      "questId": "q_caravan",
+      "ordinal": 0,
+      "deliver": "discovered",
+      "gateFlag": [
+        "car_escorting",
+        "car_raided"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_car_blackmail",
+      "questId": "q_caravan",
+      "ordinal": 1,
+      "deliver": "conditional",
+      "gateFlag": [
+        "rule_hard_public_execution",
+        "rule_hard_quiet_execution",
+        "rule_soft_paid_blackmail"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_car_arrive",
+      "questId": "q_caravan",
+      "ordinal": 2,
+      "deliver": "discovered",
+      "gateFlag": [
+        "car_agent_placed"
+      ],
+      "prereqs": [
+        "qb_car_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_car_request",
+      "questId": "q_caravan",
+      "ordinal": 3,
+      "deliver": "conditional",
+      "gateFlag": [
+        "thwarted_versari"
+      ],
+      "prereqs": [
+        "qb_car_arrive"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_car_agent",
+      "questId": "q_caravan",
+      "ordinal": 4,
+      "deliver": "conditional",
+      "gateFlag": [
+        "car_aborted",
+        "car_agent_armed"
+      ],
+      "prereqs": [
+        "qb_car_arrive"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_car_abort",
+      "questId": "q_caravan",
+      "ordinal": 5,
+      "deliver": "conditional",
+      "gateFlag": [],
+      "prereqs": [
+        "qb_car_agent"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_car_extract",
+      "questId": "q_caravan",
+      "ordinal": 6,
+      "deliver": "conditional",
+      "gateFlag": [],
+      "prereqs": [
+        "qb_car_agent"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_carto_1",
+      "questId": "q_carto",
+      "ordinal": 0,
+      "deliver": "discovered",
+      "gateFlag": [],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_carto_2",
+      "questId": "q_carto",
+      "ordinal": 1,
+      "deliver": "discovered",
+      "gateFlag": [],
+      "prereqs": [
+        "qb_carto_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_carto_3",
+      "questId": "q_carto",
+      "ordinal": 2,
+      "deliver": "discovered",
+      "gateFlag": [
+        "surveyor_silenced"
+      ],
+      "prereqs": [
+        "qb_carto_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_clm_1",
+      "questId": "q_claim",
+      "ordinal": 0,
+      "deliver": "discovered",
+      "gateFlag": [
+        "claim_asked_first",
+        "claim_odell_paid",
+        "claim_walked",
+        "seen_claim"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_clm_2",
+      "questId": "q_claim",
+      "ordinal": 1,
+      "deliver": "auto",
+      "gateFlag": [
+        "claim_ansel_paid",
+        "claim_held_terms",
+        "claim_knows_third"
+      ],
+      "prereqs": [
+        "qb_clm_1"
+      ],
+      "routedFrom": [
+        "ch_clm1_terms",
+        "ch_clm1_ask"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_clm_3",
+      "questId": "q_claim",
+      "ordinal": 2,
+      "deliver": "auto",
+      "gateFlag": [
+        "claim_bought",
+        "claim_installed",
+        "claim_taken"
+      ],
+      "prereqs": [
+        "qb_clm_2"
+      ],
+      "routedFrom": [
+        "ch_clm2_pay",
+        "ch_clm2_hold",
+        "ch_clm2_who"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_clm_4_bought",
+      "questId": "q_claim",
+      "ordinal": 3,
+      "deliver": "conditional",
+      "gateFlag": [
+        "claim_holds_by_consent"
+      ],
+      "prereqs": [
+        "qb_clm_3"
+      ],
+      "routedFrom": [
+        "ch_clm3_pay"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_clm_4_installed",
+      "questId": "q_claim",
+      "ordinal": 4,
+      "deliver": "conditional",
+      "gateFlag": [
+        "claim_client_shaky",
+        "claim_client_stable"
+      ],
+      "prereqs": [
+        "qb_clm_3"
+      ],
+      "routedFrom": [
+        "ch_clm3_install"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_clm_4_taken",
+      "questId": "q_claim",
+      "ordinal": 5,
+      "deliver": "conditional",
+      "gateFlag": [
+        "claim_held_by_force"
+      ],
+      "prereqs": [
+        "qb_clm_3"
+      ],
+      "routedFrom": [
+        "ch_clm3_take"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_cr_1",
+      "questId": "q_courier",
+      "ordinal": 0,
+      "deliver": "discovered",
+      "gateFlag": [
+        "cr_escorted",
+        "cr_first_contact",
+        "cr_read_letter"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_cr_2",
+      "questId": "q_courier",
+      "ordinal": 1,
+      "deliver": "discovered",
+      "gateFlag": [
+        "cr_correspondence_traced"
+      ],
+      "prereqs": [
+        "qb_cr_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_cro_1",
+      "questId": "q_croppers",
+      "ordinal": 0,
+      "deliver": "discovered",
+      "gateFlag": [
+        "cro_approached",
+        "cro_observed"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_cro_surrounded",
+      "questId": "q_croppers",
+      "ordinal": 1,
+      "deliver": "auto",
+      "gateFlag": [
+        "cro_relic_hunt"
+      ],
+      "prereqs": [
+        "qb_cro_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_cro_observed",
+      "questId": "q_croppers",
+      "ordinal": 2,
+      "deliver": "auto",
+      "gateFlag": [
+        "cro_relic_hunt",
+        "cro_robbed_them"
+      ],
+      "prereqs": [
+        "qb_cro_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_cro_baron",
+      "questId": "q_croppers",
+      "ordinal": 3,
+      "deliver": "discovered",
+      "gateFlag": [],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_cro_relic",
+      "questId": "q_croppers",
+      "ordinal": 4,
+      "deliver": "auto",
+      "gateFlag": [
+        "helped_the_croppers",
+        "sold_the_croppers_relic"
+      ],
+      "prereqs": [
+        "qb_cro_baron"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_cro_blowback",
+      "questId": "q_croppers",
+      "ordinal": 5,
+      "deliver": "conditional",
+      "gateFlag": [
+        "blamed_for_barons_war"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_debt_1",
+      "questId": "q_debt",
+      "ordinal": 0,
+      "deliver": "discovered",
+      "gateFlag": [
+        "debt_paid"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_debt_2",
+      "questId": "q_debt",
+      "ordinal": 1,
+      "deliver": "discovered",
+      "gateFlag": [
+        "debt_paid"
+      ],
+      "prereqs": [
+        "qb_debt_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_debt_3",
+      "questId": "q_debt",
+      "ordinal": 2,
+      "deliver": "discovered",
+      "gateFlag": [
+        "debt_blamed",
+        "debt_vouched"
+      ],
+      "prereqs": [
+        "qb_debt_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_db_1",
+      "questId": "q_debtbook",
+      "ordinal": 0,
+      "deliver": "conditional",
+      "gateFlag": [
+        "db_entry_one",
+        "seen_debt_book"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_db_2",
+      "questId": "q_debtbook",
+      "ordinal": 1,
+      "deliver": "conditional",
+      "gateFlag": [
+        "db_entry_two"
+      ],
+      "prereqs": [
+        "qb_db_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_db_3",
+      "questId": "q_debtbook",
+      "ordinal": 2,
+      "deliver": "conditional",
+      "gateFlag": [
+        "db_resolved",
+        "debt_book_carried",
+        "debt_book_clear",
+        "versari_book_closed"
+      ],
+      "prereqs": [
+        "qb_db_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_db_4",
+      "questId": "q_debtbook",
+      "ordinal": 3,
+      "deliver": "auto",
+      "gateFlag": [
+        "saw_the_debt_map",
+        "spread_the_debt_map"
+      ],
+      "prereqs": [
+        "qb_db_3"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_fav_1",
+      "questId": "q_favor",
+      "ordinal": 0,
+      "deliver": "conditional",
+      "gateFlag": [
+        "fav_started"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_fav_2",
+      "questId": "q_favor",
+      "ordinal": 1,
+      "deliver": "conditional",
+      "gateFlag": [
+        "fav_resolved",
+        "favor_honored",
+        "favor_refused"
+      ],
+      "prereqs": [
+        "qb_fav_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_fav_3",
+      "questId": "q_favor",
+      "ordinal": 2,
+      "deliver": "auto",
+      "gateFlag": [],
+      "prereqs": [
+        "qb_fav_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_fd_1",
+      "questId": "q_ford",
+      "ordinal": 0,
+      "deliver": "discovered",
+      "gateFlag": [
+        "fd_blind_destroyed",
+        "fd_found_blind"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_fd_2",
+      "questId": "q_ford",
+      "ordinal": 1,
+      "deliver": "discovered",
+      "gateFlag": [
+        "fd_blind_destroyed",
+        "fd_count_falsified",
+        "fd_count_stolen",
+        "fd_counter_bought"
+      ],
+      "prereqs": [
+        "qb_fd_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_gls_1",
+      "questId": "q_glass",
+      "ordinal": 0,
+      "deliver": "discovered",
+      "gateFlag": [
+        "glass_asked",
+        "glass_passed",
+        "glass_sampled",
+        "seen_glass"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_gls_2",
+      "questId": "q_glass",
+      "ordinal": 1,
+      "deliver": "discovered",
+      "gateFlag": [
+        "glass_field_noted",
+        "glass_field_studied"
+      ],
+      "prereqs": [
+        "qb_gls_1"
+      ],
+      "routedFrom": [
+        "ch_gls1_sample",
+        "ch_gls1_ask"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_gr_1",
+      "questId": "q_graves",
+      "ordinal": 0,
+      "deliver": "discovered",
+      "gateFlag": [
+        "gr_found"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_gr_2",
+      "questId": "q_graves",
+      "ordinal": 1,
+      "deliver": "discovered",
+      "gateFlag": [
+        "heard_southern_account",
+        "southern_accounts_match"
+      ],
+      "prereqs": [
+        "qb_gr_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_hau_1",
+      "questId": "q_haulers",
+      "ordinal": 0,
+      "deliver": "conditional",
+      "gateFlag": [
+        "haulers_hired",
+        "haulers_refused",
+        "seen_haulers"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_hau_2",
+      "questId": "q_haulers",
+      "ordinal": 1,
+      "deliver": "conditional",
+      "gateFlag": [
+        "haulers_informed_hall",
+        "haulers_kept_buying",
+        "haulers_stopped"
+      ],
+      "prereqs": [
+        "qb_hau_1"
+      ],
+      "routedFrom": [
+        "ch_hau1_hire"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_hau_3",
+      "questId": "q_haulers",
+      "ordinal": 2,
+      "deliver": "auto",
+      "gateFlag": [
+        "haulers_account_closed",
+        "haulers_double_dealt",
+        "haulers_standing_contract"
+      ],
+      "prereqs": [
+        "qb_hau_2"
+      ],
+      "routedFrom": [
+        "ch_hau2_keep",
+        "ch_hau2_stop",
+        "ch_hau2_tell"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_herd_1",
+      "questId": "q_herd",
+      "ordinal": 0,
+      "deliver": "discovered",
+      "gateFlag": [],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_herd_2",
+      "questId": "q_herd",
+      "ordinal": 1,
+      "deliver": "discovered",
+      "gateFlag": [
+        "heard_witch_account"
+      ],
+      "prereqs": [
+        "qb_herd_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_herd_3",
+      "questId": "q_herd",
+      "ordinal": 2,
+      "deliver": "discovered",
+      "gateFlag": [
+        "went_south"
+      ],
+      "prereqs": [
+        "qb_herd_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_hire_1",
+      "questId": "q_hire",
+      "ordinal": 0,
+      "deliver": "discovered",
+      "gateFlag": [
+        "hire_declined",
+        "hire_engaged",
+        "seen_hire"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_hire_2",
+      "questId": "q_hire",
+      "ordinal": 1,
+      "deliver": "auto",
+      "gateFlag": [
+        "hire_paid",
+        "hire_resolved",
+        "hire_turned"
+      ],
+      "prereqs": [
+        "qb_hire_1"
+      ],
+      "routedFrom": [
+        "ch_hire1_hear"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_hire_3",
+      "questId": "q_hire",
+      "ordinal": 2,
+      "deliver": "conditional",
+      "gateFlag": [
+        "hire_betrayed_dorn",
+        "hire_failed_honestly",
+        "hire_kept"
+      ],
+      "prereqs": [
+        "qb_hire_2"
+      ],
+      "routedFrom": [
+        "ch_hire2_open",
+        "ch_hire2_trap",
+        "ch_hire2_pay",
+        "ch_hire2_turn"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_mk_1",
+      "questId": "q_markers",
+      "ordinal": 0,
+      "deliver": "discovered",
+      "gateFlag": [
+        "mk_followed"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_mk_2",
+      "questId": "q_markers",
+      "ordinal": 1,
+      "deliver": "discovered",
+      "gateFlag": [
+        "mk_network_arrangement",
+        "mk_network_broken",
+        "mk_saw_the_handoff",
+        "mk_seized_the_handoff"
+      ],
+      "prereqs": [
+        "qb_mk_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_mas_1",
+      "questId": "q_massacre",
+      "ordinal": 0,
+      "deliver": "discovered",
+      "gateFlag": [
+        "mas_identified"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_mas_identify",
+      "questId": "q_massacre",
+      "ordinal": 1,
+      "deliver": "auto",
+      "gateFlag": [],
+      "prereqs": [
+        "qb_mas_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_mas_compound",
+      "questId": "q_massacre",
+      "ordinal": 2,
+      "deliver": "discovered",
+      "gateFlag": [
+        "mas_fought_traders",
+        "mas_knows_location"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_mas_goldgrass",
+      "questId": "q_massacre",
+      "ordinal": 3,
+      "deliver": "discovered",
+      "gateFlag": [
+        "mas_joint_raid"
+      ],
+      "prereqs": [
+        "qb_mas_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_mas_revenge",
+      "questId": "q_massacre",
+      "ordinal": 4,
+      "deliver": "discovered",
+      "gateFlag": [],
+      "prereqs": [
+        "qb_mas_goldgrass"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_not_1",
+      "questId": "q_notes",
+      "ordinal": 0,
+      "deliver": "conditional",
+      "gateFlag": [
+        "notes_admitted",
+        "notes_refused",
+        "notes_taxed",
+        "seen_notes"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_not_2",
+      "questId": "q_notes",
+      "ordinal": 1,
+      "deliver": "conditional",
+      "gateFlag": [
+        "notes_accounts",
+        "notes_barred",
+        "notes_own_tally"
+      ],
+      "prereqs": [
+        "qb_not_1"
+      ],
+      "routedFrom": [
+        "ch_not1_take",
+        "ch_not1_tax"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_not_3",
+      "questId": "q_notes",
+      "ordinal": 2,
+      "deliver": "conditional",
+      "gateFlag": [
+        "notes_credit_closed",
+        "notes_pledge_broken",
+        "notes_pledged"
+      ],
+      "prereqs": [
+        "qb_not_2"
+      ],
+      "routedFrom": [
+        "ch_not2_allow",
+        "ch_not2_forbid",
+        "ch_not2_tally"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_not_4_settled",
+      "questId": "q_notes",
+      "ordinal": 3,
+      "deliver": "conditional",
+      "gateFlag": [
+        "notes_are_currency"
+      ],
+      "prereqs": [
+        "qb_not_3"
+      ],
+      "routedFrom": [
+        "ch_not3_pledge"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_not_4_called",
+      "questId": "q_notes",
+      "ordinal": 4,
+      "deliver": "conditional",
+      "gateFlag": [
+        "notes_called_in"
+      ],
+      "prereqs": [
+        "qb_not_3"
+      ],
+      "routedFrom": [
+        "ch_not3_break"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_not_4_sovereign",
+      "questId": "q_notes",
+      "ordinal": 5,
+      "deliver": "conditional",
+      "gateFlag": [
+        "notes_barter_kept",
+        "notes_sovereign"
+      ],
+      "prereqs": [
+        "qb_not_3"
+      ],
+      "routedFrom": [
+        "ch_not3_refuse"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_rail_1",
+      "questId": "q_rail",
+      "ordinal": 0,
+      "deliver": "discovered",
+      "gateFlag": [
+        "rail_helped"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_rail_2",
+      "questId": "q_rail",
+      "ordinal": 1,
+      "deliver": "discovered",
+      "gateFlag": [],
+      "prereqs": [
+        "qb_rail_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_rail_3",
+      "questId": "q_rail",
+      "ordinal": 2,
+      "deliver": "discovered",
+      "gateFlag": [
+        "rail_guarantor",
+        "rail_passed_over",
+        "rail_seized"
+      ],
+      "prereqs": [
+        "qb_rail_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_rr_1",
+      "questId": "q_readerright",
+      "ordinal": 0,
+      "deliver": "conditional",
+      "gateFlag": [
+        "rr_started"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_rr_2",
+      "questId": "q_readerright",
+      "ordinal": 1,
+      "deliver": "conditional",
+      "gateFlag": [
+        "reader_seated"
+      ],
+      "prereqs": [
+        "qb_rr_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_rr_3",
+      "questId": "q_readerright",
+      "ordinal": 2,
+      "deliver": "conditional",
+      "gateFlag": [
+        "rule_hard_overruled_the_reader",
+        "rule_soft_heeded_the_reader"
+      ],
+      "prereqs": [
+        "qb_rr_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_ret_1",
+      "questId": "q_returned",
+      "ordinal": 0,
+      "deliver": "conditional",
+      "gateFlag": [
+        "ret_started"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_ret_2",
+      "questId": "q_returned",
+      "ordinal": 1,
+      "deliver": "conditional",
+      "gateFlag": [],
+      "prereqs": [
+        "qb_ret_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_ret_3",
+      "questId": "q_returned",
+      "ordinal": 2,
+      "deliver": "conditional",
+      "gateFlag": [
+        "rule_hard_blocked_the_returned",
+        "rule_soft_promoted_the_returned"
+      ],
+      "prereqs": [
+        "qb_ret_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_rd_1",
+      "questId": "q_road",
+      "ordinal": 0,
+      "deliver": "discovered",
+      "gateFlag": [
+        "rule_hard_protected_the_grade",
+        "rule_hard_quarried_the_grade",
+        "rule_soft_left_the_grade",
+        "seen_grade"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_rd_2",
+      "questId": "q_road",
+      "ordinal": 1,
+      "deliver": "discovered",
+      "gateFlag": [
+        "grade_dwindling",
+        "grade_kept",
+        "grade_quarried"
+      ],
+      "prereqs": [
+        "qb_rd_1"
+      ],
+      "routedFrom": [
+        "ch_rd1_protect",
+        "ch_rd1_quarry",
+        "ch_rd1_leave"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_run_1",
+      "questId": "q_runner",
+      "ordinal": 0,
+      "deliver": "discovered",
+      "gateFlag": [
+        "run_met_the_crew",
+        "run_saw_it",
+        "seen_runner"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_run_2",
+      "questId": "q_runner",
+      "ordinal": 1,
+      "deliver": "discovered",
+      "gateFlag": [
+        "run_damaged",
+        "run_gave_them_the_yard"
+      ],
+      "prereqs": [
+        "qb_run_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_run_3",
+      "questId": "q_runner",
+      "ordinal": 2,
+      "deliver": "auto",
+      "gateFlag": [
+        "kept_the_shell",
+        "run_traded_for_work",
+        "sold_the_shell"
+      ],
+      "prereqs": [
+        "qb_run_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_run_4",
+      "questId": "q_runner",
+      "ordinal": 3,
+      "deliver": "conditional",
+      "gateFlag": [
+        "owns_runner"
+      ],
+      "prereqs": [
+        "qb_run_3"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_sw_1",
+      "questId": "q_saltman",
+      "ordinal": 0,
+      "deliver": "discovered",
+      "gateFlag": [
+        "sw_rode_with_him"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_sw_2",
+      "questId": "q_saltman",
+      "ordinal": 1,
+      "deliver": "conditional",
+      "gateFlag": [
+        "salt_man_intel"
+      ],
+      "prereqs": [
+        "qb_sw_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_salvage_1",
+      "questId": "q_salvage",
+      "ordinal": 0,
+      "deliver": "discovered",
+      "gateFlag": [],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_salvage_2",
+      "questId": "q_salvage",
+      "ordinal": 1,
+      "deliver": "auto",
+      "gateFlag": [
+        "salvage_forced",
+        "salvage_split",
+        "salvage_walked"
+      ],
+      "prereqs": [
+        "qb_salvage_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_salvage_3",
+      "questId": "q_salvage",
+      "ordinal": 2,
+      "deliver": "discovered",
+      "gateFlag": [
+        "stranger_is_salvage_boss",
+        "stranger_unresolved"
+      ],
+      "prereqs": [
+        "qb_salvage_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_sea_1",
+      "questId": "q_seasons",
+      "ordinal": 0,
+      "deliver": "conditional",
+      "gateFlag": [
+        "seasons_bought",
+        "seasons_cut",
+        "seasons_deferred",
+        "seasons_rite",
+        "seen_seasons"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_sea_2",
+      "questId": "q_seasons",
+      "ordinal": 1,
+      "deliver": "conditional",
+      "gateFlag": [
+        "seasons_asked",
+        "seasons_lost_grain",
+        "seasons_own_hands"
+      ],
+      "prereqs": [
+        "qb_sea_1"
+      ],
+      "routedFrom": [
+        "ch_sea1_cut",
+        "ch_sea1_rite",
+        "ch_sea1_buy",
+        "ch_sea1_defer"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_sea_3",
+      "questId": "q_seasons",
+      "ordinal": 2,
+      "deliver": "conditional",
+      "gateFlag": [
+        "seasons_pressed",
+        "seasons_scattered",
+        "seasons_took_them"
+      ],
+      "prereqs": [
+        "qb_sea_2"
+      ],
+      "routedFrom": [
+        "ch_sea2_own",
+        "ch_sea2_lost",
+        "ch_sea2_ask"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_sea_4_bound",
+      "questId": "q_seasons",
+      "ordinal": 3,
+      "deliver": "conditional",
+      "gateFlag": [
+        "croppers_bound"
+      ],
+      "prereqs": [
+        "qb_sea_3"
+      ],
+      "routedFrom": [
+        "ch_sea3_take"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_sea_4_scattered",
+      "questId": "q_seasons",
+      "ordinal": 4,
+      "deliver": "conditional",
+      "gateFlag": [
+        "croppers_scattered"
+      ],
+      "prereqs": [
+        "qb_sea_3"
+      ],
+      "routedFrom": [
+        "ch_sea3_scatter"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_sea_4_restored",
+      "questId": "q_seasons",
+      "ordinal": 5,
+      "deliver": "conditional",
+      "gateFlag": [
+        "seasons_guarantor"
+      ],
+      "prereqs": [
+        "qb_sea_3"
+      ],
+      "routedFrom": [
+        "ch_sea3_press"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_sig_1",
+      "questId": "q_signal",
+      "ordinal": 0,
+      "deliver": "discovered",
+      "gateFlag": [
+        "signal_acknowledged",
+        "signal_ignored"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_sig_2",
+      "questId": "q_signal",
+      "ordinal": 1,
+      "deliver": "auto",
+      "gateFlag": [
+        "sig_path_diplomatic",
+        "sig_path_force",
+        "sig_path_intrigue",
+        "technician_stayed"
+      ],
+      "prereqs": [
+        "qb_sig_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_sig_dip",
+      "questId": "q_signal",
+      "ordinal": 2,
+      "deliver": "auto",
+      "gateFlag": [
+        "sig_extracted",
+        "technician_stayed"
+      ],
+      "prereqs": [
+        "qb_sig_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_sig_force",
+      "questId": "q_signal",
+      "ordinal": 3,
+      "deliver": "auto",
+      "gateFlag": [],
+      "prereqs": [
+        "qb_sig_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_sig_intr",
+      "questId": "q_signal",
+      "ordinal": 4,
+      "deliver": "auto",
+      "gateFlag": [],
+      "prereqs": [
+        "qb_sig_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_sig_out",
+      "questId": "q_signal",
+      "ordinal": 5,
+      "deliver": "auto",
+      "gateFlag": [
+        "technician_coerced",
+        "technician_willing",
+        "technician_with_player"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_sig_drift",
+      "questId": "q_signal",
+      "ordinal": 6,
+      "deliver": "auto",
+      "gateFlag": [
+        "technician_coerced",
+        "technician_released",
+        "technician_with_player"
+      ],
+      "prereqs": [
+        "qb_sig_out"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_sig_end",
+      "questId": "q_signal",
+      "ordinal": 7,
+      "deliver": "auto",
+      "gateFlag": [
+        "technician_coerced",
+        "technician_dead",
+        "technician_with_player"
+      ],
+      "prereqs": [
+        "qb_sig_drift"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_sig_stays",
+      "questId": "q_signal",
+      "ordinal": 8,
+      "deliver": "auto",
+      "gateFlag": [],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_sig_dead",
+      "questId": "q_signal",
+      "ordinal": 9,
+      "deliver": "auto",
+      "gateFlag": [],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_stb_1",
+      "questId": "q_stewardbook",
+      "ordinal": 0,
+      "deliver": "conditional",
+      "gateFlag": [
+        "stb_started"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_stb_2",
+      "questId": "q_stewardbook",
+      "ordinal": 1,
+      "deliver": "conditional",
+      "gateFlag": [
+        "stb_third_due"
+      ],
+      "prereqs": [
+        "qb_stb_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_stb_3",
+      "questId": "q_stewardbook",
+      "ordinal": 2,
+      "deliver": "auto",
+      "gateFlag": [
+        "rule_hard_buried_the_theft",
+        "rule_hard_made_an_example",
+        "rule_soft_settled_quietly"
+      ],
+      "prereqs": [
+        "qb_stb_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_tem_1",
+      "questId": "q_tempest",
+      "ordinal": 0,
+      "deliver": "conditional",
+      "gateFlag": [
+        "seen_tempest_envoy",
+        "tempest_heard"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_tem_2",
+      "questId": "q_tempest",
+      "ordinal": 1,
+      "deliver": "auto",
+      "gateFlag": [
+        "tempest_betrayed",
+        "tempest_direct_support",
+        "tempest_material_only"
+      ],
+      "prereqs": [
+        "qb_tem_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_tem_3",
+      "questId": "q_tempest",
+      "ordinal": 2,
+      "deliver": "conditional",
+      "gateFlag": [
+        "tempest_withheld"
+      ],
+      "prereqs": [
+        "qb_tem_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_tem_4",
+      "questId": "q_tempest",
+      "ordinal": 3,
+      "deliver": "conditional",
+      "gateFlag": [],
+      "prereqs": [
+        "qb_tem_3"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_tem_betray",
+      "questId": "q_tempest",
+      "ordinal": 4,
+      "deliver": "conditional",
+      "gateFlag": [],
+      "prereqs": [
+        "qb_tem_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_weather_1",
+      "questId": "q_weather",
+      "ordinal": 0,
+      "deliver": "discovered",
+      "gateFlag": [
+        "weather_forced",
+        "weather_shared"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_weather_2",
+      "questId": "q_weather",
+      "ordinal": 1,
+      "deliver": "auto",
+      "gateFlag": [
+        "weather_named_him"
+      ],
+      "prereqs": [
+        "qb_weather_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_weather_3",
+      "questId": "q_weather",
+      "ordinal": 2,
+      "deliver": "discovered",
+      "gateFlag": [
+        "stranger_is_scout",
+        "stranger_unresolved"
+      ],
+      "prereqs": [
+        "qb_weather_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_wir_1",
+      "questId": "q_wire",
+      "ordinal": 0,
+      "deliver": "discovered",
+      "gateFlag": [
+        "seen_wire_woman",
+        "wire_hired",
+        "wire_taken",
+        "wire_understood"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_wir_2",
+      "questId": "q_wire",
+      "ordinal": 1,
+      "deliver": "discovered",
+      "gateFlag": [
+        "wire_reader_dealt_with",
+        "wire_reader_held",
+        "wire_reader_under_your_colors"
+      ],
+      "prereqs": [
+        "qb_wir_1"
+      ],
+      "routedFrom": [
+        "ch_wir1_hire",
+        "ch_wir1_escort",
+        "ch_wir1_take"
+      ],
+      "predicted": "SKIPPED"
+    },
+    {
+      "beatId": "qb_wr_1",
+      "questId": "q_wirereader",
+      "ordinal": 0,
+      "deliver": "conditional",
+      "gateFlag": [
+        "wr_started"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_wr_2",
+      "questId": "q_wirereader",
+      "ordinal": 1,
+      "deliver": "conditional",
+      "gateFlag": [
+        "wr_third_due"
+      ],
+      "prereqs": [
+        "qb_wr_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_wr_3",
+      "questId": "q_wirereader",
+      "ordinal": 2,
+      "deliver": "conditional",
+      "gateFlag": [
+        "wire_network_denied",
+        "wire_network_open"
+      ],
+      "prereqs": [
+        "qb_wr_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_wks_1",
+      "questId": "q_works",
+      "ordinal": 0,
+      "deliver": "discovered",
+      "gateFlag": [
+        "seen_works",
+        "wks_allowed",
+        "wks_rent_established",
+        "works_never_took"
+      ],
+      "prereqs": [],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_wks_2",
+      "questId": "q_works",
+      "ordinal": 1,
+      "deliver": "conditional",
+      "gateFlag": [
+        "wks_full_arrangement"
+      ],
+      "prereqs": [
+        "qb_wks_1"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_wks_3",
+      "questId": "q_works",
+      "ordinal": 2,
+      "deliver": "conditional",
+      "gateFlag": [
+        "works_expelled",
+        "works_formalized",
+        "works_left"
+      ],
+      "prereqs": [
+        "qb_wks_2"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_wks_4_formal",
+      "questId": "q_works",
+      "ordinal": 3,
+      "deliver": "conditional",
+      "gateFlag": [],
+      "prereqs": [
+        "qb_wks_3"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_wks_4_expel",
+      "questId": "q_works",
+      "ordinal": 4,
+      "deliver": "conditional",
+      "gateFlag": [
+        "laker_war_faction_noted_you"
+      ],
+      "prereqs": [
+        "qb_wks_3"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    },
+    {
+      "beatId": "qb_wks_4_left",
+      "questId": "q_works",
+      "ordinal": 5,
+      "deliver": "conditional",
+      "gateFlag": [],
+      "prereqs": [
+        "qb_wks_3"
+      ],
+      "routedFrom": [],
+      "predicted": "reachable"
+    }
+  ]
+}

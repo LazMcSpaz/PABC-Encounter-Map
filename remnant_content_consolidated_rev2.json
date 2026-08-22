@@ -1124,11 +1124,7 @@
    "deliver": "discovered",
    "placementFilter": {
     "type": "location",
-    "factionAffiliation": "plainers",
-    "withinHexesOf": {
-     "hex": "encounter-hex",
-     "range": 1
-    }
+    "factionAffiliation": "plainers"
    },
    "text": "The tracks end at a wall built out of the old world — haulers and freight vehicles dragged into a ring, cut down, welded and packed with earth until the whole thing became a fort. A man on the rampart watches your unit come the last half mile and lets you get close enough to hear him before he asks what you want.",
    "art": "A rampart made of stacked and welded old-world hauler bodies; a lone figure standing on it."
@@ -1262,7 +1258,7 @@
    "deliver": "discovered",
    "placementFilter": {
     "type": "terrain",
-    "terrain": "any"
+    "hasRoad": false
    },
    "text": "Forty or fifty Croppers in a hollow in the middle of open country, well away from any road, standing in a formation that is plainly not a camp. There is singing. Their wagons are drawn up at the edge of the hollow and there is nobody near them. You cannot make out what they are actually doing from here.",
    "art": "A ring of plains folk standing in a shallow hollow at dusk, wagons drawn up behind them."
@@ -1790,8 +1786,7 @@
    "ordinal": 0,
    "deliver": "discovered",
    "placementFilter": {
-    "type": "terrain",
-    "terrain": "wetland"
+    "hasRoad": true
    },
    "text": "A blind above the river crossing, built properly out of cut brush and sunk into the bank, with a clean sight line onto the ford and weeks of tally marks scratched into the back board. It is empty right now. Somebody has been counting everyone who crosses here since the spring.",
    "art": "A brush-built hide above a river crossing; tally marks cut into a plank inside."
@@ -1802,8 +1797,7 @@
    "ordinal": 1,
    "deliver": "discovered",
    "placementFilter": {
-    "type": "terrain",
-    "terrain": "wetland"
+    "hasRoad": true
    },
    "deliverCondition": {
     "has_flag": {
@@ -1978,8 +1972,7 @@
    "ordinal": 0,
    "deliver": "discovered",
    "placementFilter": {
-    "type": "terrain",
-    "terrain": "rubble"
+    "hasRoad": true
    },
    "deliverCondition": {
     "all": [
@@ -2596,7 +2589,7 @@
    "deliver": "discovered",
    "placementFilter": {
     "type": "terrain",
-    "terrain": "rubble"
+    "hasRoad": false
    },
    "text": "Forty acres of ground fused to green-black glass, flat as standing water, with grass growing right up to the edge of it and stopping. It is not a crater. There is no bowl, no rim, and no spoil anywhere — whatever did this did it downward without moving anything aside. A family has built a low house at the edge and grazes goats on the good side. They have been here eleven years and are entirely healthy. The mother mentions, without being asked, that nothing has ever grown on it, and that in high summer it is cold to the touch.",
    "art": "Forty acres of flat green-black glass meeting unbroken grass at a hard edge; a low house and goats at the margin.",
@@ -2616,7 +2609,7 @@
    "deliver": "discovered",
    "placementFilter": {
     "type": "terrain",
-    "terrain": "rubble"
+    "hasRoad": false
    },
    "text": "Nobody can work it, cut it, name it or match it. It is not a material anybody on this continent has a use for, which does not make it any less obviously manufactured. A wire-reader passing through the district on somebody else's business walks out onto it, stands there for a long time, comes back, and declines to say anything at all — which is a great deal more information than any answer she could have given you. The family go on grazing goats.",
    "art": "A woman standing alone far out on a flat glass plain; goats and a fence in the foreground.",
@@ -2696,8 +2689,7 @@
    "ordinal": 0,
    "deliver": "discovered",
    "placementFilter": {
-    "type": "terrain",
-    "terrain": "any"
+    "hasRoad": true
    },
    "text": "Two miles of pre-collapse roadbed running dead flat and dead true across broken country, a century on, with the drainage still working. Locals have been quarrying it for a generation. The cut stone is excellent and the holes are where you would expect them, and everything within four miles — walls, footings, a chapel, a byre — is built out of the road somebody is still trying to drive wagons along.",
    "art": "A flat engineered roadbed crossing rough ground, with sections pulled out for stone; a wall nearby built from the same material.",
@@ -2716,8 +2708,7 @@
    "ordinal": 1,
    "deliver": "discovered",
    "placementFilter": {
-    "type": "terrain",
-    "terrain": "any"
+    "hasRoad": true
    },
    "text": "A season later the district has arranged itself around whatever you decided, in the unhurried way districts do. Nobody argued at the time. Everybody has an opinion now.",
    "art": "A stretch of old roadbed in whatever state it has been left in; carts on it or a wall built from it.",
@@ -3199,9 +3190,15 @@
    "condition": {
     "any": [
      {
-      "op": "gte",
-      "left": "players.active.techLevel",
-      "right": 1
+      "has_chip": {
+       "holder": "location-on-hex",
+       "chipId": [
+        "labs",
+        "advanced-lab"
+       ],
+       "player": "active",
+       "hex": "encounter-hex"
+      }
      },
      {
       "op": "eq",
@@ -3866,9 +3863,11 @@
    "label": "Get him out quietly",
    "outcomeText": "Nobody makes a demand and nobody fires a shot, and the whole thing depends on people you have spent a long time paying for.",
    "condition": {
-    "op": "gte",
-    "left": "players.active.intrigue",
-    "right": 2
+    "has_tech": {
+     "path": "intelligence",
+     "branch": "b",
+     "player": "active"
+    }
    }
   },
   {
@@ -4077,9 +4076,11 @@
    "label": "Offer to find out why",
    "outcomeText": "You tell them plainly that you trust the Versari no further than they do, and that you have people who can go and look. They do not say yes out loud. They tell you where the granaries are and who counts them.",
    "condition": {
-    "op": "gte",
-    "left": "players.active.recon",
-    "right": 2
+    "has_tech": {
+     "path": "intelligence",
+     "branch": "b",
+     "player": "active"
+    }
    }
   },
   {
@@ -4366,9 +4367,10 @@
    "label": "Watch from the ridge",
    "outcomeText": "Your scouts get up on the high ground and put glasses on the hollow without ever breaking the skyline.",
    "condition": {
-    "op": "gte",
-    "left": "players.active.recon",
-    "right": 1
+    "has_tech": {
+     "path": "intelligence",
+     "player": "active"
+    }
    }
   },
   {
@@ -8920,6 +8922,16 @@
    }
   },
   {
+   "id": "ef_sig_ignore_complete",
+   "parentKind": "choice",
+   "parentId": "ch_sig_ignore",
+   "ordinal": 2,
+   "type": "COMPLETE_QUEST",
+   "paramsJson": {
+    "questId": "q_signal"
+   }
+  },
+  {
    "id": "ef_sig_path_dip",
    "parentKind": "choice",
    "parentId": "ch_sig_diplomatic",
@@ -9384,6 +9396,16 @@
    }
   },
   {
+   "id": "ef_sig_free_complete",
+   "parentKind": "choice",
+   "parentId": "ch_sig_out_free",
+   "ordinal": 4,
+   "type": "COMPLETE_QUEST",
+   "paramsJson": {
+    "questId": "q_signal"
+   }
+  },
+  {
    "id": "ef_sig_hold_coerced",
    "parentKind": "choice",
    "parentId": "ch_sig_out_hold",
@@ -9824,6 +9846,29 @@
    }
   },
   {
+   "id": "ef_car_bm_pay_paidflag",
+   "parentKind": "choice",
+   "parentId": "ch_car_bm_pay",
+   "ordinal": 3,
+   "type": "SET_PLAYER_FLAG",
+   "paramsJson": {
+    "flag": "car_blackmail_paid",
+    "value": true,
+    "duration": "permanent",
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_car_bm_pay_complete",
+   "parentKind": "choice",
+   "parentId": "ch_car_bm_pay",
+   "ordinal": 4,
+   "type": "COMPLETE_QUEST",
+   "paramsJson": {
+    "questId": "q_caravan"
+   }
+  },
+  {
    "id": "ef_car_bm_ref_standing",
    "parentKind": "choice",
    "parentId": "ch_car_bm_refuse",
@@ -9855,6 +9900,29 @@
    "paramsJson": {
     "questId": "q_caravan",
     "beatId": "qb_car_blackmail"
+   }
+  },
+  {
+   "id": "ef_car_bm_ref_refusedflag",
+   "parentKind": "choice",
+   "parentId": "ch_car_bm_refuse",
+   "ordinal": 3,
+   "type": "SET_PLAYER_FLAG",
+   "paramsJson": {
+    "flag": "car_blackmail_refused",
+    "value": true,
+    "duration": "permanent",
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_car_bm_ref_complete",
+   "parentKind": "choice",
+   "parentId": "ch_car_bm_refuse",
+   "ordinal": 4,
+   "type": "COMPLETE_QUEST",
+   "paramsJson": {
+    "questId": "q_caravan"
    }
   },
   {
@@ -9894,6 +9962,29 @@
    }
   },
   {
+   "id": "ef_car_bm_pub_hangedflag",
+   "parentKind": "choice",
+   "parentId": "ch_car_bm_public",
+   "ordinal": 3,
+   "type": "SET_PLAYER_FLAG",
+   "paramsJson": {
+    "flag": "car_witness_hanged",
+    "value": true,
+    "duration": "permanent",
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_car_bm_pub_complete",
+   "parentKind": "choice",
+   "parentId": "ch_car_bm_public",
+   "ordinal": 4,
+   "type": "COMPLETE_QUEST",
+   "paramsJson": {
+    "questId": "q_caravan"
+   }
+  },
+  {
    "id": "ef_car_bm_qui_flag",
    "parentKind": "choice",
    "parentId": "ch_car_bm_quiet",
@@ -9927,6 +10018,29 @@
    "paramsJson": {
     "questId": "q_caravan",
     "beatId": "qb_car_blackmail"
+   }
+  },
+  {
+   "id": "ef_car_bm_qui_vanishedflag",
+   "parentKind": "choice",
+   "parentId": "ch_car_bm_quiet",
+   "ordinal": 3,
+   "type": "SET_PLAYER_FLAG",
+   "paramsJson": {
+    "flag": "car_witness_vanished",
+    "value": true,
+    "duration": "permanent",
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_car_bm_qui_complete",
+   "parentKind": "choice",
+   "parentId": "ch_car_bm_quiet",
+   "ordinal": 4,
+   "type": "COMPLETE_QUEST",
+   "paramsJson": {
+    "questId": "q_caravan"
    }
   },
   {
@@ -10125,6 +10239,16 @@
    }
   },
   {
+   "id": "ef_car_req_pay_complete",
+   "parentKind": "choice",
+   "parentId": "ch_car_req_pay",
+   "ordinal": 4,
+   "type": "COMPLETE_QUEST",
+   "paramsJson": {
+    "questId": "q_caravan"
+   }
+  },
+  {
    "id": "ef_car_req_ref_adv",
    "parentKind": "choice",
    "parentId": "ch_car_req_refuse",
@@ -10133,6 +10257,29 @@
    "paramsJson": {
     "questId": "q_caravan",
     "beatId": "qb_car_request"
+   }
+  },
+  {
+   "id": "ef_car_req_ref_declinedflag",
+   "parentKind": "choice",
+   "parentId": "ch_car_req_refuse",
+   "ordinal": 1,
+   "type": "SET_PLAYER_FLAG",
+   "paramsJson": {
+    "flag": "car_supply_declined",
+    "value": true,
+    "duration": "permanent",
+    "target": "active"
+   }
+  },
+  {
+   "id": "ef_car_req_ref_complete",
+   "parentKind": "choice",
+   "parentId": "ch_car_req_refuse",
+   "ordinal": 2,
+   "type": "COMPLETE_QUEST",
+   "paramsJson": {
+    "questId": "q_caravan"
    }
   },
   {
@@ -11682,6 +11829,16 @@
     "value": true,
     "duration": "permanent",
     "target": "active"
+   }
+  },
+  {
+   "id": "ef_cro_blow_complete",
+   "parentKind": "choice",
+   "parentId": "ch_cro_blowback_ack",
+   "ordinal": 2,
+   "type": "COMPLETE_QUEST",
+   "paramsJson": {
+    "questId": "q_croppers"
    }
   },
   {

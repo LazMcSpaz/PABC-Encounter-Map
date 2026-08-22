@@ -1,0 +1,102 @@
+{
+  "ch_rail1_walk": {
+    "before": "Leave them to it",
+    "after": "Leave them to close the gap alone"
+  },
+  "ch_weather2_talk": {
+    "before": "Talk",
+    "after": "Talk with them through the storm"
+  },
+  "ch_salvage2_force": {
+    "before": "Take it",
+    "after": "Drive the families off and take the wreck"
+  },
+  "ch_sig_force": {
+    "before": "Take him",
+    "after": "Take him by force"
+  },
+  "ch_car_req_refuse": {
+    "before": "Decline",
+    "after": "Decline the second shipment"
+  },
+  "ch_mas_gg_decline": {
+    "before": "Leave it with them",
+    "after": "Leave the hall to deal with it"
+  },
+  "ch_cro_leave": {
+    "before": "Leave them to it",
+    "after": "Ride on without approaching"
+  },
+  "ch_cro_baron_leave": {
+    "before": "Withdraw",
+    "after": "Withdraw without the relic"
+  },
+  "ch_wire_leave": {
+    "before": "Leave them to it",
+    "after": "Let them settle it themselves"
+  },
+  "ch_stew_outsider": {
+    "before": "Hire someone who's done it",
+    "after": "Pay for an experienced steward"
+  },
+  "ch_asm2_comply": {
+    "before": "Comply",
+    "after": "Honor the block you granted them"
+  },
+  "ch_fav2_refuse": {
+    "before": "Refuse",
+    "after": "Refuse the passage"
+  },
+  "ch_fav2_partial": {
+    "before": "Offer something else",
+    "after": "Offer them goods instead of passage"
+  },
+  "ch_gr1_leave": {
+    "before": "Leave them",
+    "after": "Leave the graves"
+  },
+  "ch_sw1_pass": {
+    "before": "Leave him to it",
+    "after": "Let him ride the dark stretch alone"
+  },
+  "ch_app3k_ack": {
+    "before": "Leave him to it",
+    "after": "Leave him at the bench"
+  },
+  "ch_db1_decline": {
+    "before": "Decline",
+    "after": "Decline the advance"
+  },
+  "ch_run2_pass": {
+    "before": "Leave them to it",
+    "after": "Leave them to find their own panel"
+  },
+  "ch_sea3_take": {
+    "before": "Take them on",
+    "after": "Take the Croppers onto your ground"
+  },
+  "ch_hire1_decline": {
+    "before": "Decline",
+    "after": "Decline the contract"
+  },
+  "ch_hau2_stop": {
+    "before": "Stop",
+    "after": "End the arrangement"
+  },
+  "ch_wir1_take": {
+    "before": "Take her",
+    "after": "Take her by force"
+  },
+  "ch_rd1_leave": {
+    "before": "Leave them to it",
+    "after": "Leave the locals to quarry it"
+  },
+  "ch_petition_split": {
+    "before": "Deal with the leaders privately",
+    "after": "Buy the leaders off separately"
+  },
+  "ch_petition_split_weak": {
+    "before": "Try to deal with the leaders",
+    "after": "Make the leaders private offers"
+  }
+}
